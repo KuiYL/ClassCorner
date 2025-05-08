@@ -1,0 +1,61 @@
+/* Подключение шрифтов */
+@font-face {
+    font-family: "MontserratAlternates";
+    src: url('/font/MontserratAlternates-Black.ttf') format('truetype');
+    font-weight: 900;
+}
+
+@font-face {
+    font-family: "MontserratAlternates";
+    src: url('/font/MontserratAlternates-Bold.ttf') format('truetype');
+    font-weight: 700;
+}
+
+@font-face {
+    font-family: "MontserratAlternates";
+    src: url('/font/MontserratAlternates-SemiBold.ttf') format('truetype');
+    font-weight: 600;
+}
+
+@font-face {
+    font-family: "MontserratAlternates";
+    src: url('/font/MontserratAlternates-Regular.ttf') format('truetype');
+    font-weight: 400;
+}
+
+/* Базовые стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    font-family: "MontserratAlternates", sans-serif;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+main {
+    flex: 1;
+}
+
+a {
+    text-decoration: none;
+    color: inherit;
+}
+
+ul,
+li {
+    list-style-type: none;
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+}

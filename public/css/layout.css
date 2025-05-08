@@ -1,0 +1,211 @@
+/* Стили шапки */
+header {
+    margin: 36px;
+    display: flex;
+    justify-content: center;
+}
+
+header .wrapper {
+    max-width: 1320px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+
+header a img {
+    max-width: 200px;
+    transition: transform 0.3s ease;
+}
+
+header .menu {
+    display: flex;
+    gap: 16px;
+    background-color: inherit;
+    box-shadow: 0 0 6px #ebebeb;
+    border-radius: 6px;
+}
+
+header .menu li {
+    padding: 16px 39px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1E212C;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+header .menu li:hover {
+    background-color: #818ADB;
+    color: #FBFBFB;
+}
+
+header .login-button,
+header .login-button-phone {
+    max-width: 208px;
+    height: 51px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    background-color: #818ADB;
+    color: #FBFBFB;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+header .login-button-phone {
+    display: none;
+}
+
+header .login-button:hover {
+    background-color: #616EBD;
+    transform: scale(1.02);
+}
+
+/* Бургер-меню */
+header .hamburger {
+    display: none;
+    flex-direction: column;
+    gap: 5px;
+    cursor: pointer;
+    border: none;
+    background: none;
+    z-index: 11;
+}
+
+header .hamburger span {
+    width: 25px;
+    height: 3px;
+    background: #333;
+    border-radius: 3px;
+    transition: transform 0.3s ease, opacity 0.3s ease, background 0.3s ease;
+}
+
+header .hamburger.open span:nth-child(1) {
+    transform: translateY(8px) rotate(45deg);
+    background: white;
+}
+
+header .hamburger.open span:nth-child(2) {
+    opacity: 0;
+}
+
+header .hamburger.open span:nth-child(3) {
+    transform: translateY(-8px) rotate(-45deg);
+    background: white;
+}
+
+/* Стили для menu-burger */
+.menu-burger {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(30, 33, 44, 0.95);
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    z-index: 10;
+    opacity: 0;
+    transform: translateY(-100%);
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+.menu-burger.active {
+    display: flex;
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.menu-burger li {
+    margin: 1rem 0;
+    font-size: 20px;
+    text-align: center;
+}
+
+.menu-burger a {
+    color: #FBFBFB;
+    font-size: 18px;
+    font-weight: 600;
+    transition: color 0.3s ease;
+    text-decoration: none;
+}
+
+.menu-burger a:hover {
+    color: #818ADB;
+}
+
+/* Адаптация под устройства */
+@media (max-width: 1200px) {
+    header .menu {
+        display: none;
+    }
+
+    header .hamburger {
+        display: flex;
+    }
+
+    .menu-burger.active {
+        display: flex;
+    }
+}
+
+@media (max-width: 768px) {
+    header a img {
+        max-width: 150px;
+    }
+
+    header .login-button {
+        max-width: 160px;
+        height: 45px;
+        font-size: 14px;
+        padding: 0 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    header a img {
+        max-width: 140px;
+    }
+
+    header .login-button {
+        display: none;
+    }
+
+    header .login-button-phone {
+        display: flex;
+        max-width: 126px;
+        height: 40px;
+        font-size: 12px;
+        padding: 0 8px;
+    }
+
+    .menu-burger {
+        justify-content: flex-start;
+        padding-top: 100px;
+    }
+
+    .menu-burger li {
+        width: 100%;
+        padding: 1rem;
+        font-size: 18px;
+        background: none;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .menu-burger li:hover {
+        background-color: rgba(129, 138, 219, 0.8);
+        color: white;
+    }
+
+}
