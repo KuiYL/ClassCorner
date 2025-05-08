@@ -88,7 +88,6 @@ img {
     align-items: center;
 }
 
-/* Стиль для первого блока (текстовый контент) */
 .banner .first {
     max-width: 603px;
     width: 100%;
@@ -122,14 +121,12 @@ img {
     max-width: 555px;
 }
 
-/* Кнопки в первом блоке */
 .banner .buttons {
     display: flex;
     gap: 20px;
     align-items: center;
 }
 
-/* Основной стиль для кнопки */
 .action-button {
     max-width: 250px;
     height: 50px;
@@ -151,7 +148,6 @@ img {
     transform: scale(1.02);
 }
 
-/* Стиль для второй кнопки с изображением */
 .banner .extra-button {
     width: 48px;
     height: 50px;
@@ -167,7 +163,6 @@ img {
     height: 24px;
 }
 
-/* Текст под кнопками */
 .banner .first .buttons p {
     display: flex;
     gap: 20px;
@@ -175,7 +170,6 @@ img {
     font-weight: 500;
 }
 
-/* Для второго блока с изображением */
 .banner .second {
     display: flex;
     justify-content: center;
@@ -188,7 +182,6 @@ img {
         flex-direction: column;
         align-items: center;
         gap: 30px;
-        /* Добавление промежутка между колонками */
     }
 
     .banner .first {
@@ -198,7 +191,6 @@ img {
 
     .banner .first .head {
         font-size: 42px;
-        /* Уменьшаем размер шрифта для меньших экранов */
     }
 
     .banner .first .info {

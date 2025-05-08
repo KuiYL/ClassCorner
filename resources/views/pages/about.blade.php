@@ -41,21 +41,7 @@
         </div>
     </div>
 
-    <div class="about">
 
-    </div>
-
-    <div class="benefits">
-
-    </div>
-
-    <div class="faq">
-
-    </div>
-
-    <div class="subscribe">
-
-    </div>
     @include('layout.footer')
 </body>
 
