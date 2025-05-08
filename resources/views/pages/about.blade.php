@@ -18,14 +18,16 @@
     <div class="banner">
         <div class="wrapper">
             <div class="first">
-                <h1 class="head">Ваш путь <span class="banner-active">к знаниям</span> начинается здесь!</h1>
-                <p class="info">Создайте уникальные классы для своих учеников уже сегодня с нашей образовательной
-                    платформой! Наша
-                    платформа помогает педагогам воплощать свои идеи в жизнь каждый день и двигаться за пределы
-                    стандартного обучения.
+                <div class="">
+                    <h2 class="extra-banner-text">О компании</h2>
+                    <h1 class="head"><span class="banner-active">Классный Уголок</span></h1>
+                </div>
+                <p class="info">Мы создаем условия для легкого взаимодействия между учителями и учениками, помогая
+                    преподавателям управлять занятиями, разрабатывать и отслеживать задания, а учащимся — эффективно
+                    участвовать в процессе обучения.
                 </p>
                 <div class="buttons">
-                    <a href="#" class="action-button">Попробовать бесплатно</a>
+                    <a href="#" class="action-button">Карьера с нами</a>
 
                     <a href="#" class="extra-button"> <img src="{{ 'images/arrow-right button.svg' }}"
                             alt=""></a>
@@ -34,7 +36,7 @@
                 </div>
             </div>
             <div class="second">
-                <img src="{{ 'images/home-banner.svg' }}" alt="">
+                <img src="{{ 'images/about-banner.svg' }}" alt="">
             </div>
         </div>
     </div>

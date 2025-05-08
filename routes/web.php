@@ -15,3 +15,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::get('/', [PagesController::class, "showHomePage"])->name('/');
+Route::get('/about', [PagesController::class, "showAboutCompanyPage"])->name('/about');
+Route::get('/career', [PagesController::class, "showCompanyCareerPage"])->name('/career');

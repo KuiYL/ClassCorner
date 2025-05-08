@@ -13,8 +13,21 @@
 
 @font-face {
     font-family: "MontserratAlternates";
+    src: url('/font/MontserratAlternates-BoldItalic.ttf') format('truetype');
+    font-weight: 700;
+    font-style: italic;
+}
+
+@font-face {
+    font-family: "MontserratAlternates";
     src: url('/font/MontserratAlternates-SemiBold.ttf') format('truetype');
     font-weight: 600;
+}
+
+@font-face {
+    font-family: "MontserratAlternates";
+    src: url('/font/MontserratAlternates-Medium.ttf') format('truetype');
+    font-weight: 500;
 }
 
 @font-face {
@@ -58,4 +71,207 @@ img {
     max-width: 100%;
     height: auto;
     display: block;
+}
+
+
+/* Основной стиль для баннера */
+.banner {
+    display: flex;
+    justify-content: center;
+}
+
+.banner .wrapper {
+    max-width: 1320px;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* Стиль для первого блока (текстовый контент) */
+.banner .first {
+    max-width: 603px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+}
+
+.banner .first .head {
+    font-size: 51px;
+    font-weight: bold;
+    color: #201C44;
+}
+
+.banner-active {
+    font-weight: bold;
+    font-style: italic;
+    color: #6E76C1;
+}
+
+.extra-banner-text {
+    font-size: 26px;
+    font-weight: 500;
+    color: #201C44;
+}
+
+.banner .first .info {
+    font-size: 18px;
+    color: #131126;
+    line-height: 28px;
+    max-width: 555px;
+}
+
+/* Кнопки в первом блоке */
+.banner .buttons {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+}
+
+/* Основной стиль для кнопки */
+.action-button {
+    max-width: 250px;
+    height: 50px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    background-color: #818ADB;
+    color: #FBFBFB;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.3s ease;
+    padding: 0 16px;
+    white-space: nowrap;
+}
+
+.banner .action-button:hover {
+    background-color: #616EBD;
+    transform: scale(1.02);
+}
+
+/* Стиль для второй кнопки с изображением */
+.banner .extra-button {
+    width: 48px;
+    height: 50px;
+    border-radius: 6px;
+    border: 1px solid #8992E4;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.banner .extra-button img {
+    width: 24px;
+    height: 24px;
+}
+
+/* Текст под кнопками */
+.banner .first .buttons p {
+    display: flex;
+    gap: 20px;
+    font-size: 16px;
+    font-weight: 500;
+}
+
+/* Для второго блока с изображением */
+.banner .second {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Адаптация для устройств шириной до 1200px */
+@media (max-width: 1200px) {
+    .banner .wrapper {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+        /* Добавление промежутка между колонками */
+    }
+
+    .banner .first {
+        text-align: center;
+        gap: 25px;
+    }
+
+    .banner .first .head {
+        font-size: 42px;
+        /* Уменьшаем размер шрифта для меньших экранов */
+    }
+
+    .banner .first .info {
+        font-size: 16px;
+        max-width: 100%;
+    }
+
+    .banner .buttons {
+        flex-direction: column;
+        align-items: center;
+        gap: 15px;
+        justify-content: center;
+    }
+
+
+    .banner .action-button {
+        max-width: 100%;
+        width: 90%;
+        font-size: 14px;
+        padding: 0 12px;
+    }
+
+    .banner .extra-button {
+        width: 45px;
+        height: 45px;
+    }
+
+    .banner .first .buttons p {
+        font-size: 14px;
+    }
+
+    .banner .second img {
+        display: none;
+    }
+}
+
+/* Мобильная адаптация */
+@media (max-width: 768px) {
+    .banner .wrapper {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .banner .first {
+        text-align: center;
+        gap: 20px;
+    }
+
+    .banner .second img {
+        display: none;
+    }
+
+    .banner .action-button {
+        max-width: 100%;
+        font-size: 14px;
+        padding: 0 12px;
+    }
+
+    .banner .extra-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .banner .first .info {
+        font-size: 16px;
+        max-width: 100%;
+    }
+
+    .banner .buttons {
+        justify-content: center;
+    }
+
+    .banner .buttons p {
+        font-size: 14px;
+    }
 }
