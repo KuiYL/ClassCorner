@@ -1,4 +1,4 @@
-<header>
+<header id="top">
     <div class="wrapper">
 
         <button class="hamburger" aria-label="Toggle menu">
