@@ -1,7 +1,7 @@
-<footer>
+<footer class="hidden">
     <div class="wrapper">
         <div class="column-left">
-            <a href="#"><img src="{{ asset('images/logo-white ver.svg') }}" alt="Логотип компании"></a>
+            <a href="{{ route('home') }}"><img src="{{ asset('images/logo-white ver.svg') }}" alt="Логотип компании"></a>
             <p class="info"> — это онлайн-обучение с инновационными решениями для автоматизации проверки домашних
                 заданий. Наша цель — создать удобный инструмент для преподавателей и учеников, улучшающий
                 образовательный процесс.</p>
@@ -18,27 +18,27 @@
             <nav class="column">
                 <p class="title">О КОМПАНИИ</p>
                 <div class="column-info">
-                    <a href="#">О нас</a>
-                    <a href="#">Карьера в компании</a>
-                    <a href="#">Контакты</a>
+                    <a href="{{ route('about') }}">О нас</a>
+                    <a href="{{ route('career') }}">Карьера в компании</a>
+                    <a href="{{ route('contact') }}">Контакты</a>
                 </div>
             </nav>
 
             <nav class="column">
                 <p class="title">СВЯЗЬ С НАМИ</p>
                 <div class="column-info">
-                    <a href="#">Правила использования</a>
-                    <a href="#">Служба поддержки</a>
-                    <a href="#">Оставить отзыв</a>
+                    <a href="{{ route('service-conditions') }}">Правила использования</a>
+                    <a href="{{ route('contact') }}">Служба поддержки</a>
+                    <a href="{{ route('contact') }}">Оставить отзыв</a>
                 </div>
             </nav>
 
             <nav class="column">
                 <p class="title">ПРАВОВАЯ ИНФОРМАЦИЯ</p>
                 <div class="column-info">
-                    <a href="#">Пользовательское соглашение</a>
-                    <a href="#">Политика конфиденциальности</a>
-                    <a href="#">Защита персональных данных</a>
+                    <a href="{{ route('service-conditions') }}">Пользовательское соглашение</a>
+                    <a href="{{ route('privacy-policy') }}">Политика конфиденциальности</a>
+                    <a href="{{ route('security') }}">Защита персональных данных</a>
                 </div>
             </nav>
         </div>

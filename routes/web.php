@@ -14,6 +14,11 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', [PagesController::class, "showHomePage"])->name('/');
-Route::get('/about', [PagesController::class, "showAboutCompanyPage"])->name('/about');
-Route::get('/career', [PagesController::class, "showCompanyCareerPage"])->name('/career');
+Route::get('/', [PagesController::class, "showHomePage"])->name('home');
+Route::get('/about', [PagesController::class, "showAboutCompanyPage"])->name('about');
+Route::get('/career', [PagesController::class, "showCompanyCareerPage"])->name('career');
+Route::get('/contact', [PagesController::class, "showContactPage"])->name('contact');
+
+Route::get('/privacy-policy', [PagesController::class, "showPrivacyPage"])->name('privacy-policy');
+Route::get('/security', [PagesController::class, "showSecurityPage"])->name('security');
+Route::get('/service-conditions', [PagesController::class, "showServiceConditionsPage"])->name('service-conditions');
