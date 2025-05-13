@@ -26,7 +26,7 @@
                 @if (auth()->user()->role === 'admin')
                     <li><a href="{{ route('admin.dashboard') }}" class="link-button">Админ-панель</a></li>
                 @endif
-                @if (auth()->user()->role === 'user')
+                @if (auth()->user()->role === 'teacher' || auth()->user()->role === 'student')
                     <li><a href="{{ route('user.dashboard') }}" class="link-button">Личный кабинет</a></li>
                 @endif
             @endauth

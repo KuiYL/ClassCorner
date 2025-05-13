@@ -22,14 +22,14 @@ if (hamburger && burgerMenu && body) {
 // FAQ-элементы
 document.addEventListener('DOMContentLoaded', () => {
     const faqItems = document.querySelectorAll('.faq-item');
-    const closeIconPath = "path/to/close-icon.png";
-    const openIconPath = "path/to/open-icon.png";
+
 
     faqItems.forEach(item => {
         const question = item.querySelector('.question');
         const answer = item.querySelector('.answer');
         const icon = question?.querySelector('img');
-
+        const closeIconPath = document.querySelector('meta[name="close-icon"]').getAttribute('content');
+        const openIconPath = document.querySelector('meta[name="open-icon"]').getAttribute('content');
         if (question && answer && icon) {
             question.addEventListener('click', () => {
                 const isOpen = item.classList.contains('faq-item-open');
@@ -86,13 +86,14 @@ document.addEventListener("DOMContentLoaded", () => {
         let autoSlideIndex = 0;
         let autoSlideInterval;
 
-        const indicatorInactive = "path/to/inactive-icon.png";
-        const activeIndicator = "path/to/active-icon.png";
+
+
 
         function updateSlider(index) {
             const slideWidth = slider.clientWidth / slidesToShow;
             slider.style.transform = `translateX(-${index * slideWidth * slidesToShow}px)`;
-
+            const indicatorInactive = document.querySelector('meta[name="indicator-active"]').getAttribute('content');
+            const activeIndicator = document.querySelector('meta[name="indicator"]').getAttribute('content');
             indicators.forEach((indicator, i) => {
                 if (i === index) {
                     indicator.src = activeIndicator;

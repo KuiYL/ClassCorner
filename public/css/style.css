@@ -353,6 +353,7 @@ hr.solid {
     width: 100%;
     display: flex;
     justify-content: center;
+    flex-direction: row;
     gap: 8px;
 }
 
@@ -437,6 +438,7 @@ hr.solid {
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
     min-height: 200px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
+    margin-bottom: 20px;
 }
 
 .history-company .items .item:hover {
@@ -625,6 +627,7 @@ hr.solid {
     border-radius: 12px;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
 }
 
 .benefits-company .item:hover {
