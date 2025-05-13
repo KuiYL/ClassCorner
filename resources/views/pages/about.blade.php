@@ -6,11 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>О нас</title>
-    <link rel="stylesheet" href="{{ 'css/style.css' }}">
-    <link rel="stylesheet" href="{{ 'css/layout.css' }}">
-    <link rel="stylesheet" href="{{ 'css/components.css' }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adaptation.css') }}">
 
-    <script src="{{ 'js/script.js' }}" defer></script>
+    <script src="{{ asset('js/script.js') }}" defer></script>
     <meta name="indicator-active" content="{{ asset('images/indicator-active.svg') }}">
     <meta name="indicator" content="{{ asset('images/indicator-inactive.svg') }}">
 </head>
@@ -18,7 +19,7 @@
 <body>
     @include('layout.header')
 
-    <div class="banner">
+    <div class="banner hidden">
         <div class="wrapper">
             <div class="first">
                 <div class="">

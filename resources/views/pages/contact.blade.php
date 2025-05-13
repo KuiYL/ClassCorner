@@ -5,19 +5,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Карьера</title>
-    <link rel="stylesheet" href="{{ 'css/style.css' }}">
-    <link rel="stylesheet" href="{{ 'css/layout.css' }}">
-    <link rel="stylesheet" href="{{ 'css/components.css' }}">
-    <link rel="stylesheet" href="{{ 'css/adaptation.css' }}">
+    <title>Контакты</title>
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adaptation.css') }}">
 
-    <script src="{{ 'js/script.js' }}" defer></script>
+    <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
 
 <body>
     @include('layout.header')
 
-    <div class="contacts-form">
+    <div class="contacts-form hidden">
         <div class="wrapper">
             <div class="first">
                 <div class="head-block">
@@ -88,8 +88,11 @@
                     </div>
                     <div class="send-contact">
                         <button type="submit" class="action-button">Отправить сообщение</button>
-                        <p>Нажимая кнопку, вы разрешаете <a href="#">обработку персональных данных</a> и
-                            соглашаетесь с <a href="#">политикой конфиденциальности</a></p>
+                        <p>Нажимая кнопку, вы разрешаете <a href="{{ route('privacy-policy') }}">обработку
+                                персональных данных</a> и
+                            соглашаетесь с <a href="{{ route('service-conditions') }}">политикой
+                                конфиденциальности</a>
+                        </p>
                     </div>
                 </form>
             </div>

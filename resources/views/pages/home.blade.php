@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Главная</title>
-    <link rel="stylesheet" href="{{ 'css/style.css' }}">
-    <link rel="stylesheet" href="{{ 'css/layout.css' }}">
-    <link rel="stylesheet" href="{{ 'css/components.css' }}">
-    <link rel="stylesheet" href="{{ 'css/adaptation.css' }}">
+    <link rel="stylesheet" href="{{ asset('css/style.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/adaptation.css') }}">
 
-    <script src="{{ 'js/script.js' }}" defer></script>
+    <script src="{{ asset('js/script.js') }}" defer></script>
     <meta name="close-icon" content="{{ asset('images/faq-close.svg') }}">
     <meta name="open-icon" content="{{ asset('images/faq-open.svg') }}">
 </head>
@@ -19,7 +19,7 @@
 <body>
     @include('layout.header')
 
-    <div class="banner">
+    <div class="banner hidden">
         <div class="wrapper">
             <div class="first">
                 <h1 class="head">Ваш путь <span class="banner-active">к знаниям</span> начинается здесь!</h1>
