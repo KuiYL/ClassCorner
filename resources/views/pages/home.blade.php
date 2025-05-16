@@ -14,6 +14,7 @@
     <script src="{{ asset('js/script.js') }}" defer></script>
     <meta name="close-icon" content="{{ asset('images/faq-close.svg') }}">
     <meta name="open-icon" content="{{ asset('images/faq-open.svg') }}">
+    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
 </head>
 
 <body>

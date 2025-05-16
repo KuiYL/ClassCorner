@@ -1,17 +1,114 @@
-
 @media (max-width: 1200px) {
-    .about .wrapper {
+
+    .about,
+    .faq,
+    .benefits,
+    .subscribe,
+    .history-company,
+    .quote,
+    .staff,
+    .benefits-company,
+    .contacts-form {
+        margin-top: 28px;
+    }
+
+    .head-block {
+        width: 100%;
+        display: flex;
         flex-direction: column;
+        gap: 8px;
+        color: #201C44;
+    }
+
+    .head-block p {
+        line-height: 160%;
+        font-weight: 500;
+        font-size: 14px;
+    }
+
+    .head-block h2 {
+        line-height: 160%;
+        font-weight: 500;
+        font-size: 32px;
+    }
+
+    .about .wrapper .first img {
+        width: 500px;
+    }
+
+    .about p {
+        font-size: 15px;
+    }
+
+    .about .wrapper {
         align-items: center;
+        padding: 0 20px;
+    }
+
+    .about .wrapper .second {
+        width: 60%;
+    }
+
+    .about .action-button {
+        width: 100%;
+        max-width: 100%;
+    }
+
+    .benefits .wrapper {
+        flex-direction: column;
+        gap: 30px;
     }
 
     .benefits .icon-boxes {
         flex-direction: column;
         gap: 30px;
+        padding: 0 20px;
+    }
+
+    .benefits hr {
+        height: 55px;
+    }
+
+    .faq .wrapper {
+        padding: 0 20px;
     }
 
     .faq-items {
         gap: 20px;
+        width: 80%;
+    }
+
+    .faq-item .question {
+        max-width: 600px;
+
+    }
+
+    .question p {
+        font-size: 18px;
+    }
+
+    .faq-item-open .answer {
+        width: 95%;
+    }
+
+    .subscribe .wrapper {
+        text-align: center;
+    }
+
+    .subscribe form.form-subscribe {
+        flex-direction: column;
+        gap: 15px;
+        align-items: center;
+    }
+
+    .subscribe .custom-input {
+        width: 90%;
+        max-width: 550px;
+    }
+
+    .subscribe .action-button {
+        width: 90%;
+        max-width: 550px;
     }
 
     header .menu {
@@ -85,7 +182,6 @@
     }
 
     .banner .buttons {
-        flex-direction: column;
         align-items: center;
         gap: 15px;
         justify-content: center;
@@ -111,6 +207,28 @@
     .banner .second img {
         display: none;
     }
+
+    .quote .wrapper {
+        max-width: 850px;
+    }
+
+    .history-company .wrapper,
+    .benefits-company .wrapper,
+    .contacts-form .wrapper,
+    .law .wrapper,
+    .choice-login .wrapper,
+    .auth .wrapper {
+        margin: 16px;
+    }
+
+    .benefits-company .items {
+        grid-template-columns: repeat(auto-fill, minmax(290px, max-content));
+    }
+
+    .choice-login .choice a {
+        max-width: 400px;
+    }
+
 }
 
 @media (max-width: 768px) {
@@ -118,20 +236,65 @@
         padding: 0 20px;
     }
 
+    .menu-burger {
+        justify-content: flex-start;
+        padding-top: 100px;
+    }
+
+    .menu-burger li {
+        width: 100%;
+        padding: 1rem;
+        font-size: 18px;
+        background: none;
+        text-align: center;
+        transition: background-color 0.3s ease;
+    }
+
+    .menu-burger li:hover {
+        background-color: #6E76C1;
+        color: #6E76C1;
+    }
+
+    .about .wrapper .first img {
+        max-width: 320px;
+    }
+
     .faq .wrapper {
         padding: 0 20px;
     }
 
-    .form-subscribe .custom-input {
-        width: 60%;
+    .faq-items {
+        gap: 20px;
+        width: 80%;
     }
 
-    .action-button{
+    .faq-item .question {
+        max-width: 500px;
+
+    }
+
+    .faq-item-open {
+        gap: 0px;
+    }
+
+    .faq-item-open .answer {
+        width: 90%;
+    }
+
+    .quote .wrapper {
+        max-width: 650px;
+    }
+
+    .action-button {
         font-size: 16px;
         padding: 10px 20px;
     }
 
-      header a img {
+    header {
+        margin-bottom: 14px;
+    }
+
+    header a img {
         max-width: 150px;
     }
 
@@ -218,9 +381,72 @@
     .banner .buttons p {
         font-size: 14px;
     }
+
+    .contacts-form {
+        width: 100%;
+        margin: 28px 0;
+    }
+
+    .contacts-form .wrapper {
+        max-width: 1200px;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .contacts-form .contact-socials {
+        display: none;
+    }
+
+    .contacts-form .contact-ways {
+        flex-direction: row;
+        justify-content: center;
+    }
+
+    .contacts-form .first {
+        gap: 15px;
+    }
+
+    .contacts-form .first .head-block {
+        text-align: center;
+    }
+
+    .choice-login .choice a {
+        max-width: 360px;
+    }
+
+    .auth,
+    .choice-login {
+        margin-top: 28px;
+        margin-bottom: 28px;
+    }
+
+    .auth .second {
+        display: none;
+    }
+
+    .auth .first {
+        max-width: 100%;
+    }
+
+    .slide .position {
+        font-size: 15px;
+    }
+
+    .form-subscribe .custom-input {
+        font-size: 14px;
+    }
 }
 
 @media (max-width: 480px) {
+    header .auth-button {
+        display: none;
+    }
+
+    .banner .buttons {
+        flex-direction: column;
+    }
+
     .about .wrapper .second .list-info {
         gap: 8px;
     }
@@ -230,13 +456,13 @@
         line-height: 22px;
     }
 
-    .form-subscribe .custom-input {
-        width: 100%;
-    }
-
     .action-button {
         font-size: 14px;
         padding: 8px 16px;
+    }
+
+    header a img {
+        max-width: 140px;
     }
 
     header a img {
@@ -270,8 +496,8 @@
     }
 
     .menu-burger li:hover {
-        background-color: rgba(129, 138, 219, 0.8);
-        color: white;
+        background-color: #6E76C1;
+        color: #6E76C1;
     }
 
     footer {
@@ -309,5 +535,145 @@
     .extra--footer a {
         font-size: 11px;
     }
-}
 
+    .about .wrapper .first {
+        display: none;
+    }
+
+    .about .wrapper .second {
+        width: 100%;
+    }
+
+    .faq-item .question {
+        max-width: 230px;
+    }
+
+    .faq-item .question img {
+        width: 60px;
+    }
+
+    .faq-item .question p {
+        font-size: 14px;
+        line-height: 22px;
+    }
+
+    .faq-item-open .answer {
+        font-size: 14px;
+    }
+
+    .history-company .items {
+        display: flex;
+        flex-direction: column;
+        gap: 24px;
+        width: 100%;
+    }
+
+    .quote .wrapper {
+        max-width: 350px;
+    }
+
+    .quote .text {
+        color: #201C44;
+        font-size: 28px;
+    }
+
+    .slider-container {
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .slider {
+        display: flex;
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .slide {
+        flex: 0 0 25%;
+        box-sizing: border-box;
+        padding: 10px;
+        text-align: center;
+        height: 200px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    .slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .slide .position {
+        display: none;
+    }
+
+    .slide .name {
+        font-size: 14px;
+    }
+
+    .contacts-form .contact-ways {
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    form .form-row {
+        flex-wrap: wrap;
+        gap: 14px;
+    }
+
+    .choice-login .wrapper a {
+        color: #201C44;
+        font-size: 16px;
+    }
+
+    a .active {
+        color: #6E76C1;
+        font-size: 18px;
+        font-weight: 600;
+        font-style: italic;
+    }
+
+    .choice-login .choice {
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .auth,
+    .choice-login {
+        margin-top: 6px;
+        margin-bottom: 6px;
+    }
+
+    .head-block p {
+        line-height: 160%;
+        font-weight: 500;
+        font-size: 12px;
+    }
+
+    .head-block h2 {
+        line-height: 160%;
+        font-weight: 500;
+        font-size: 23px;
+    }
+
+    .auth .head-block h2 {
+        font-size: 23px;
+    }
+
+    .faq .wrapper {
+        gap: 22px;
+    }
+
+    .subscribe .wrapper {
+        gap: 22px;
+        padding-top: 50px;
+        height: 400px;
+    }
+
+    .auth a {
+        font-size: 14px;
+        text-align: center;
+    }
+}

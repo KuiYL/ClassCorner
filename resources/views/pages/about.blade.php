@@ -14,6 +14,7 @@
     <script src="{{ asset('js/script.js') }}" defer></script>
     <meta name="indicator-active" content="{{ asset('images/indicator-active.svg') }}">
     <meta name="indicator" content="{{ asset('images/indicator-inactive.svg') }}">
+    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
 </head>
 
 <body>
@@ -86,7 +87,7 @@
         </div>
     </div>
 
-    <div class="staff">
+    <div class="staff hidden">
         <div class="wrapper">
             <div class="head-block">
                 <p>Познакомьтесь с нашей командой</p>
@@ -165,7 +166,7 @@
                                 <p class="name">Иван Орлов</p>
                             </div>
                         </div>
-                        <p class="position">Дизайнер пользовательского интерфейса (UI/UX)</p>
+                        <p class="position">Разработчик WEB</p>
                     </div>
                 </div>
             </div>
