@@ -72,72 +72,106 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-// Слайдер
+//Слайдер
 document.addEventListener("DOMContentLoaded", () => {
     const slider = document.querySelector(".slider");
-    const indicators = document.querySelectorAll(".indicator");
+    const indicatorsContainer = document.querySelector(".indicators");
     const slides = document.querySelectorAll(".slide");
-    const slidesToShow = 4;
 
-    if (slider && indicators.length > 0 && slides.length > 0) {
-        const totalSlides = slides.length;
-        const maxIndex = Math.ceil(totalSlides / slidesToShow) - 1;
-        let currentIndex = 0;
-        let autoSlideIndex = 0;
-        let autoSlideInterval;
+    let slidesToShow = 4;
+    let currentIndex = 0;
+    let autoSlideIndex = 0;
+    let autoSlideInterval;
 
-
-
-
-        function updateSlider(index) {
-            const slideWidth = slider.clientWidth / slidesToShow;
-            slider.style.transform = `translateX(-${index * slideWidth * slidesToShow}px)`;
-            const indicatorInactive = document.querySelector('meta[name="indicator-active"]').getAttribute('content');
-            const activeIndicator = document.querySelector('meta[name="indicator"]').getAttribute('content');
-            indicators.forEach((indicator, i) => {
-                if (i === index) {
-                    indicator.src = activeIndicator;
-                    indicator.classList.add("active");
-                } else {
-                    indicator.src = indicatorInactive;
-                    indicator.classList.remove("active");
-                }
-            });
+    function calculateSlidesToShow() {
+        if (window.innerWidth >= 700) {
+            slidesToShow = 4;
+        } else {
+            slidesToShow = 3;
         }
+        updateSlideWidths();
+    }
 
-        function autoSlide() {
-            const slideWidth = slider.clientWidth / slidesToShow;
-
-            if (autoSlideIndex >= totalSlides - slidesToShow) {
-                autoSlideIndex = 0;
-                currentIndex = 0;
-                updateSlider(currentIndex);
-            } else {
-                autoSlideIndex++;
-                if (autoSlideIndex % slidesToShow === 0) {
-                    currentIndex = Math.floor(autoSlideIndex / slidesToShow) % indicators.length;
-                    updateSlider(currentIndex);
-                }
-                slider.style.transform = `translateX(-${autoSlideIndex * slideWidth}px)`;
-            }
-        }
-
-        indicators.forEach((indicator, index) => {
-            indicator.addEventListener("click", () => {
-                currentIndex = index;
-                autoSlideIndex = index * slidesToShow;
-                updateSlider(currentIndex);
-            });
-        });
-
-        autoSlideInterval = setInterval(autoSlide, 2600);
-
-        indicators.forEach((indicator) => {
-            indicator.addEventListener("mouseover", () => clearInterval(autoSlideInterval));
-            indicator.addEventListener("mouseout", () => (autoSlideInterval = setInterval(autoSlide, 2000)));
+    function updateSlideWidths() {
+        const slideWidth = 100 / slidesToShow;
+        slides.forEach((slide) => {
+            slide.style.flex = `0 0 ${slideWidth}%`;
         });
     }
+
+    function updateIndicators() {
+        const totalIndicators = window.innerWidth >= 700 ? 2 : 3;
+        const indicatorInactive = document.querySelector('meta[name="indicator-active"]').getAttribute('content');
+        const activeIndicator = document.querySelector('meta[name="indicator"]').getAttribute('content');
+
+        indicatorsContainer.innerHTML = "";
+
+        for (let i = 0; i < totalIndicators; i++) {
+            const indicator = document.createElement("img");
+            indicator.src = i === 0 ? activeIndicator : indicatorInactive;
+            indicator.classList.add("indicator");
+            if (i === 0) indicator.classList.add("active");
+            indicator.dataset.slide = i;
+            indicatorsContainer.appendChild(indicator);
+
+            indicator.addEventListener("click", () => {
+                currentIndex = i;
+                autoSlideIndex = i * slidesToShow;
+                updateSlider(currentIndex);
+            });
+        }
+    }
+
+    function updateSlider(index) {
+        const slideWidth = slider.clientWidth / slidesToShow;
+        slider.style.transform = `translateX(-${index * slideWidth * slidesToShow}px)`;
+
+        const indicators = document.querySelectorAll(".indicator");
+        const indicatorInactive = document.querySelector('meta[name="indicator-active"]').getAttribute('content');
+        const activeIndicator = document.querySelector('meta[name="indicator"]').getAttribute('content');
+
+        indicators.forEach((indicator, i) => {
+            if (i === index) {
+                indicator.src = activeIndicator;
+                indicator.classList.add("active");
+            } else {
+                indicator.src = indicatorInactive;
+                indicator.classList.remove("active");
+            }
+        });
+    }
+
+    function autoSlide() {
+        const totalSlides = slides.length;
+        const maxIndex = Math.ceil(totalSlides / slidesToShow) - 1;
+
+        if (autoSlideIndex >= totalSlides - slidesToShow) {
+            autoSlideIndex = 0;
+            currentIndex = 0;
+        } else {
+            autoSlideIndex++;
+            if (autoSlideIndex % slidesToShow === 0) {
+                currentIndex = Math.floor(autoSlideIndex / slidesToShow) % (maxIndex + 1);
+            }
+        }
+        updateSlider(currentIndex);
+    }
+
+    function initSlider() {
+        calculateSlidesToShow();
+        updateIndicators();
+        updateSlider(0);
+    }
+
+    window.addEventListener("resize", initSlider);
+
+    initSlider();
+    autoSlideInterval = setInterval(autoSlide, 2300);
+
+    indicatorsContainer.addEventListener("mouseover", () => clearInterval(autoSlideInterval));
+    indicatorsContainer.addEventListener("mouseout", () => (autoSlideInterval = setInterval(autoSlide, 2300)));
 });
+
 
 // Загрузка файла
 function triggerFileInput() {
@@ -206,3 +240,45 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    // Анимация карточек классов
+    const classCards = document.querySelectorAll('.class-card');
+    classCards.forEach((card, index) => {
+        card.style.opacity = '0';
+        card.style.transform = 'translateY(20px)';
+        setTimeout(() => {
+            card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 + index * 100);
+    });
+
+    // Эффект при нажатии на элементы
+    const interactiveItems = document.querySelectorAll('.class-card, [href]');
+    interactiveItems.forEach(item => {
+        item.style.transition = 'all 0.2s ease';
+        item.addEventListener('mousedown', () => {
+            item.classList.add('animate-pop');
+        });
+        item.addEventListener('animationend', () => {
+            item.classList.remove('animate-pop');
+        });
+    });
+
+    // Анимация прогресс-баров
+    const progressBars = document.querySelectorAll('.progress-ring__circle');
+    progressBars.forEach(bar => {
+        const radius = bar.r.baseVal.value;
+        const circumference = radius * 2 * Math.PI;
+        bar.style.strokeDasharray = `${circumference} ${circumference}`;
+        bar.style.strokeDashoffset = circumference;
+
+        const offset = circumference - (70 / 100) * circumference;
+        setTimeout(() => {
+            bar.style.transition = 'stroke-dashoffset 0.5s ease';
+            bar.style.strokeDashoffset = offset;
+        }, 300);
+    });
+});
+

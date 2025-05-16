@@ -8,12 +8,12 @@
     <title>О безопасности</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
     <link rel="stylesheet" href="{{ asset('css/adaptation.css') }}">
 
     <script src="{{ asset('js/script.js') }}" defer></script>
     <meta name="close-icon" content="{{ asset('images/faq-close.svg') }}">
     <meta name="open-icon" content="{{ asset('images/faq-open.svg') }}">
+    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
 </head>
 
 <body>

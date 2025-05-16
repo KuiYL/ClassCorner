@@ -8,10 +8,10 @@
     <title>Карьера</title>
     <link rel="stylesheet" href="{{ asset('css/style.css') }}">
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/components.css') }}">
     <link rel="stylesheet" href="{{ asset('css/adaptation.css') }}">
 
     <script src="{{ asset('js/script.js') }}" defer></script>
+    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
 </head>
 
 <body>
@@ -84,7 +84,7 @@
         </div>
     </div>
 
-    <div class="contacts-form">
+    <div class="contacts-form hidden">
         <div class="wrapper">
             <div class="first">
                 <div class="head-block">

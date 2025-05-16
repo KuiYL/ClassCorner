@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\AssignmentsController;
 use App\Http\Controllers\AvatarController;
+use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
@@ -36,5 +38,19 @@ Route::get('/choose-avatar', [PagesController::class, 'showAvatarChoose'])->name
 Route::post('/choose-avatar', [AvatarController::class, 'store'])->name('choose.avatar.store');
 
 Route::middleware('auth')->group(function () {
+    Route::get('/dashboard', [PagesController::class, 'showDashboradPage'])->name('user.dashboard');
+    Route::get('/dashboard/classes', [PagesController::class, 'showClassesPage'])->name('user.classes');
+
+    Route::get('/classes/create', [PagesController::class, 'createClass'])->name('classes.create');
+    Route::post('/classes', [ClassesController::class, 'store'])->name('classes.store');
+
+    Route::get('/classes/edit/{id}', [PagesController::class, 'editClass'])->name('classes.edit');
+    Route::put('/classes/update/{id}', [ClassesController::class, 'update'])->name('classes.update');
+    Route::delete('/classes/{id}', [ClassesController::class, 'destroy'])->name('classes.destroy');
+
+    Route::get('/class/{classId}', [PagesController::class, 'showClassPage'])->name('class.show');
+
+    Route::get('/assignments/create', [PagesController::class, 'createAssignments'])->name('assignments.create');
+    Route::post('/assignments', [AssignmentsController::class, 'store'])->name('assignment.store');
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
 });

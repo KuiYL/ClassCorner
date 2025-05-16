@@ -24,8 +24,13 @@ header .menu {
     display: flex;
     gap: 16px;
     background-color: inherit;
-    box-shadow: 0 0 6px #ebebeb;
+    box-shadow: 0 0 6px #dddddd;
     border-radius: 6px;
+}
+
+header .auth-button {
+    display: flex;
+    gap: 10px;
 }
 
 header .menu li {
@@ -140,9 +145,6 @@ header .hamburger.open span:nth-child(3) {
     text-decoration: none;
 }
 
-.menu-burger a:hover {
-    color: #818ADB;
-}
 
 /* Общие стили футера */
 footer {
