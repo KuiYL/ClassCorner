@@ -18,42 +18,42 @@ class PagesController extends Controller
 
     public function  showAboutCompanyPage()
     {
-        return view('pages.about');
+        return view('pages.site.about');
     }
 
     public function  showCompanyCareerPage()
     {
-        return view('pages.career');
+        return view('pages.site.career');
     }
 
     public function  showPrivacyPage()
     {
-        return view('pages.privacy_policy');
+        return view('pages.site.privacy_policy');
     }
 
     public function  showSecurityPage()
     {
-        return view('pages.security');
+        return view('pages.site.security');
     }
 
     public function  showServiceConditionsPage()
     {
-        return view('pages.service_conditions');
+        return view('pages.site.service_conditions');
     }
 
     public function  showContactPage()
     {
-        return view('pages.contact');
+        return view('pages.site.contact');
     }
 
     public function  showChoiceLoginPage()
     {
-        return view('pages.choiceLogin');
+        return view('pages.site.choiceLogin');
     }
 
     public function  showLoginPage()
     {
-        return view('pages.login');
+        return view('pages.site.login');
     }
 
     public function showRegisterPage($role)
@@ -63,7 +63,7 @@ class PagesController extends Controller
         if (!in_array($role, $roles)) {
             abort(404);
         }
-        return view('pages.register', compact('role'));
+        return view('pages.site.register', compact('role'));
     }
 
     public function showAvatarChoose()
@@ -80,22 +80,22 @@ class PagesController extends Controller
             return redirect()->route('login')->withErrors('Сессия истекла. Повторите регистрацию.');
         }
 
-        return view('pages.chooseAvatar');
+        return view('pages.site.chooseAvatar');
     }
 
     public function  showDashboradPage()
     {
         $user = auth()->user();
         if (!$user) {
-            return view('pages.login');
+            return redirect()->route('login');
         }
 
         if ($user->role === 'teacher') {
             return $this->showDashboardTeacher();
         } else if ($user->role === 'admin') {
-            return view('pages.dashboardAdmin', compact('user'));
+            return view('pages.platform.dashboardAdmin', compact('user'));
         } else if ($user->role === 'student') {
-            return view('pages.dashboardUser', compact('user'));
+            return view('pages.platform.dashboardUser', compact('user'));
         }
     }
 
@@ -130,7 +130,7 @@ class PagesController extends Controller
 
         $newAssignmentsCount = $assignmentsToGrade->count();
 
-        return view('pages.dashboardTeacher', compact(
+        return view('pages.platform.dashboardTeacher', compact(
             'user',
             'classes',
             'assignmentsToGrade',
@@ -146,17 +146,17 @@ class PagesController extends Controller
     {
         $user = auth()->user();
         if (!$user) {
-            return view('pages.login');
+            return redirect()->route('login');
         }
 
         if ($user->role === 'teacher') {
             $classes = $user->classes;
 
-            return view('pages.classesTeacher', compact('user', 'classes'));
+            return view('pages.platform.classesTeacher', compact('user', 'classes'));
         } else if ($user->role === 'admin') {
-            return view('pages.dashboardAdmin', compact('user'));
+            return view('pages.platform.dashboardAdmin', compact('user'));
         } else if ($user->role === 'student') {
-            return view('pages.dashboardUser', compact('user'));
+            return view('pages.platform.dashboardUser', compact('user'));
         }
     }
 
@@ -164,22 +164,22 @@ class PagesController extends Controller
     {
         $teachers = User::where('role', 'teacher')->get();
 
-        return view('pages.classes.create', compact('teachers'));
+        return view('pages.platform.classes.create', compact('teachers'));
     }
     public function createAssignments()
     {
-        return view('pages.assignments.create');
+        return view('pages.platform.assignments.create');
     }
     public function editClass($id)
     {
         $class = Classes::findOrFail($id);
 
-        return view('pages.classes.update', compact('class'));
+        return view('pages.platform.classes.update', compact('class'));
     }
 
     public function showClassPage($classId)
     {
-        $user = auth()->user();
+        $user = User::findOrFail(auth()->id());
 
         if (!$user) {
             return redirect()->route('login')->with('error', 'Пожалуйста, войдите в систему.');
@@ -209,6 +209,6 @@ class PagesController extends Controller
             $students = $class->students;
         }
 
-        return view('pages.classes.class', compact('class', 'assignments', 'students', 'role', 'user', 'classes'));
+        return view('pages.platform.classes.class', compact('class', 'assignments', 'students', 'role', 'user', 'classes'));
     }
 }
