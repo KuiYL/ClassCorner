@@ -42,5 +42,13 @@ class Assignments extends Model
     {
         return $query->where('status', 'active');
     }
-
+    public function getStatusNameAttribute()
+    {
+        $statuses = [
+            'pending' => 'В ожидании',
+            'active' => 'Активно',
+            'completed' => 'Выполнено',
+        ];
+        return $statuses[$this->status] ?? $this->status;
+    }
 }

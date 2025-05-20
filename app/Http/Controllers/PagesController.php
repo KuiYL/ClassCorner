@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Assignments;
 use App\Models\Classes;
 use App\Models\StudentAssignments;
 use App\Models\User;
@@ -11,6 +12,35 @@ use Illuminate\Support\Facades\Log;
 
 class PagesController extends Controller
 {
+
+    private function getAuthenticatedUser()
+    {
+        $user = User::findOrFail(auth()->id());
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        return $user;
+    }
+
+    private function redirectIfNotRole($user, $role)
+    {
+        if ($user->role !== $role) {
+            abort(403, 'Access denied');
+        }
+    }
+
+    private function getUserClasses($user, $status = 'approved')
+    {
+        return $user->classes()->wherePivot('status', $status)->get();
+    }
+
+    private function getUserAssignmentsToGrade($user)
+    {
+        return StudentAssignments::whereHas('assignment', function ($query) use ($user) {
+            $query->where('teacher_id', $user->id);
+        })->where('status', 'submitted')->get();
+    }
+
     public function  showHomePage()
     {
         return view('pages.home');
@@ -68,147 +98,136 @@ class PagesController extends Controller
 
     public function showAvatarChoose()
     {
-        $userId = Cache::get('registered_user_id_' . session('registered_user_id'));
-
-        if (!$userId) {
-            return redirect()->route('login')->withErrors('Сессия истекла. Повторите регистрацию.');
-        }
-
         $userId = session('registered_user_id');
-
-        if (!$userId) {
+        if (!$userId || !Cache::has('registered_user_id_' . $userId)) {
             return redirect()->route('login')->withErrors('Сессия истекла. Повторите регистрацию.');
         }
-
         return view('pages.site.chooseAvatar');
     }
 
-    public function  showDashboradPage()
+    public function showDashboradPage()
     {
-        $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login');
-        }
+        $user = $this->getAuthenticatedUser();
 
-        if ($user->role === 'teacher') {
-            return $this->showDashboardTeacher();
-        } else if ($user->role === 'admin') {
-            return view('pages.platform.dashboardAdmin', compact('user'));
-        } else if ($user->role === 'student') {
-            return view('pages.platform.dashboardUser', compact('user'));
+        switch ($user->role) {
+            case 'teacher':
+                return $this->showDashboardTeacher($user);
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
         }
     }
 
-    public function showDashboardTeacher()
+    public function showDashboardTeacher($user = null)
     {
-        $user = User::findOrFail(auth()->id());
+        $user = $user ?? $this->getAuthenticatedUser();
+        $this->redirectIfNotRole($user, 'teacher');
 
-        if ($user->role !== 'teacher') {
-            abort(403, 'Access denied');
-        }
+        $classes = $this->getUserClasses($user);
+        $assignmentsToGrade = $this->getUserAssignmentsToGrade($user);
 
-        $classes = $user->classes()->wherePivot('status', 'approved')->get();
-
-        $assignmentsToGrade = StudentAssignments::whereHas('assignment', function ($query) use ($user) {
-            $query->where('teacher_id', $user->id);
-        })->where('status', 'submitted')->get();
-
-        $activeClassesCount = $user->classes()->wherePivot('status', 'approved')->count();
-
-        // Подсчёт студентов без учителей
-        $studentsCount = $user->classes()
-            ->wherePivot('status', 'approved')
-            ->with(['students' => function ($query) {
-                $query->where('role', '!=', 'teacher'); // Исключаем учителей
-            }])
-            ->get()
-            ->sum(fn($class) => $class->students->count());
-
-        $assignmentsCount = StudentAssignments::whereHas('assignment', function ($query) use ($user) {
-            $query->where('teacher_id', $user->id);
-        })->count();
-
-        $newAssignmentsCount = $assignmentsToGrade->count();
-
-        return view('pages.platform.dashboardTeacher', compact(
-            'user',
-            'classes',
-            'assignmentsToGrade',
-            'activeClassesCount',
-            'studentsCount',
-            'assignmentsCount',
-            'newAssignmentsCount'
-        ));
+        return view('pages.platform.dashboardTeacher', [
+            'user' => $user,
+            'classes' => $classes,
+            'assignmentsToGrade' => $assignmentsToGrade,
+            'activeClassesCount' => $classes->count(),
+            'studentsCount' => $classes->sum(fn($class) => $class->students->count()),
+            'assignmentsCount' => $assignmentsToGrade->count(),
+            'newAssignmentsCount' => $assignmentsToGrade->count(),
+        ]);
     }
 
-
-    public function  showClassesPage()
+    public function showClassesPage()
     {
-        $user = auth()->user();
-        if (!$user) {
-            return redirect()->route('login');
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                return view('pages.platform.classesTeacher', compact('user', 'classes'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
         }
+    }
 
-        if ($user->role === 'teacher') {
-            $classes = $user->classes;
+    public function showAssignmentsPage()
+    {
+        $user = $this->getAuthenticatedUser();
 
-            return view('pages.platform.classesTeacher', compact('user', 'classes'));
-        } else if ($user->role === 'admin') {
-            return view('pages.platform.dashboardAdmin', compact('user'));
-        } else if ($user->role === 'student') {
-            return view('pages.platform.dashboardUser', compact('user'));
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                $assignments = Assignments::where('teacher_id', $user->id)->get();
+
+                return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'assignments'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
         }
     }
 
     public function createClass()
     {
+        $user = $this->getAuthenticatedUser();
         $teachers = User::where('role', 'teacher')->get();
+        $classes = $this->getUserClasses($user);
 
-        return view('pages.platform.classes.create', compact('teachers'));
+        return view('pages.classes.create', compact('teachers', 'user', 'classes'));
     }
-    public function createAssignments()
+
+    public function createAssignments($classId = null)
     {
-        return view('pages.platform.assignments.create');
+        $user = $this->getAuthenticatedUser();
+        $classes = $this->getUserClasses($user);
+
+        $selectedClass = $classId ? $classes->find($classId) : null;
+        if ($classId && !$selectedClass) {
+            return redirect()->route('assignments.create')->withErrors('Класс не найден или недоступен.');
+        }
+
+        return view('pages.assignments.create', compact('user', 'classes', 'selectedClass'));
     }
+
+    public function editAssignments($id, $classId = null)
+    {
+        $user = $this->getAuthenticatedUser();
+        $classes = $this->getUserClasses($user);
+        $assignment = Assignments::findOrFail($id);
+        $fields = json_decode($assignment->options, true) ?? [];
+        $selectedClass = $classId ? $classes->find($classId) : null;
+        if ($classId && !$selectedClass) {
+            return redirect()->route('assignments.create')->withErrors('Класс не найден или недоступен.');
+        }
+
+        return view('pages.assignments.update', compact('user', 'classes', 'selectedClass', 'assignment', 'fields'));
+    }
+
     public function editClass($id)
     {
         $class = Classes::findOrFail($id);
+        $user = $this->getAuthenticatedUser();
+        $classes = $this->getUserClasses($user);
 
-        return view('pages.platform.classes.update', compact('class'));
+        return view('pages.classes.update', compact('class', 'user', 'classes'));
     }
 
     public function showClassPage($classId)
     {
-        $user = User::findOrFail(auth()->id());
-
-        if (!$user) {
-            return redirect()->route('login')->with('error', 'Пожалуйста, войдите в систему.');
-        }
-        $classes = $user->classes;
-
+        $user = $this->getAuthenticatedUser();
         $class = $user->classes()->findOrFail($classId);
 
         if (!$class) {
-            return abort(403, 'У вас нет доступа к этому классу.');
+            abort(403, 'У вас нет доступа к этому классу.');
         }
-
 
         $role = $user->role;
-        $assignments = [];
-        $students = [];
-
-        if ($role === 'teacher') {
-            $assignments = $class->assignments()->where('teacher_id', $user->id)->get();
-            $students = $class->students;
-        } elseif ($role === 'student') {
-            $assignments = $user->studentAssignments()->whereHas('assignment', function ($query) use ($classId) {
-                $query->where('class_id', $classId);
-            })->get();
-        } elseif ($role === 'admin') {
-            $assignments = $class->assignments;
-            $students = $class->students;
-        }
-
-        return view('pages.platform.classes.class', compact('class', 'assignments', 'students', 'role', 'user', 'classes'));
+        $assignments = $role === 'teacher' ? $class->assignments()->where('teacher_id', $user->id)->get() : [];
+        $students = $role === 'teacher' || $role === 'admin' ? $class->students : [];
+        $classes = $this->getUserClasses($user);
+        return view('pages.classes.class', compact('class', 'assignments', 'students', 'role', 'user', 'classes'));
     }
 }

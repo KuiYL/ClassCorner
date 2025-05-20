@@ -1,43 +1,52 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить класс</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Редактирование Класса</title>
+    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
 
-<body class="bg-gray-50 font-sans">
-    <div class="container mx-auto">
-        <h1 class="text-2xl font-bold mb-6">Редактирование класса</h1>
+<body>
+    @include('layout.sidebar', ['activePage' => 'classes'])
 
-        <form action="{{ route('classes.update', $class->id) }}" method="POST">
-            @csrf
-            @method('PUT')
-            <div class="mb-4">
-                <label for="name" class="block text-gray-700 font-medium">Название</label>
-                <input type="text" id="name" name="name" value="{{ old('name', $class->name) }}"
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                @error('name')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
+    <div class="topbar">
+        @include('layout.topbar')
+        <main>
+            <div class="main-platform">
+
+                <form action="{{ route('classes.update', $class->id) }}" method="POST">
+                    @csrf
+                    @method('PUT')
+                    <div class="head-block">
+                        <h2><span class="attention-title">Изменить</span> данные класса</h1>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Название<span>*</span></label>
+                        <input type="text" id="name" name="name" value="{{ old('name', $class->name) }}">
+                        @error('name')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="description">Описание (необязательно)</label>
+                        <textarea id="description" name="description" rows="4">{{ old('description', $class->description) }}</textarea>
+                        @error('description')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <button type="submit" class="action-button">Сохранить изменения</button>
+                </form>
             </div>
-
-            <div class="mb-4">
-                <label for="description" class="block text-gray-700 font-medium">Описание</label>
-                <textarea id="description" name="description" rows="4"
-                    class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500">{{ old('description', $class->description) }}</textarea>
-                @error('description')
-                    <span class="text-red-500 text-sm">{{ $message }}</span>
-                @enderror
-            </div>
-
-            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Сохранить
-                изменения</button>
-        </form>
+        </main>
     </div>
-
 </body>
 
 </html>

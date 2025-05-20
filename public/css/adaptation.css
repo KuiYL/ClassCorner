@@ -436,6 +436,22 @@
     .form-subscribe .custom-input {
         font-size: 14px;
     }
+
+    .main-platform .banner {
+        flex-direction: row;
+    }
+
+    .main-platform .banner .items {
+        margin-top: 0;
+    }
+
+    .topbar .search button {
+        display: none;
+    }
+
+    .main-platform .banner .greeting {
+        margin-bottom: 0;
+    }
 }
 
 @media (max-width: 480px) {

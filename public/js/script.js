@@ -1,36 +1,35 @@
 // Бургер-меню
-const hamburger = document.querySelector('.hamburger');
-const burgerMenu = document.querySelector('.menu-burger');
-const body = document.querySelector('body');
-
-if (hamburger && burgerMenu && body) {
-    hamburger.addEventListener('click', () => {
-        hamburger.classList.toggle('open');
-        burgerMenu.classList.toggle('active');
-        body.classList.toggle('no-scroll');
-    });
-
-    document.addEventListener('click', (e) => {
-        if (!burgerMenu.contains(e.target) && !hamburger.contains(e.target)) {
-            hamburger.classList.remove('open');
-            burgerMenu.classList.remove('active');
-            body.classList.remove('no-scroll');
-        }
-    });
-}
-
-// FAQ-элементы
 document.addEventListener('DOMContentLoaded', () => {
+    const hamburger = document.querySelector('.hamburger');
+    const burgerMenu = document.querySelector('.menu-burger');
+    const body = document.body;
+
+    if (hamburger && burgerMenu && body) {
+        hamburger.addEventListener('click', () => {
+            hamburger.classList.toggle('open');
+            burgerMenu.classList.toggle('active');
+            body.classList.toggle('no-scroll');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!burgerMenu.contains(e.target) && !hamburger.contains(e.target)) {
+                hamburger.classList.remove('open');
+                burgerMenu.classList.remove('active');
+                body.classList.remove('no-scroll');
+            }
+        });
+    }
+
+    // FAQ-элементы
     const faqItems = document.querySelectorAll('.faq-item');
-
-
     faqItems.forEach(item => {
         const question = item.querySelector('.question');
         const answer = item.querySelector('.answer');
         const icon = question?.querySelector('img');
-        const closeIconPath = document.querySelector('meta[name="close-icon"]').getAttribute('content');
-        const openIconPath = document.querySelector('meta[name="open-icon"]').getAttribute('content');
-        if (question && answer && icon) {
+        const closeIconPath = document.querySelector('meta[name="close-icon"]')?.content;
+        const openIconPath = document.querySelector('meta[name="open-icon"]')?.content;
+
+        if (question && answer && icon && closeIconPath && openIconPath) {
             question.addEventListener('click', () => {
                 const isOpen = item.classList.contains('faq-item-open');
                 faqItems.forEach(i => {
@@ -49,99 +48,77 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
-});
 
-// Lazy load для элементов
-document.addEventListener("DOMContentLoaded", () => {
-    const elements = document.querySelectorAll(".hidden");
-
+    // Lazy load
+    const elements = document.querySelectorAll('.hidden');
     if (elements.length > 0) {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        entry.target.classList.add("visible");
-                        observer.unobserve(entry.target);
-                    }
-                });
-            },
-            { threshold: 0.1 }
-        );
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('visible');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, { threshold: 0.1 });
 
-        elements.forEach((el) => observer.observe(el));
+        elements.forEach(el => observer.observe(el));
     }
-});
 
-//Слайдер
-document.addEventListener("DOMContentLoaded", () => {
-    const slider = document.querySelector(".slider");
-    const indicatorsContainer = document.querySelector(".indicators");
-    const slides = document.querySelectorAll(".slide");
+    // Слайдер
+    const slider = document.querySelector('.slider');
+    const indicatorsContainer = document.querySelector('.indicators');
+    const slides = document.querySelectorAll('.slide');
 
     let slidesToShow = 4;
     let currentIndex = 0;
     let autoSlideIndex = 0;
     let autoSlideInterval;
 
-    function calculateSlidesToShow() {
-        if (window.innerWidth >= 700) {
-            slidesToShow = 4;
-        } else {
-            slidesToShow = 3;
-        }
-        updateSlideWidths();
-    }
-
-    function updateSlideWidths() {
+    const updateSlideWidths = () => {
         const slideWidth = 100 / slidesToShow;
-        slides.forEach((slide) => {
-            slide.style.flex = `0 0 ${slideWidth}%`;
-        });
-    }
+        slides.forEach(slide => slide.style.flex = `0 0 ${slideWidth}%`);
+    };
 
-    function updateIndicators() {
-        const totalIndicators = window.innerWidth >= 700 ? 2 : 3;
-        const indicatorInactive = document.querySelector('meta[name="indicator-active"]').getAttribute('content');
-        const activeIndicator = document.querySelector('meta[name="indicator"]').getAttribute('content');
+    const updateIndicators = () => {
+        const indicatorActive = document.querySelector('meta[name="indicator-active"]')?.content || '';
+        const indicatorInactive = document.querySelector('meta[name="indicator"]')?.content || '';
+        if (!indicatorActive || !indicatorInactive) return;
 
-        indicatorsContainer.innerHTML = "";
+        const totalIndicators = Math.ceil(slides.length / slidesToShow);
+        indicatorsContainer.innerHTML = '';
 
         for (let i = 0; i < totalIndicators; i++) {
-            const indicator = document.createElement("img");
-            indicator.src = i === 0 ? activeIndicator : indicatorInactive;
-            indicator.classList.add("indicator");
-            if (i === 0) indicator.classList.add("active");
+            const indicator = document.createElement('img');
+            indicator.src = i === 0 ? indicatorActive : indicatorInactive;
+            indicator.classList.add('indicator');
+            if (i === 0) indicator.classList.add('active');
             indicator.dataset.slide = i;
             indicatorsContainer.appendChild(indicator);
 
-            indicator.addEventListener("click", () => {
+            indicator.addEventListener('click', () => {
                 currentIndex = i;
                 autoSlideIndex = i * slidesToShow;
                 updateSlider(currentIndex);
             });
         }
-    }
+    };
 
-    function updateSlider(index) {
+    const updateSlider = (index) => {
         const slideWidth = slider.clientWidth / slidesToShow;
-        slider.style.transform = `translateX(-${index * slideWidth * slidesToShow}px)`;
+        slider.style.transform = `translateX(-${index * slideWidth}px)`;
+        const indicators = indicatorsContainer.querySelectorAll('.indicator');
+        const activeIndicator = document.querySelector('meta[name="indicator-active"]')?.content;
+        const inactiveIndicator = document.querySelector('meta[name="indicator"]')?.content;
 
-        const indicators = document.querySelectorAll(".indicator");
-        const indicatorInactive = document.querySelector('meta[name="indicator-active"]').getAttribute('content');
-        const activeIndicator = document.querySelector('meta[name="indicator"]').getAttribute('content');
+        if (activeIndicator && inactiveIndicator) {
+            indicators.forEach((indicator, i) => {
+                indicator.src = i === index ? activeIndicator : inactiveIndicator;
+                indicator.classList.toggle('active', i === index);
+            });
+        }
+    };
 
-        indicators.forEach((indicator, i) => {
-            if (i === index) {
-                indicator.src = activeIndicator;
-                indicator.classList.add("active");
-            } else {
-                indicator.src = indicatorInactive;
-                indicator.classList.remove("active");
-            }
-        });
-    }
-
-    function autoSlide() {
+    const autoSlide = () => {
         const totalSlides = slides.length;
         const maxIndex = Math.ceil(totalSlides / slidesToShow) - 1;
 
@@ -155,21 +132,23 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         }
         updateSlider(currentIndex);
-    }
+    };
 
-    function initSlider() {
-        calculateSlidesToShow();
+    const initSlider = () => {
+        slidesToShow = window.innerWidth >= 700 ? 4 : 3;
+        updateSlideWidths();
         updateIndicators();
         updateSlider(0);
+    };
+
+    if (slider && indicatorsContainer && slides.length > 0) {
+        window.addEventListener('resize', initSlider);
+        initSlider();
+        autoSlideInterval = setInterval(autoSlide, 2300);
+
+        indicatorsContainer.addEventListener('mouseover', () => clearInterval(autoSlideInterval));
+        indicatorsContainer.addEventListener('mouseout', () => (autoSlideInterval = setInterval(autoSlide, 2300)));
     }
-
-    window.addEventListener("resize", initSlider);
-
-    initSlider();
-    autoSlideInterval = setInterval(autoSlide, 2300);
-
-    indicatorsContainer.addEventListener("mouseover", () => clearInterval(autoSlideInterval));
-    indicatorsContainer.addEventListener("mouseout", () => (autoSlideInterval = setInterval(autoSlide, 2300)));
 });
 
 
@@ -241,8 +220,8 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 });
 
-document.addEventListener('DOMContentLoaded', function () {
-    // Анимация карточек классов
+document.addEventListener('DOMContentLoaded', () => {
+    // Анимация появления карточек
     const classCards = document.querySelectorAll('.class-card');
     classCards.forEach((card, index) => {
         card.style.opacity = '0';
@@ -254,8 +233,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }, 100 + index * 100);
     });
 
-    // Эффект при нажатии на элементы
-    const interactiveItems = document.querySelectorAll('.class-card, [href]');
+    // Анимация кнопки
+    const createBtn = document.querySelector('.floating-btn');
+    if (createBtn) {
+        createBtn.style.opacity = '0';
+        createBtn.style.transform = 'scale(0.5)';
+        setTimeout(() => {
+            createBtn.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
+            createBtn.style.opacity = '1';
+            createBtn.style.transform = 'scale(1)';
+        }, 500);
+    }
+
+    // Анимации для интерактивных элементов
+    const interactiveItems = document.querySelectorAll('.class-card, .task-completed, .task-urgent, [href]');
     interactiveItems.forEach(item => {
         item.style.transition = 'all 0.2s ease';
         item.addEventListener('mousedown', () => {
@@ -266,19 +257,63 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Анимация прогресс-баров
-    const progressBars = document.querySelectorAll('.progress-ring__circle');
-    progressBars.forEach(bar => {
-        const radius = bar.r.baseVal.value;
-        const circumference = radius * 2 * Math.PI;
-        bar.style.strokeDasharray = `${circumference} ${circumference}`;
-        bar.style.strokeDashoffset = circumference;
+    // Логика для выпадающего меню
+    const settingsIcons = document.querySelectorAll('.class-settings');
 
-        const offset = circumference - (70 / 100) * circumference;
-        setTimeout(() => {
-            bar.style.transition = 'stroke-dashoffset 0.5s ease';
-            bar.style.strokeDashoffset = offset;
-        }, 300);
+    settingsIcons.forEach(settingsIcon => {
+        const settingsMenu = settingsIcon.querySelector('.settings-menu');
+
+        if (settingsMenu) {
+            settingsIcon.addEventListener('click', (e) => {
+                e.stopPropagation();
+                document.querySelectorAll('.settings-menu').forEach(menu => {
+                    if (menu !== settingsMenu) {
+                        menu.classList.remove('active');
+                    }
+                });
+                settingsMenu.classList.toggle('active');
+            });
+        }
     });
-});
 
+    document.addEventListener('click', () => {
+        document.querySelectorAll('.settings-menu').forEach(menu => {
+            menu.classList.remove('active');
+        });
+    });
+
+
+    // Логика для модального окна
+    const modal = document.getElementById('modal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalText = document.getElementById('modalText');
+    const deleteForm = document.getElementById('deleteForm');
+    const cancelDelete = document.getElementById('cancelDelete');
+
+    if (modal && modalTitle && modalText && deleteForm && cancelDelete) {
+        const openModal = (itemId, itemName, itemType) => {
+            const deleteUrl = itemType === 'class'
+                ? `/classes/${itemId}`
+                : `/assignments/${itemId}`;
+
+            deleteForm.action = deleteUrl;
+            document.getElementById('classId').value = itemId;
+            modalTitle.textContent = `Удалить ${itemType === 'class' ? 'класс' : 'задание'}?`;
+            modalText.textContent = `Вы уверены, что хотите удалить ${itemType === 'class' ? 'класс' : 'задание'} "${itemName}"?`;
+            modal.classList.remove('hidden');
+        };
+
+        document.querySelectorAll('.delete-button').forEach(button => {
+            button.addEventListener('click', () => {
+                const itemId = button.dataset.id;
+                const itemName = button.dataset.name;
+                const itemType = button.dataset.type;
+                openModal(itemId, itemName, itemType);
+            });
+        });
+
+        cancelDelete.addEventListener('click', () => {
+            modal.classList.add('hidden');
+        });
+    }
+});
