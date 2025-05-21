@@ -11,7 +11,7 @@
 </head>
 
 <body>
-    @include('layout.sidebar', ['activePage' => 'dashboard'])
+    @include('layout.sidebar', ['activePage' => 'classes'])
     <div class="topbar">
         @include('layout.topbar')
         <main>
@@ -34,46 +34,111 @@
                     </div>
                 </div>
 
-                <div class="assignments">
-                    <div class="head">
-                        <h3>Задания</h3>
+                <div class="assignments-container">
+                    <div class="assignments-header">
+                        <h3>Мои задания</h3>
+                        <a class="new-assignment-btn" href="{{ route('assignments.create', $class->id) }}">Добавить
+                            задание</a>
                     </div>
-                    <div class="items">
-                        @forelse ($assignments as $assignment)
-                            <div
-                                class="item @if ($assignment->status == 'submitted') task-urgent @else task-completed @endif animate-pop">
-                                <div class="wrapper">
-                                    <div>
-                                        <div class="text-title">
-                                            <span class="title">{{ $assignment->title }}</span>
-                                            @if ($assignment->status == 'submitted')
-                                                <span class="title-emergency">Срочно</span>
-                                            @endif
-                                        </div>
-                                        <p class="count">
-                                            {{ $assignment->class->name ?? 'Класс не указан' }} ·
-                                            {{ $assignment->students_count ?? 0 }} работ
-                                        </p>
-                                        <div class="data-info">
-                                            <i class="fas fa-clock"></i>
-                                            <span>Срок проверки: до
-                                                {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y H:i') }}</span>
+                    <div class="assignments-filters"
+                        style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                        <label>
+                            Статус:
+                            <select id="filter-status">
+                                <option value="">Все</option>
+                                <option value="В ожидании">В ожидании</option>
+                                <option value="Активно">Активно</option>
+                                <option value="Выполнено">Выполнено</option>
+                            </select>
+                        </label>
+
+                        <label>
+                            Тип вопроса:
+                            <select id="filter-type">
+                                <option value="">Все</option>
+                                <option value="Загрузка файла">Загрузка файла</option>
+                                <option value="Множественный выбор">Множественный выбор</option>
+                                <option value="Один выбор">Один выбор</option>
+                                <option value="Текстовый ответ">Текстовый ответ</option>
+                            </select>
+                        </label>
+                    </div>
+
+                    @if ($assignments->isEmpty())
+                        <div class="assignments-empty">
+                            У вас пока нет заданий. Нажмите "Новое задание", чтобы создать.
+                        </div>
+                    @else
+                        <div class="assignments-list">
+                            @foreach ($assignments as $assignment)
+                                <div class="assignment-card">
+                                    <div class="card-header">
+                                        <h4 class="assignment-title">{{ $assignment->title }}</h4>
+                                        <div class="header-controls">
+                                            <span class="assignment-status">{{ $assignment->status_name }}</span>
+                                            <button class="action-button">Подробнее</button>
                                         </div>
                                     </div>
-                                    <button class="check" title="Проверить">
-                                        <i class="fas fa-check-circle"></i>
-                                    </button>
+                                    <div class="card-details hidden">
+                                        <p class="assignment-description">{{ $assignment->description }}</p>
+                                        <div class="assignment-details">
+                                            <span>Класс: {{ $assignment->class->name ?? 'Без класса' }}</span>
+                                            <span>Дедлайн: {{ $assignment->due_date }}</span>
+                                            @php
+                                                $typeTranslations = [
+                                                    'file_upload' => 'Загрузка файла',
+                                                    'multiple_choice' => 'Множественный выбор',
+                                                    'single_choice' => 'Один выбор',
+                                                    'text' => 'Текстовый ответ',
+                                                ];
+
+                                                $decodedOptions = json_decode($assignment->options, true);
+                                                $questionTypes = [];
+
+                                                if (!empty($decodedOptions)) {
+                                                    foreach ($decodedOptions as $question) {
+                                                        $questionTypes[] = $question['type'];
+                                                    }
+                                                    $questionTypes = array_unique($questionTypes);
+                                                }
+                                            @endphp
+                                            <span>Типы вопросов:
+                                                {{ !empty($questionTypes)
+                                                    ? implode(
+                                                        ', ',
+                                                        array_map(fn($type) => $typeTranslations[$type] ?? ucfirst(str_replace('_', ' ', $type)), $questionTypes),
+                                                    )
+                                                    : 'Отсутствуют' }}
+                                            </span>
+                                        </div>
+                                        <div class="card-actions">
+                                            <div class="card-actions">
+                                                <a href="{{ route('assignments.show', $assignment->id) }}"
+                                                    class="btn view-btn">Перейти</a>
+                                                <a href="{{ route('assignments.edit', $assignment->id, $assignment->class_id) }}"
+                                                    class="btn edit-btn">Изменить</a>
+                                                <button class="btn delete-btn delete-button" type="button"
+                                                    data-id="{{ $assignment->id }}"
+                                                    data-name="{{ $assignment->title }}" data-type="assignment">
+                                                    Удалить
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-                        @empty
-                            <p class="empty-message">Нет заданий.</p>
-                        @endforelse
-                    </div>
+                            @endforeach
+                        </div>
+
+                        <div class="no-assignments-message hidden">
+                            <p>Нет заданий, соответствующих выбранным фильтрам.</p>
+                        </div>
+                    @endif
                 </div>
 
                 <div class="table">
                     <div class="head">
                         <h3>Студенты класса</h3>
+                        <button class="btn invite-student-btn">Пригласить ученика</button>
                     </div>
                     <table>
                         <thead>
@@ -101,6 +166,17 @@
                     </table>
                 </div>
 
+                <div id="invite-student-modal" class="modal-invite hidden">
+                    <div class="modal-invite-content">
+                        <span class="close-btn" id="close-modal">&times;</span>
+                        <h3>Пригласить ученика</h3>
+                        <input type="text" id="search-student" placeholder="Введите имя или email">
+                        <ul id="search-results" class="search-results"></ul>
+                        <button id="add-student-btn" class="btn primary">Добавить выбранного</button>
+                        <button id="close-modal-bottom" class="btn secondary">Отмена</button>
+                    </div>
+                </div>
+
         </main>
     </div>
 
@@ -109,6 +185,128 @@
             <i class="fas fa-plus"></i>
         </button>
     </a>
+    @include('layout.modal-delete')
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const cards = document.querySelectorAll(".assignment-card");
+
+            cards.forEach((card) => {
+                const toggleBtn = card.querySelector(".action-button");
+                const cardDetails = card.querySelector(".card-details");
+
+                toggleBtn.addEventListener("click", () => {
+                    const isHidden = cardDetails.classList.toggle("hidden");
+                    toggleBtn.textContent = isHidden ? "Подробнее" : "Скрыть";
+                    cardDetails.style.display = isHidden ? "none" : "block";
+                });
+            });
+
+            const filterStatus = document.getElementById("filter-status");
+            const filterType = document.getElementById("filter-type");
+
+            function filterAssignments() {
+                const statusVal = filterStatus.value.trim();
+                const typeVal = filterType.value.trim();
+
+                let hasVisibleCards = false;
+
+                cards.forEach(card => {
+                    const cardStatus = card.querySelector(".assignment-status")?.textContent.trim() || "";
+                    const cardTypesText = card.querySelector(".assignment-details span:nth-child(3)")
+                        ?.textContent.replace('Типы вопросов:', '').trim() || "";
+
+                    const statusMatch = !statusVal || cardStatus === statusVal;
+                    const typeMatch = !typeVal || cardTypesText.includes(typeVal);
+
+                    if (statusMatch && typeMatch) {
+                        card.style.display = "block";
+                        hasVisibleCards = true;
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+
+                const noAssignmentsMessage = document.querySelector(".no-assignments-message");
+                if (hasVisibleCards) {
+                    noAssignmentsMessage.classList.add("hidden");
+                } else {
+                    noAssignmentsMessage.classList.remove("hidden");
+                }
+            }
+
+
+            filterStatus.addEventListener("change", filterAssignments);
+            filterType.addEventListener("change", filterAssignments);
+
+            filterAssignments();
+        });
+        document.addEventListener("DOMContentLoaded", function() {
+            const modal = document.getElementById('invite-student-modal');
+            const openBtn = document.querySelector('.invite-student-btn');
+            const closeBtns = document.querySelectorAll('#close-modal, #close-modal-bottom');
+
+            openBtn.addEventListener('click', () => {
+                modal.classList.remove('hidden');
+            });
+
+            closeBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    modal.classList.add('hidden');
+                });
+            });
+
+            const searchInput = document.getElementById('search-student');
+            const resultsList = document.getElementById('search-results');
+
+            const students = [{
+                    name: 'Иван Иванов',
+                    email: 'ivan@example.com'
+                },
+                {
+                    name: 'Мария Петрова',
+                    email: 'maria@example.com'
+                },
+                {
+                    name: 'Александр Смирнов',
+                    email: 'alex@example.com'
+                }
+            ];
+
+            searchInput.addEventListener('input', () => {
+                const query = searchInput.value.toLowerCase();
+                resultsList.innerHTML = '';
+                if (query) {
+                    const filtered = students.filter(student =>
+                        student.name.toLowerCase().includes(query) ||
+                        student.email.toLowerCase().includes(query)
+                    );
+                    filtered.forEach(student => {
+                        const li = document.createElement('li');
+                        li.textContent = `${student.name} (${student.email})`;
+                        li.addEventListener('click', () => {
+                            searchInput.value = `${student.name} (${student.email})`;
+                            resultsList.innerHTML = '';
+                        });
+                        resultsList.appendChild(li);
+                    });
+                }
+            });
+
+            document.getElementById('add-student-btn').addEventListener('click', () => {
+                const selected = searchInput.value;
+                if (selected) {
+                    alert(`Ученик "${selected}" добавлен в класс!`);
+                    modal.classList.add('hidden');
+                    searchInput.value = '';
+                    resultsList.innerHTML = '';
+                } else {
+                    alert('Выберите ученика.');
+                }
+            });
+        });
+    </script>
+
 </body>
 
 </html>

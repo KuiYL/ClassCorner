@@ -6,6 +6,7 @@ use App\Models\Assignments;
 use App\Models\Classes;
 use App\Models\StudentAssignments;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
@@ -32,6 +33,16 @@ class PagesController extends Controller
     private function getUserClasses($user, $status = 'approved')
     {
         return $user->classes()->wherePivot('status', $status)->get();
+    }
+
+    private function getTeacherStudentsCount($user)
+    {
+        $classes = $this->getUserClasses($user);
+
+        return $classes->sum(
+            fn($class) =>
+            $class->students->filter(fn($student) => $student->role === 'student')->count()
+        );
     }
 
     private function getUserAssignmentsToGrade($user)
@@ -126,13 +137,13 @@ class PagesController extends Controller
 
         $classes = $this->getUserClasses($user);
         $assignmentsToGrade = $this->getUserAssignmentsToGrade($user);
-
+        $teacherStudentsCount = $this->getTeacherStudentsCount($user);
         return view('pages.platform.dashboardTeacher', [
             'user' => $user,
             'classes' => $classes,
             'assignmentsToGrade' => $assignmentsToGrade,
             'activeClassesCount' => $classes->count(),
-            'studentsCount' => $classes->sum(fn($class) => $class->students->count()),
+            'studentsCount' => $teacherStudentsCount,
             'assignmentsCount' => $assignmentsToGrade->count(),
             'newAssignmentsCount' => $assignmentsToGrade->count(),
         ]);
@@ -163,6 +174,93 @@ class PagesController extends Controller
                 $assignments = Assignments::where('teacher_id', $user->id)->get();
 
                 return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'assignments'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
+        }
+    }
+
+    public function showCalendarPage()
+    {
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+
+                $assignments = Assignments::where('teacher_id', $user->id)
+                    ->with('class')
+                    ->orderBy('due_date')
+                    ->get()
+                    ->groupBy('due_date')
+                    ->map(function ($group) {
+                        return $group->map(function ($item) {
+                            return [
+                                'id' => $item->id,
+                                'title' => $item->title,
+                                'description' => $item->description,
+                                'due_date' => $item->due_date,
+                                'class_id' => $item->class_id,
+                                'class_name' => optional($item->class)->name,
+                            ];
+                        });
+                    });
+
+                return view('pages.platform.calendarTeacher', compact('user', 'classes', 'assignments'));
+
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
+        }
+    }
+
+    public function showStatisticsPage()
+    {
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                $assignments = Assignments::where('teacher_id', $user->id)->get();
+
+                return view('pages.platform.statisticsTeacher', compact('user', 'classes', 'assignments'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
+        }
+    }
+
+    public function showProfilePage()
+    {
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                $assignments = Assignments::where('teacher_id', $user->id)->get();
+
+                return view('pages.user.profile', compact('user', 'classes'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            case 'student':
+                return view('pages.platform.dashboardUser', compact('user'));
+        }
+    }
+
+    public function showEditAvatarChoosePage()
+    {
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                $assignments = Assignments::where('teacher_id', $user->id)->get();
+
+                return view('pages.user.chooseAvatar', compact('user', 'classes'));
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
@@ -229,5 +327,14 @@ class PagesController extends Controller
         $students = $role === 'teacher' || $role === 'admin' ? $class->students : [];
         $classes = $this->getUserClasses($user);
         return view('pages.classes.class', compact('class', 'assignments', 'students', 'role', 'user', 'classes'));
+    }
+
+    public function showAssignmentPage($id)
+    {
+        $user = $this->getAuthenticatedUser();
+        $classes = $this->getUserClasses($user);
+        $assignment = Assignments::with('class')->findOrFail($id);
+        $assignmentFields = json_decode($assignment->options, true);
+        return view('pages.assignments.assignment', compact('user', 'classes', 'assignment', 'assignmentFields'));
     }
 }

@@ -52,7 +52,7 @@ class AssignmentsController extends Controller
                 'status' => 'pending',
             ]);
 
-            return redirect()->route('user.assignments')->with('success', 'Задание успешно создано!');
+            return redirect()->back()->with('success', 'Задание успешно создано!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
@@ -104,7 +104,7 @@ class AssignmentsController extends Controller
                 'options' => json_encode($fields),
             ]);
 
-            return redirect()->route('user.assignments')->with('success', 'Задание успешно обновлено!');
+            return redirect()->back()->with('success', 'Задание успешно обновлено!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {

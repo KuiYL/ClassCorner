@@ -53,8 +53,9 @@
                                                         <i class="fas fa-edit"></i> Изменить
                                                     </a>
                                                     <button class="setting-menu-action delete-button" type="button"
-                                                        data-id="{{ $class->id }}" data-name="{{ $class->name }}">
-                                                        <i class="fas fa-trash"></i> Удалить
+                                                        data-id="{{ $class->id }}" data-name="{{ $class->name }}"
+                                                        data-type="class">
+                                                        <i class="fas fa-trash"></i>Удалить
                                                     </button>
                                                 </div>
                                             </div>

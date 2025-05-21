@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    @include('layout.sidebar', ['activePage' => 'dashboard'])
+    @include('layout.sidebar', ['activePage' => 'tasks'])
     <div class="topbar">
         @include('layout.topbar')
         <main>
@@ -96,10 +96,8 @@
             const dueDateInput = document.getElementById('due_date');
             const fields = [];
 
-            // Установить минимальную дату для дедлайна
             dueDateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
 
-            // Добавить новое поле
             addFieldBtn.addEventListener('click', () => {
                 const fieldIndex = fields.length;
                 const fieldDiv = document.createElement('div');
@@ -137,7 +135,6 @@
                 };
                 fields.push(field);
 
-                // Обработчики для поля
                 fieldDiv.querySelector('.field-name').addEventListener('input', (e) => {
                     field.name = e.target.value.trim();
                 });
@@ -173,7 +170,6 @@
                     };
                     field.options.push(option);
 
-                    // Обработчики для варианта
                     optionDiv.querySelector('.option-value').addEventListener('input', (e) => {
                         option.value = e.target.value.trim();
                     });
@@ -198,7 +194,6 @@
                 });
             });
 
-            // Обработчик отправки формы
             document.getElementById('assignment-form').addEventListener('submit', (e) => {
                 e.preventDefault();
 

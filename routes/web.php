@@ -33,6 +33,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [PagesController::class, 'showDashboradPage'])->name('user.dashboard');
     Route::get('/dashboard/classes', [PagesController::class, 'showClassesPage'])->name('user.classes');
     Route::get('/dashboard/assignments', [PagesController::class, 'showAssignmentsPage'])->name('user.assignments');
+    Route::get('/dashboard/calendar', [PagesController::class, 'showCalendarPage'])->name('user.calendar');
+    Route::get('/dashboard/statistics', [PagesController::class, 'showStatisticsPage'])->name('user.statistics');
+    Route::get('/user/profile', [PagesController::class, 'showProfilePage'])->name('user.profile');
+    Route::get('/user/choose-avatar', [PagesController::class, 'showEditAvatarChoosePage'])->name('user.choose-avatar');
+    Route::post('/user/choose-avatar', [AvatarController::class, 'storeWithID'])->name('user.avatar');
 
     Route::get('/classes/create', [PagesController::class, 'createClass'])->name('classes.create');
     Route::post('/classes', [ClassesController::class, 'store'])->name('classes.store');
@@ -49,6 +54,14 @@ Route::middleware('auth')->group(function () {
     Route::get('/assignments/edit/{id}/{classId?}', [PagesController::class, 'editAssignments'])->name('assignments.edit');
     Route::put('/assignments/update/{id}/{classId?}', [AssignmentsController::class, 'update'])->name('assignments.update');
     Route::delete('/assignments/{id}', [AssignmentsController::class, 'destroy'])->name('assignments.destroy');
+    Route::get('/assignment/{id}', [PagesController::class, 'showAssignmentPage'])->name('assignments.show');
 
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
+    Route::put('/user/edit-profile', [UserController::class, 'updateInfo'])->name('user.edit-profile');
+    Route::post('/user/change-password', [UserController::class, 'updatePassword'])->name('user.change-password');
+    Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('user.destroy');
+
+    Route::post('/classes/{class}/invite', [UserController::class, 'invite'])->name('classes.invite');
+    Route::post('/invitations/{invitation}/accept', [UserController::class, 'accept'])->name('invitations.accept');
+    Route::post('/invitations/{invitation}/decline', [UserController::class, 'decline'])->name('invitations.decline');
 });

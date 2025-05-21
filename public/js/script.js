@@ -292,15 +292,40 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (modal && modalTitle && modalText && deleteForm && cancelDelete) {
         const openModal = (itemId, itemName, itemType) => {
-            const deleteUrl = itemType === 'class'
-                ? `/classes/${itemId}`
-                : `/assignments/${itemId}`;
+            let deleteUrl = '';
+            let entityName = '';
+
+            switch (itemType) {
+                case 'class':
+                    deleteUrl = `/classes/${itemId}`;
+                    entityName = 'класс';
+                    break;
+                case 'assignment':
+                    deleteUrl = `/assignments/${itemId}`;
+                    entityName = 'задание';
+                    break;
+                case 'user':
+                    deleteUrl = `/users/${itemId}`;
+                    entityName = 'пользователя';
+                    break;
+                default:
+                    console.error(`Неизвестный тип: ${itemType}`);
+                    return;
+            }
 
             deleteForm.action = deleteUrl;
-            document.getElementById('classId').value = itemId;
-            modalTitle.textContent = `Удалить ${itemType === 'class' ? 'класс' : 'задание'}?`;
-            modalText.textContent = `Вы уверены, что хотите удалить ${itemType === 'class' ? 'класс' : 'задание'} "${itemName}"?`;
-            modal.classList.remove('hidden');
+            modalTitle.textContent = `Удалить ${entityName}?`;
+            modalText.textContent = `Вы уверены, что хотите удалить ${entityName} "${itemName}"?`;
+
+            modal.classList.add('active');
+        };
+
+        const closeModal = () => {
+            modal.classList.remove('active');
+
+            setTimeout(() => {
+                modal.style.pointerEvents = 'none';
+            }, 300);
         };
 
         document.querySelectorAll('.delete-button').forEach(button => {
@@ -309,11 +334,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const itemName = button.dataset.name;
                 const itemType = button.dataset.type;
                 openModal(itemId, itemName, itemType);
+                modal.style.pointerEvents = 'auto';
             });
         });
 
         cancelDelete.addEventListener('click', () => {
-            modal.classList.add('hidden');
+            closeModal();
+        });
+
+        modal.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                closeModal();
+            }
         });
     }
+
 });

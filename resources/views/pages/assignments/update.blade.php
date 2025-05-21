@@ -12,7 +12,7 @@
 </head>
 
 <body>
-    @include('layout.sidebar', ['activePage' => 'dashboard'])
+    @include('layout.sidebar', ['activePage' => 'tasks'])
 
     <div class="topbar">
         @include('layout.topbar')

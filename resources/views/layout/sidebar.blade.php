@@ -24,18 +24,29 @@
                 </div>
                 Задания
             </a>
-            <a href="#" class="{{ $activePage === 'calendar' ? 'item-active' : 'item' }}">
+            <a href="{{ route('user.calendar') }}" class="{{ $activePage === 'calendar' ? 'item-active' : 'item' }}">
                 <div class="{{ $activePage === 'calendar' ? 'icon-active' : 'icon' }}">
                     <i class="fas fa-calendar-alt"></i>
                 </div>
                 Календарь
             </a>
-            <a href="#" class="{{ $activePage === 'materials' ? 'item-active' : 'item' }}">
-                <div class="{{ $activePage === 'materials' ? 'icon-active' : 'icon' }}">
-                    <i class="fas fa-file-alt"></i>
+            <a href="{{ route('user.statistics') }}"
+                class="{{ $activePage === 'statistics' ? 'item-active' : 'item' }}">
+                <div class="{{ $activePage === 'statistics' ? 'icon-active' : 'icon' }}">
+                    <i class="fas fa-chart-pie"></i>
                 </div>
-                Материалы
+                Статистика
             </a>
+            <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();"
+                class="item">
+                <div class="icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                Выход
+            </a>
+            <form id="logoutForm" action="{{ route('logout') }}" method="POST" style="display: none;">
+                @csrf
+            </form>
         </div>
 
         <div class="classes">

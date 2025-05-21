@@ -8,15 +8,19 @@
         </div>
     </div>
     <div class="account">
-        <a href="/settings" class="settings" title="Настройки">
+        <a href="{{ route('user.profile') }}" class="settings" title="Настройки">
             <i class="fas fa-cog"></i>
         </a>
         <div class="text">
             <p class="name">{{ $user->name . ' ' . $user->surname }}</p>
             <p class="position">Преподаватель</p>
         </div>
-        <img src="{{ isset($user->avatar) && Str::startsWith($user->avatar, 'images/')
-            ? asset(Str::replace('images/', 'images/avatar', $user->avatar) . '.svg')
+        <img src="{{ isset($user->avatar)
+            ? (Str::startsWith($user->avatar, 'avatars/')
+                ? Storage::url($user->avatar)
+                : (Str::startsWith($user->avatar, 'images/')
+                    ? asset(preg_replace('/^(images\/)/', 'images/avatar', $user->avatar) . '.svg')
+                    : asset('images/default-avatar.svg')))
             : asset('images/default-avatar.svg') }}"
             alt="Профиль">
     </div>
