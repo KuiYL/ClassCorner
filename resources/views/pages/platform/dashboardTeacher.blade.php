@@ -96,7 +96,7 @@
                                         <div class="info-assigments">
                                             <div class="assigments-text">
                                                 <i class="fas fa-tasks"></i>
-                                                <span>{{ $class->assignments()->active()->count() }} заданий</span>
+                                                <span>{{ $class->assignments->count() }} заданий</span>
                                             </div>
                                             <a href="{{ route('class.show', $class->id) }}"
                                                 class="text-sm text-[#6E76C1] font-medium">Открыть</a>

@@ -13,7 +13,15 @@
         </a>
         <div class="text">
             <p class="name">{{ $user->name . ' ' . $user->surname }}</p>
-            <p class="position">Преподаватель</p>
+            @php
+                $roles = [
+                    'admin' => 'Администратор',
+                    'teacher' => 'Преподаватель',
+                    'student' => 'Студент',
+                ];
+            @endphp
+
+            <p class="position">{{ $roles[$user->role] ?? 'Неизвестная роль' }}</p>
         </div>
         <img src="{{ isset($user->avatar)
             ? (Str::startsWith($user->avatar, 'avatars/')

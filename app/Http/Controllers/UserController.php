@@ -190,7 +190,7 @@ class UserController extends Controller
 
         $class = $invitation->class;
         $user = User::where('email', $invitation->invitee_email)->first();
-        $class->students()->attach($user->id);
+        $class->students()->attach($user->id, ['status' => 'approved']);
         return back()->with('success', 'Приглашение принято!');
     }
 

@@ -10,6 +10,283 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
+<style>
+    /* === Форма создания задания === */
+    .assignment-form {
+        max-width: 900px;
+        margin: 2rem auto;
+        background-color: #fff;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+        padding: 2rem;
+    }
+
+    .assignment-form h2 {
+        font-size: 1.8rem;
+        margin-bottom: 1.5rem;
+        color: #333;
+    }
+
+    .assignment-form h3 {
+        font-size: 1.4rem;
+        margin-top: 2rem;
+        margin-bottom: 1rem;
+        color: #555EB1;
+    }
+
+    /* === Сетка форм === */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    .form-group.full {
+        grid-column: span 2;
+    }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+        color: #555;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+        width: 100%;
+        padding: 0.75rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+        border-color: #555EB1;
+        outline: none;
+    }
+
+    .form-divider {
+        margin: 2rem 0;
+        border: none;
+        height: 1px;
+        background: #eee;
+    }
+
+    /* === Конструктор полей === */
+    .fields-container {
+        margin-top: 1rem;
+    }
+
+    .field {
+        background-color: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        position: relative;
+        transition: transform 0.2s ease;
+    }
+
+    .field:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .field h4 {
+        margin: 0 0 1rem 0;
+        font-size: 1rem;
+        color: #333;
+    }
+
+    /* === Заголовок поля === */
+    .field .form-group:first-child {
+        margin-bottom: 1rem;
+    }
+
+    /* === Тип поля === */
+    .field .form-group:nth-child(2) {
+        margin-bottom: 1rem;
+    }
+
+    /* === Блок вариантов === */
+    .options-container {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .option input[type="text"] {
+        flex: 1;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .option button.remove-option-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+        transition: background-color 0.2s ease;
+    }
+
+    .option button.remove-option-btn:hover {
+        background-color: #c0392b;
+    }
+
+    .add-field-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+        border-radius: 8px;
+        background-color: #6E76C1;
+        color: white;
+        border: none;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+    }
+
+    .add-field-btn:hover {
+        background-color: #555EB1;
+    }
+
+    .remove-field-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .remove-field-btn:hover {
+        background-color: #c0392b;
+    }
+
+    /* === Кнопка сохранения === */
+    .btn.primary.large.full-width {
+        width: 100%;
+        font-size: 1.1rem;
+        padding: 1rem;
+        margin-top: 2rem;
+    }
+
+    .options-container {
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid #eee;
+    }
+
+    .options-container.hidden {
+        display: none;
+    }
+
+    .option {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .option input[type="text"] {
+        flex: 1;
+        padding: 0.5rem 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        font-size: 1rem;
+    }
+
+    .option .remove-option-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.4rem 0.6rem;
+        cursor: pointer;
+    }
+
+    .option .remove-option-btn:hover {
+        background-color: #c0392b;
+    }
+
+    /* === Кнопка "Добавить вариант" === */
+    .add-option-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        background-color: #6E76C1;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        font-size: 0.95rem;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .add-option-btn:hover {
+        background-color: #555EB1;
+    }
+
+    /* === Вариант ответа (поле ввода) === */
+    .option input[type="text"] {
+        flex: 1;
+        padding: 0.6rem 1rem;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        min-width: 200px;
+    }
+
+    /* === Радио/чекбоксы === */
+    .option input[type="radio"],
+    .option input[type="checkbox"] {
+        margin-top: 0 !important;
+        margin-bottom: 0 !important;
+        width: auto;
+    }
+
+    /* === Кнопка удаления варианта === */
+    .remove-option-btn {
+        background-color: #e74c3c;
+        color: white;
+        border: none;
+        padding: 0.4rem 0.6rem;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease;
+    }
+
+    .remove-option-btn:hover {
+        background-color: #c0392b;
+    }
+</style>
 
 <body>
     @include('layout.sidebar', ['activePage' => 'tasks'])
@@ -17,193 +294,253 @@
         @include('layout.topbar')
         <main>
             <div class="main-platform">
-                <form id="assignment-form" action="{{ route('assignment.store') }}" method="POST">
+                <form id="assignment-form" action="{{ route('assignment.store') }}" method="POST"
+                    class="assignment-form">
                     @csrf
 
-                    @if ($errors->has('global'))
-                        <div class="error-message global-error">
-                            {{ $errors->first('global') }}
-                        </div>
-                    @endif
-                    @if (session('error'))
-                        <div class="error-message global-error">
-                            {{ session('error') }}
-                        </div>
-                    @endif
+                    <h2>Создать новое задание</h2>
 
-                    @if (session('success'))
-                        <div class="success-message">
-                            {{ session('success') }}
+                    <!-- Основные поля -->
+                    <div class="form-grid">
+                        <div class="form-group full">
+                            <label for="title">Название задания:</label>
+                            <input type="text" id="title" name="title" value="{{ old('title') }}">
+                            @error('title')
+                                <div class="error-message">{{ $message }}</div>
+                            @enderror
                         </div>
-                    @endif
-                    <div>
-                        <label for="title">Название задания:</label>
-                        <input type="text" id="title" name="title" value="{{ old('title') }}" required>
-                        @if ($errors->has('title'))
-                            <div class="error-message">{{ $errors->first('title') }}</div>
-                        @endif
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="class_id">Выберите класс:</label>
+                                <select id="class_id" name="class_id">
+                                    <option value="">-- Выберите класс --</option>
+                                    @foreach ($classes as $class)
+                                        <option value="{{ $class->id }}"
+                                            {{ old('class_id') == $class->id ? 'selected' : '' }}>
+                                            {{ $class->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('class_id')
+                                    <div class="error-message">{{ $message }}</div>
+                                @enderror
+                            </div>
+
+                            <div class="form-group">
+                                <label for="due_date">Дата сдачи:</label>
+                                <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}">
+                                @error('due_date')
+                                    <div class="error-message">{{ $message }}</div>
+                                @enderror
+                            </div>
+                        </div>
+
+                        <div class="form-group full">
+                            <label for="description">Описание задания:</label>
+                            <textarea id="description" name="description" rows="5">{{ old('description') }}</textarea>
+                            @error('description')
+                                <div class="error-message">{{ $message }}</div>
+                            @enderror
+                        </div>
                     </div>
 
-                    <div>
-                        <label for="description">Описание задания:</label>
-                        <textarea id="description" name="description" required>{{ old('description') }}</textarea>
-                        @if ($errors->has('description'))
-                            <div class="error-message">{{ $errors->first('description') }}</div>
-                        @endif
+                    <hr class="form-divider">
+
+                    <!-- Конструктор задания -->
+                    <h3>Конструктор задания</h3>
+
+                    <div class="fields-container">
+                        <div id="fields-container"></div>
+
+                        <button type="button" id="add-field-btn" class="btn primary add-field-btn">
+                            <i class="fas fa-plus"></i> Добавить поле
+                        </button>
                     </div>
 
-                    <div>
-                        <label for="due_date">Дата сдачи:</label>
-                        <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}" required>
-                        @if ($errors->has('due_date'))
-                            <div class="error-message">{{ $errors->first('due_date') }}</div>
-                        @endif
-                    </div>
-                    <div>
-                        <label for="class_id">Выберите класс:</label>
-                        <select id="class_id" name="class_id" required>
-                            <option value="" disabled
-                                {{ old('class_id', $selectedClass->id ?? '') == '' ? 'selected' : '' }}>-- Выберите
-                                класс --</option>
-                            @foreach ($classes as $class)
-                                <option value="{{ $class->id }}"
-                                    {{ old('class_id', $selectedClass->id ?? '') == $class->id ? 'selected' : '' }}>
-                                    {{ $class->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                        @if ($errors->has('class_id'))
-                            <div class="error-message">{{ $errors->first('class_id') }}</div>
-                        @endif
-                    </div>
+                    <!-- Скрытый JSON для отправки данных -->
                     <input type="hidden" name="fields_json" id="fields-json">
-                    <h3>Поля задания:</h3>
-                    <div id="fields-container"></div>
-                    <button type="button" id="add-field-btn">Добавить поле</button>
-                    @if ($errors->has('type'))
-                        <div class="error-message">{{ $errors->first('type') }}</div>
-                    @endif
-                    <button type="submit">Сохранить задание</button>
+
+                    <button type="submit" class="btn primary large full-width mt-2">
+                        Сохранить задание
+                    </button>
                 </form>
             </div>
         </main>
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const fieldsContainer = document.getElementById('fields-container');
-            const addFieldBtn = document.getElementById('add-field-btn');
-            const dueDateInput = document.getElementById('due_date');
-            const fields = [];
+        document.addEventListener("DOMContentLoaded", function() {
+            const fieldsContainer = document.getElementById("fields-container");
+            const addFieldBtn = document.getElementById("add-field-btn");
 
-            dueDateInput.setAttribute('min', new Date().toISOString().split('T')[0]);
+            // === Форма календаря и другие поля ===
+            const dueDateInput = document.getElementById("due_date");
+            dueDateInput.setAttribute("min", new Date().toISOString().split("T")[0]);
 
-            addFieldBtn.addEventListener('click', () => {
-                const fieldIndex = fields.length;
-                const fieldDiv = document.createElement('div');
-                fieldDiv.classList.add('field');
-                fieldDiv.dataset.index = fieldIndex;
+            let fieldIndex = 0;
+
+            function createFieldElement() {
+                const fieldDiv = document.createElement("div");
+                fieldDiv.className = "field";
+                fieldDiv.dataset.index = fieldIndex++;
 
                 fieldDiv.innerHTML = `
-                    <div>
-                        <label>Название поля:</label>
-                        <input type="text" class="field-name" required>
-                    </div>
-                    <div>
-                        <label>Тип поля:</label>
-                        <select class="field-type">
-                            <option value="text">Текст</option>
-                            <option value="file_upload">Загрузка файла</option>
-                            <option value="multiple_choice">Множественный выбор</option>
-                            <option value="single_choice">Одиночный выбор</option>
-                        </select>
-                    </div>
-                    <div class="options-container" style="display: none;">
-                        <label>Варианты:</label>
-                        <div class="options-list"></div>
-                        <button type="button" class="add-option-btn">Добавить вариант</button>
-                    </div>
-                    <button type="button" class="remove-field-btn">Удалить поле</button>
-                `;
+            <div class="form-group">
+                <label>Название вопроса:</label>
+                <input type="text" class="field-name" placeholder="Введите вопрос">
+            </div>
+            <div class="form-group">
+                <label>Тип вопроса:</label>
+                <select class="field-type">
+                    <option value="text">Текстовый ответ</option>
+                    <option value="file_upload">Загрузка файла</option>
+                    <option value="multiple_choice">Множественный выбор</option>
+                    <option value="single_choice">Одиночный выбор</option>
+                </select>
+            </div>
+            <div class="options-container hidden">
+                <label>Варианты:</label>
+                <div class="options-list"></div>
+                <button type="button" class="btn secondary add-option-btn">
+                    <i class="fas fa-plus"></i> Добавить вариант
+                </button>
+            </div>
+            <button type="button" class="remove-field-btn btn danger">Удалить поле</button>
+        `;
 
-                fieldsContainer.appendChild(fieldDiv);
+                const fieldTypeSelect = fieldDiv.querySelector(".field-type");
+                const optionsContainer = fieldDiv.querySelector(".options-container");
+                const optionsList = fieldDiv.querySelector(".options-list");
 
                 const field = {
-                    name: '',
-                    type: 'text',
-                    options: [],
+                    name: "",
+                    type: "text",
+                    options: []
                 };
-                fields.push(field);
 
-                fieldDiv.querySelector('.field-name').addEventListener('input', (e) => {
-                    field.name = e.target.value.trim();
-                });
+                // === Изменение типа поля ===
+                fieldTypeSelect.addEventListener("change", function() {
+                    const selectedType = this.value;
 
-                fieldDiv.querySelector('.field-type').addEventListener('change', (e) => {
-                    field.type = e.target.value;
-                    const optionsContainer = fieldDiv.querySelector('.options-container');
-                    if (field.type === 'multiple_choice' || field.type === 'single_choice') {
-                        optionsContainer.style.display = 'block';
+                    if (selectedType === "single_choice" || selectedType === "multiple_choice") {
+                        optionsContainer.classList.remove("hidden");
+                        field.type = selectedType;
+                        updateOptionInputs(optionsList, selectedType);
                     } else {
-                        optionsContainer.style.display = 'none';
+                        optionsContainer.classList.add("hidden");
                         field.options = [];
                     }
                 });
 
-                fieldDiv.querySelector('.add-option-btn').addEventListener('click', () => {
-                    const optionsList = fieldDiv.querySelector('.options-list');
-                    const optionIndex = field.options.length;
+                // === Обработчик добавления варианта ===
+                fieldDiv.querySelector(".add-option-btn").addEventListener("click", function() {
+                    const optionDiv = document.createElement("div");
+                    optionDiv.className = "option";
 
-                    const optionDiv = document.createElement('div');
-                    optionDiv.classList.add('option');
+                    const isSingleChoice = fieldTypeSelect.value === "single_choice";
+
                     optionDiv.innerHTML = `
-                        <input type="text" class="option-value" placeholder="Вариант ответа" required>
-                        <input type="${field.type === 'single_choice' ? 'radio' : 'checkbox'}" class="correct-option">
-                        <button type="button" class="remove-option-btn">Удалить вариант</button>
-                    `;
+                <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option" name="option-${fieldIndex}">
+                <input type="text" class="option-value" placeholder="Вариант ответа">
+                <button type="button" class="remove-option-btn"><i class="fas fa-trash"></i></button>
+            `;
 
-                    optionsList.appendChild(optionDiv);
-
-                    const option = {
-                        value: '',
-                        isCorrect: false
-                    };
-                    field.options.push(option);
-
-                    optionDiv.querySelector('.option-value').addEventListener('input', (e) => {
-                        option.value = e.target.value.trim();
+                    // === Удаление варианта ===
+                    optionDiv.querySelector(".remove-option-btn").addEventListener("click", function() {
+                        optionDiv.remove();
                     });
 
-                    optionDiv.querySelector('.correct-option').addEventListener('change', (e) => {
-                        option.isCorrect = e.target.checked;
-                        if (field.type === 'single_choice') {
-                            field.options.forEach((opt) => opt.isCorrect = false);
-                            option.isCorrect = true;
+                    // === Если тип изменяется, обновляем тип инпутов ===
+                    function updateOptionInputs(container, type) {
+                        container.querySelectorAll(".option").forEach(option => {
+                            const radioOrCheckbox = option.querySelector(".correct-option");
+                            const isRadio = type === "single_choice";
+                            radioOrCheckbox.type = isRadio ? "radio" : "checkbox";
+                            radioOrCheckbox.name = isRadio ? `option-${fieldIndex}` : "";
+                        });
+                    }
+
+                    // === Обработка клика по варианту ===
+                    optionDiv.querySelector(".correct-option").addEventListener("click", function(e) {
+                        if (fieldTypeSelect.value === "single_choice") {
+                            [...optionsList.querySelectorAll(".correct-option")].forEach(cb => {
+                                cb.checked = false;
+                            });
+                            e.target.checked = true;
                         }
                     });
 
-                    optionDiv.querySelector('.remove-option-btn').addEventListener('click', () => {
-                        field.options.splice(optionIndex, 1);
-                        optionDiv.remove();
+                    optionsList.appendChild(optionDiv);
+
+                    field.options.push({
+                        value: "",
+                        isCorrect: false,
+                        element: optionDiv
+                    });
+
+                    optionDiv.querySelector(".option-value").addEventListener("input", function(e) {
+                        field.options.forEach(opt => {
+                            if (opt.element === e.target.parentElement) {
+                                opt.value = e.target.value;
+                            }
+                        });
+                    });
+
+                    optionDiv.querySelector(".correct-option").addEventListener("change", function(e) {
+                        const isChecked = e.target.checked;
+                        field.options.forEach(opt => {
+                            if (opt.element === e.target.parentElement) {
+                                opt.isCorrect = isChecked;
+                            }
+                        });
                     });
                 });
 
-                fieldDiv.querySelector('.remove-field-btn').addEventListener('click', () => {
-                    fields.splice(fieldIndex, 1);
+                // === Удаление всего поля ===
+                fieldDiv.querySelector(".remove-field-btn").addEventListener("click", function() {
                     fieldDiv.remove();
                 });
+
+                return fieldDiv;
+            }
+
+            // === Добавление нового поля ===
+            addFieldBtn.addEventListener("click", function() {
+                const newField = createFieldElement();
+                fieldsContainer.appendChild(newField);
             });
 
-            document.getElementById('assignment-form').addEventListener('submit', (e) => {
+            // === Отправка формы ===
+            document.getElementById("assignment-form").addEventListener("submit", function(e) {
                 e.preventDefault();
 
-                const filledFields = fields.filter(field => field.name);
-                if (filledFields.length === 0) {
-                    alert('Добавьте хотя бы одно поле.');
-                    return;
-                }
+                const filledFields = [];
 
-                document.getElementById('fields-json').value = JSON.stringify(filledFields);
+                document.querySelectorAll(".field").forEach(fieldDiv => {
+                    const name = fieldDiv.querySelector(".field-name").value.trim();
+                    const type = fieldDiv.querySelector(".field-type").value;
+                    const optionsList = fieldDiv.querySelector(".options-list");
+
+                    const options = [...optionsList.querySelectorAll(".option")].map(optionDiv => ({
+                        value: optionDiv.querySelector(".option-value").value.trim(),
+                        isCorrect: optionDiv.querySelector(".correct-option").checked
+                    }));
+
+                    if (!name) {
+                        alert("Заполните название вопроса.");
+                        e.preventDefault();
+                        return;
+                    }
+
+                    filledFields.push({
+                        name,
+                        type,
+                        options
+                    });
+                });
+
+                document.getElementById("fields-json").value = JSON.stringify(filledFields);
                 e.target.submit();
             });
         });

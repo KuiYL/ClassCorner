@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Assignments;
 use App\Models\Classes;
+use App\Models\Invitation;
 use App\Models\StudentAssignments;
 use App\Models\User;
 use Carbon\Carbon;
@@ -126,7 +127,9 @@ class PagesController extends Controller
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
+                return $this->showDashboardUser($user);
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
@@ -149,6 +152,51 @@ class PagesController extends Controller
         ]);
     }
 
+    public function showDashboardUser($user = null)
+    {
+        $user = $user ?? $this->getAuthenticatedUser();
+        $this->redirectIfNotRole($user, 'student');
+
+        $classes = $user->classes;
+
+        $assignments = [];
+
+        foreach ($classes as $class) {
+            $classAssignments = $class->assignments;
+
+            foreach ($classAssignments as $assignment) {
+                $submission = StudentAssignments::where('user_id', $user->id)
+                    ->where('assignment_id', $assignment->id)
+                    ->first();
+
+                $isCompleted = false;
+                if ($submission) {
+                    $isCompleted = in_array($submission->status, ['submitted', 'graded']);
+                }
+
+                $assignments[] = [
+                    'class' => $class,
+                    'assignment' => $assignment,
+                    'completed' => $isCompleted,
+                    'submission' => $submission,
+                ];
+            }
+        }
+
+        $totalClasses = $classes->count();
+        $totalAssignments = count($assignments);
+        $completedAssignments = count(array_filter($assignments, fn($a) => $a['completed']));
+
+        return view('pages.platform.dashboardUser', compact(
+            'user',
+            'classes',
+            'assignments',
+            'totalClasses',
+            'totalAssignments',
+            'completedAssignments'
+        ));
+    }
+
     public function showClassesPage()
     {
         $user = $this->getAuthenticatedUser();
@@ -158,9 +206,17 @@ class PagesController extends Controller
                 $classes = $this->getUserClasses($user);
                 return view('pages.platform.classesTeacher', compact('user', 'classes'));
             case 'admin':
+                $classes = Classes::all();
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
+                $classes = $this->getUserClasses($user);
+                $invitations = Invitation::where('invitee_email', $user->email)
+                    ->where('status', 'pending')
+                    ->with('class.teacher')
+                    ->get();
+                return view('pages.platform.classesStudent', compact('user', 'classes', 'invitations'));
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
@@ -177,7 +233,33 @@ class PagesController extends Controller
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
+                $classes = $user->classes;
+                $assignments = [];
+                foreach ($classes as $class) {
+                    $classAssignments = $class->assignments;
+
+                    foreach ($classAssignments as $assignment) {
+                        $submission = StudentAssignments::where('user_id', $user->id)
+                            ->where('assignment_id', $assignment->id)
+                            ->first();
+
+                        $isCompleted = false;
+                        if ($submission) {
+                            $isCompleted = in_array($submission->status, ['submitted', 'graded']);
+                        }
+
+                        $assignments[] = [
+                            'class' => $class,
+                            'assignment' => $assignment,
+                            'completed' => $isCompleted,
+                            'submission' => $submission,
+                        ];
+                    }
+                }
+                $assignments = collect($assignments);
+                return view('pages.platform.assignmentsStudent', compact('user', 'classes', 'assignments'));
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
@@ -213,7 +295,51 @@ class PagesController extends Controller
                 return view('pages.platform.dashboardAdmin', compact('user'));
 
             case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
+                // Получаем классы, в которых состоит студент
+                $classes = $this->getUserClasses($user);
+
+                // Получаем все задания из этих классов
+                $assignments = [];
+
+                foreach ($classes as $class) {
+                    $classAssignments = $class->assignments;
+
+                    foreach ($classAssignments as $assignment) {
+                        $submission = StudentAssignments::where('assignment_id', $assignment->id)
+                            ->where('user_id', $user->id)
+                            ->first();
+
+                        $assignments[] = [
+                            'id' => $assignment->id,
+                            'title' => $assignment->title,
+                            'description' => $assignment->description,
+                            'due_date' => $assignment->due_date,
+                            'class_name' => optional($assignment->class)->name,
+                            'class_id' => optional($assignment->class)->id,
+                            'status' => $submission ? $submission->status : 'not_submitted',
+                            'completed' => in_array($submission?->status, ['submitted', 'graded']),
+                        ];
+                    }
+                }
+
+                $groupedAssignments = collect($assignments)->groupBy('due_date')->map(function ($group) {
+                    return $group->map(function ($item) {
+                        return [
+                            'id' => $item['id'],
+                            'title' => $item['title'],
+                            'description' => $item['description'],
+                            'due_date' => $item['due_date'],
+                            'class_name' => $item['class_name'],
+                            'class_id' => $item['class_id'],
+                            'status' => $item['status'],
+                            'completed' => $item['completed'],
+                        ];
+                    });
+                });
+
+                return view('pages.platform.calendarStudent', compact('user', 'classes', 'groupedAssignments'));
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
@@ -231,6 +357,8 @@ class PagesController extends Controller
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
                 return view('pages.platform.dashboardUser', compact('user'));
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
@@ -241,13 +369,15 @@ class PagesController extends Controller
         switch ($user->role) {
             case 'teacher':
                 $classes = $this->getUserClasses($user);
-                $assignments = Assignments::where('teacher_id', $user->id)->get();
-
                 return view('pages.user.profile', compact('user', 'classes'));
             case 'admin':
-                return view('pages.platform.dashboardAdmin', compact('user'));
+                $classes = Classes::all();
+                return view('pages.user.profile', compact('user', 'classes'));
             case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
+                $classes = $this->getUserClasses($user);
+                return view('pages.user.profile', compact('user', 'classes'));
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
@@ -258,23 +388,31 @@ class PagesController extends Controller
         switch ($user->role) {
             case 'teacher':
                 $classes = $this->getUserClasses($user);
-                $assignments = Assignments::where('teacher_id', $user->id)->get();
-
                 return view('pages.user.chooseAvatar', compact('user', 'classes'));
             case 'admin':
-                return view('pages.platform.dashboardAdmin', compact('user'));
+                $classes = Classes::all();
+                return view('pages.user.chooseAvatar', compact('user', 'classes'));
             case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
+                $classes = $this->getUserClasses($user);
+                return view('pages.user.chooseAvatar', compact('user', 'classes'));
+            default:
+                abort(403, 'Нет доступа');
         }
     }
 
     public function createClass()
     {
         $user = $this->getAuthenticatedUser();
-        $teachers = User::where('role', 'teacher')->get();
-        $classes = $this->getUserClasses($user);
-
-        return view('pages.classes.create', compact('teachers', 'user', 'classes'));
+        if ($user->role == 'admin' || $user->role == 'teacher') {
+            $teachers = User::where('role', 'teacher')->get();
+            if ($user->role == 'teacher') {
+                $classes = $this->getUserClasses($user);
+            } else {
+                $classes = Classes::all();
+            }
+            return view('pages.classes.create', compact('teachers', 'user', 'classes'));
+        }
+        abort(403, 'Нет доступа');
     }
 
     public function createAssignments($classId = null)

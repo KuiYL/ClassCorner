@@ -30,13 +30,13 @@
                 </div>
                 Календарь
             </a>
-            <a href="{{ route('user.statistics') }}"
+            {{-- <a href="{{ route('user.statistics') }}"
                 class="{{ $activePage === 'statistics' ? 'item-active' : 'item' }}">
                 <div class="{{ $activePage === 'statistics' ? 'icon-active' : 'icon' }}">
                     <i class="fas fa-chart-pie"></i>
                 </div>
                 Статистика
-            </a>
+            </a> --}}
             <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();"
                 class="item">
                 <div class="icon">
@@ -52,9 +52,14 @@
         <div class="classes">
             <div class="head">
                 <h3>Мои классы</h3>
-                <a href="{{ route('classes.create') }}">
-                    <i class="fas fa-plus"></i>
-                </a>
+                @auth
+                    @if (auth()->user()->role === 'teacher' || auth()->user()->role === 'admin')
+                        <a href="{{ route('classes.create') }}">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                    @endif
+                @endauth
+
             </div>
             <div class="class">
                 @foreach ($classes as $class)
