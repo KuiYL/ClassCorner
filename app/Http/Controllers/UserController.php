@@ -180,7 +180,7 @@ class UserController extends Controller
             'status' => 'pending',
         ]);
 
-        return response()->json(['message' => 'Приглашение отправлено!']);
+        return back()->with('success', 'Приглашение успешно отправлено!');
     }
 
     public function accept($invitationId)
@@ -191,15 +191,13 @@ class UserController extends Controller
         $class = $invitation->class;
         $user = User::where('email', $invitation->invitee_email)->first();
         $class->students()->attach($user->id);
-
-        return response()->json(['message' => 'Приглашение принято!']);
+        return back()->with('success', 'Приглашение принято!');
     }
 
     public function decline($invitationId)
     {
         $invitation = Invitation::findOrFail($invitationId);
         $invitation->update(['status' => 'declined']);
-
-        return response()->json(['message' => 'Приглашение отклонено!']);
+        return back()->with('error', 'Приглашение отклонено!');
     }
 }

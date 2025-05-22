@@ -2471,6 +2471,7 @@ main.profile-container {
     background-color: #616EBD;
 }
 
+/* === Модальное окно (overlay) === */
 .modal-invite {
     position: fixed;
     top: 0;
@@ -2492,6 +2493,7 @@ main.profile-container {
     pointer-events: auto;
 }
 
+/* === Содержимое модального окна с анимацией появления === */
 .modal-invite-content {
     background-color: #fff;
     padding: 2rem;
@@ -2502,10 +2504,10 @@ main.profile-container {
     text-align: center;
     transform: scale(0.95);
     opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
+    transition: all 0.3s ease;
     display: flex;
     flex-direction: column;
-    gap: 1rem;
+    gap: 1.5rem;
     position: relative;
 }
 
@@ -2514,6 +2516,7 @@ main.profile-container {
     opacity: 1;
 }
 
+/* === Заголовок === */
 .modal-invite-content h3 {
     margin: 0 0 1rem 0;
     font-size: 1.5rem;
@@ -2521,6 +2524,7 @@ main.profile-container {
     font-weight: bold;
 }
 
+/* === Кнопка закрытия (крестик) === */
 .modal-invite-content .close-btn {
     position: absolute;
     top: 16px;
@@ -2536,6 +2540,7 @@ main.profile-container {
     color: #555;
 }
 
+/* === Поле поиска студентов === */
 #search-student {
     width: 100%;
     padding: 0.7rem 1rem;
@@ -2543,14 +2548,15 @@ main.profile-container {
     border: 1px solid #ccc;
     border-radius: 8px;
     outline: none;
-    transition: border-color 0.3s ease;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 #search-student:focus {
     border-color: #4A90E2;
-    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
+/* === Результаты поиска студентов === */
 .search-results {
     list-style: none;
     padding: 0;
@@ -2573,6 +2579,31 @@ main.profile-container {
     color: #333;
 }
 
+/* === Форма отправки email === */
+#invite-student-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    width: 100%;
+    margin-bottom: 0;
+}
+
+#invite-student-email {
+    width: 100%;
+    padding: 0.7rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+#invite-student-email:focus {
+    border-color: #4A90E2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+}
+
+/* === Кнопки === */
 .modal-invite .btn {
     padding: 0.7rem 1.5rem;
     font-size: 1rem;
@@ -2583,10 +2614,8 @@ main.profile-container {
 }
 
 .modal-invite .btn.primary {
-    background-color: rgb(220, 252, 231);
-    color: rgb(22, 163, 74);
-    font-weight: 500;
-    border: 1px solid rgb(22, 163, 74);
+    background-color: #27AE60;
+    color: white;
 }
 
 .modal-invite .btn.secondary {
@@ -2600,4 +2629,20 @@ main.profile-container {
 
 .modal-invite .btn:active {
     transform: translateY(0);
+}
+
+.alert-success {
+    background-color: #d4edda;
+    color: #155724;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 6px;
+}
+
+.alert-error {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 1rem;
+    margin: 1rem;
+    border-radius: 6px;
 }

@@ -33,7 +33,13 @@
                         </div>
                     </div>
                 </div>
+                @if (session('success'))
+                    <div class="alert-success">{{ session('success') }}</div>
+                @endif
 
+                @if (session('error'))
+                    <div class="alert-error">{{ session('error') }}</div>
+                @endif
                 <div class="assignments-container">
                     <div class="assignments-header">
                         <h3>Мои задания</h3>
@@ -172,11 +178,15 @@
                         <h3>Пригласить ученика</h3>
                         <input type="text" id="search-student" placeholder="Введите имя или email">
                         <ul id="search-results" class="search-results"></ul>
-                        <button id="add-student-btn" class="btn primary">Добавить выбранного</button>
+                        <form id="invite-student-form" action="{{ route('classes.invite', $class->id) }}"
+                            method="POST">
+                            @csrf
+                            <input type="hidden" id="invite-student-email" name="email">
+                            <button type="submit" class="btn primary">Добавить выбранного</button>
+                        </form>
                         <button id="close-modal-bottom" class="btn secondary">Отмена</button>
                     </div>
                 </div>
-
         </main>
     </div>
 
@@ -245,64 +255,60 @@
             const modal = document.getElementById('invite-student-modal');
             const openBtn = document.querySelector('.invite-student-btn');
             const closeBtns = document.querySelectorAll('#close-modal, #close-modal-bottom');
+            const searchInput = document.getElementById('search-student');
+            const resultsList = document.getElementById('search-results');
+            const emailInput = document.getElementById('invite-student-email');
 
+            // === Открытие окна ===
             openBtn.addEventListener('click', () => {
                 modal.classList.remove('hidden');
             });
 
+            // === Закрытие окна ===
             closeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     modal.classList.add('hidden');
+                    searchInput.value = '';
+                    resultsList.innerHTML = '';
+                    emailInput.value = '';
                 });
             });
 
-            const searchInput = document.getElementById('search-student');
-            const resultsList = document.getElementById('search-results');
+            // === Список студентов из PHP переданный как JSON ===
+            const availableStudents = @json($availableStudents);
 
-            const students = [{
-                    name: 'Иван Иванов',
-                    email: 'ivan@example.com'
-                },
-                {
-                    name: 'Мария Петрова',
-                    email: 'maria@example.com'
-                },
-                {
-                    name: 'Александр Смирнов',
-                    email: 'alex@example.com'
-                }
-            ];
-
+            // === Поиск студентов при вводе текста ===
             searchInput.addEventListener('input', () => {
-                const query = searchInput.value.toLowerCase();
+                const query = searchInput.value.trim().toLowerCase();
                 resultsList.innerHTML = '';
-                if (query) {
-                    const filtered = students.filter(student =>
-                        student.name.toLowerCase().includes(query) ||
-                        student.email.toLowerCase().includes(query)
-                    );
-                    filtered.forEach(student => {
-                        const li = document.createElement('li');
-                        li.textContent = `${student.name} (${student.email})`;
-                        li.addEventListener('click', () => {
-                            searchInput.value = `${student.name} (${student.email})`;
-                            resultsList.innerHTML = '';
-                        });
-                        resultsList.appendChild(li);
-                    });
-                }
-            });
 
-            document.getElementById('add-student-btn').addEventListener('click', () => {
-                const selected = searchInput.value;
-                if (selected) {
-                    alert(`Ученик "${selected}" добавлен в класс!`);
-                    modal.classList.add('hidden');
-                    searchInput.value = '';
-                    resultsList.innerHTML = '';
-                } else {
-                    alert('Выберите ученика.');
+                if (!query) return;
+
+                const filtered = availableStudents.filter(student =>
+                    student.name.toLowerCase().includes(query) ||
+                    student.email.toLowerCase().includes(query)
+                );
+
+                if (filtered.length === 0) {
+                    const li = document.createElement('li');
+                    li.textContent = 'Студенты не найдены';
+                    li.style.color = '#888';
+                    li.style.textAlign = 'center';
+                    resultsList.appendChild(li);
+                    return;
                 }
+
+                filtered.forEach(student => {
+                    const li = document.createElement('li');
+                    li.textContent = `${student.name} (${student.email})`;
+                    li.setAttribute('data-email', student.email);
+                    li.addEventListener('click', () => {
+                        searchInput.value = `${student.name} (${student.email})`;
+                        emailInput.value = student.email;
+                        resultsList.innerHTML = '';
+                    });
+                    resultsList.appendChild(li);
+                });
             });
         });
     </script>

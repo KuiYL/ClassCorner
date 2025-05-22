@@ -323,10 +323,33 @@ class PagesController extends Controller
         }
 
         $role = $user->role;
-        $assignments = $role === 'teacher' ? $class->assignments()->where('teacher_id', $user->id)->get() : [];
-        $students = $role === 'teacher' || $role === 'admin' ? $class->students : [];
+
+        $assignments = $role === 'teacher'
+            ? $class->assignments()->where('teacher_id', $user->id)->get()
+            : [];
+
+        $students = $role === 'teacher' || $role === 'admin'
+            ? $class->students
+            : [];
+
+        $availableStudents = User::query()
+            ->where('role', 'student')
+            ->whereDoesntHave('classes', function ($query) use ($classId) {
+                $query->where('class_id', $classId);
+            })
+            ->get();
+
         $classes = $this->getUserClasses($user);
-        return view('pages.classes.class', compact('class', 'assignments', 'students', 'role', 'user', 'classes'));
+
+        return view('pages.classes.class', compact(
+            'class',
+            'assignments',
+            'students',
+            'role',
+            'user',
+            'classes',
+            'availableStudents'
+        ));
     }
 
     public function showAssignmentPage($id)
