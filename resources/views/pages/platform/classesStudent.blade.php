@@ -51,7 +51,7 @@
                                         </div>
                                         <div class="info-teacher">
                                             <i class="fas fa-user-tie"></i>
-                                            <span>{{ $class->teacher->name }}</span>
+                                            <span>{{ $class->teacher->name }} {{ $class->teacher->surname }}</span>
                                         </div>
                                         <div class="info-assigments">
                                             <div class="assigments-text">
@@ -81,11 +81,10 @@
                 <ul id="invitations-list" class="search-results">
                     @foreach ($invitations as $invitation)
                         <li class="invitation-item" data-id="{{ $invitation->id }}">
-                            <strong>{{ $invitation->class->name }}</strong><br>
+                            <strong>Название класса: {{ $invitation->class->name }}</strong><br>
                             <small>Преподаватель: {{ optional($invitation->class->teacher)->name }}</small><br>
-                            <small>Статус: {{ $invitation->status }}</small>
 
-                            <div style="margin-top: 10px; display: flex; gap: 10px;">
+                            <div class="actions">
                                 <form action="{{ route('invitations.accept', $invitation->id) }}" method="POST">
                                     @csrf
                                     <button type="submit" class="btn primary">Принять</button>

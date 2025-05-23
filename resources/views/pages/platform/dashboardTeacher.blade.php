@@ -47,7 +47,7 @@
                             <h3>Создать новый класс</h3>
                             <p>Добавьте студентов, материалы и задания</p>
                         </div>
-                        <a href="{{ route('classes.create') }}">
+                        <a href="{{ route('classes.create', ['return_url' => url()->current()]) }}">
                             <i class="fas fa-plus"></i>
                             Новый класс
                         </a>
@@ -73,12 +73,13 @@
                                                 <i class="fas fa-cog"></i>
                                                 <div class="settings-menu hidden">
                                                     <a class="setting-menu-action"
-                                                        href="{{ route('classes.edit', $class->id) }}">
+                                                        href="{{ route('classes.edit', ['id' => $class->id, 'return_url' => url()->current()]) }}">
                                                         <i class="fas fa-edit"></i> Изменить
                                                     </a>
                                                     <button class="setting-menu-action delete-button" type="button"
-                                                        data-id="{{ $class->id }}" data-name="{{ $class->name }}">
-                                                        <i class="fas fa-trash"></i> Удалить
+                                                        data-id="{{ $class->id }}" data-name="{{ $class->name }}"
+                                                        data-type="class">
+                                                        <i class="fas fa-trash"></i>Удалить
                                                     </button>
                                                 </div>
                                             </div>
@@ -91,7 +92,7 @@
                                         </div>
                                         <div class="info-teacher">
                                             <i class="fas fa-user-tie"></i>
-                                            <span>{{ $class->teacher->name }}</span>
+                                            <span>{{ $class->teacher->name }} {{ $class->teacher->surname }}</span>
                                         </div>
                                         <div class="info-assigments">
                                             <div class="assigments-text">
@@ -113,49 +114,60 @@
                         <h3>Задания на проверку</h3>
                         <a href="#">Смотреть все</a>
                     </div>
-
-                    <div class="items">
+                    <div class="assignments-filters">
+                        <div class="filters-container">
+                            <label>Фильтр по статусу:
+                                <select id="filter-status">
+                                    <option value="">Все</option>
+                                    <option value="Срочно">Срочно</option>
+                                    <option value="Проверено">Проверено</option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="assignments-scrollable">
                         @forelse ($assignmentsToGrade as $assignment)
-                            <div
-                                class="item @if ($assignment->status == 'submitted') task-urgent @else task-completed @endif animate-pop">
-                                <div class="wrapper">
-                                    <div>
-                                        <div class="text-title">
-                                            <span class="title">{{ $assignment->assignment->title }}</span>
-                                            @if ($assignment->status == 'submitted')
-                                                <span class="title-emergency">Срочно</span>
-                                            @endif
-                                        </div>
-                                        <p class="count">
-                                            {{ $assignment->assignment->class->name }} ·
-                                            {{ $assignment->students_count }} работ
-                                        </p>
-                                        <div class="data-info">
-                                            <i class="fas fa-clock"></i>
-                                            <span>Срок проверки: до
-                                                {{ $assignment->deadline->format('d.m.Y H:i') }}</span>
-                                        </div>
+                            @php
+                                $status = $assignment->status ?? 'graded';
+                                $statusLabels = [
+                                    'submitted' => 'Срочно',
+                                    'graded' => 'Проверено',
+                                ];
+                            @endphp
+
+                            <div class="assignment-card status-{{ $status }}">
+                                <div class="assignment-header">
+                                    <h4>{{ $assignment->assignment->title }}</h4>
+                                    <div class="assignment-meta">
+                                        <p><strong>Класс:</strong> <span class="assignment-class">
+                                                {{ $assignment->assignment->class->name }}
+                                            </span></p>
+                                        <p><strong>Работ:</strong> {{ $assignment->students_count }}</p>
                                     </div>
-                                    <button class="check" title="Проверить">
-                                        <i class="fas fa-check-circle"></i>
-                                    </button>
+                                    <div class="assignment-status">
+                                        {{ $statusLabels[$status] }}
+                                    </div>
                                 </div>
+                                <button class="action-button check" title="Проверить"> Проверить
+                                </button>
                             </div>
                         @empty
                             <p class="empty-message">У вас нет заданий на проверку.</p>
                         @endforelse
                     </div>
                 </div>
+
             </div>
         </main>
     </div>
 
-    <div class="floating-btn">
+    <a href="{{ route('classes.create', ['return_url' => url()->current()]) }}" class="floating-btn">
         <button>
             <i class="fas fa-plus"></i>
         </button>
-    </div>
+    </a>
     @include('layout.modal-delete')
+
 </body>
 
 </html>

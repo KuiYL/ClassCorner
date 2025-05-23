@@ -24,7 +24,7 @@
                             <h3>Создать новый класс</h3>
                             <p>Добавьте студентов, материалы и задания</p>
                         </div>
-                        <a href="{{ route('classes.create') }}">
+                        <a href="{{ route('classes.create', ['return_url' => url()->current()]) }}">
                             <i class="fas fa-plus"></i>
                             Новый класс
                         </a>
@@ -68,7 +68,7 @@
                                         </div>
                                         <div class="info-teacher">
                                             <i class="fas fa-user-tie"></i>
-                                            <span>{{ $class->teacher->name }}</span>
+                                            <span>{{ $class->teacher->name }} {{ $class->teacher->surname }}</span>
                                         </div>
                                         <div class="info-assigments">
                                             <div class="assigments-text">
@@ -88,7 +88,7 @@
         </main>
     </div>
 
-    <a href="{{ route('classes.create') }}" class="floating-btn">
+    <a href="{{ route('classes.create', ['return_url' => url()->current()]) }}" class="floating-btn">
         <button>
             <i class="fas fa-plus"></i>
         </button>

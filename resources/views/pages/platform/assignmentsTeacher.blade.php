@@ -21,12 +21,11 @@
                 <div class="banner-new-assignment">
                     <div class="wrapper">
                         <div>
-                            <h3>Добавить новое задание</h3>
-                            <p>Создайте новое задание для ваших студентов</p>
+                            <h3>Задания на проверку</h3>
+                            <p>Проверьте ответы студентов и выставите оценки</p>
                         </div>
-                        <a href="{{ route('assignments.create') }}">
-                            <i class="fas fa-tasks"></i>
-                            Новое задание
+                        <a href="{{ route('assignments.to.grade') }}" class="btn primary small">
+                            <i class="fas fa-arrow-right"></i>Перейти
                         </a>
                     </div>
                 </div>
@@ -34,19 +33,14 @@
                 <div class="assignments-container">
                     <div class="assignments-header">
                         <h3>Мои задания</h3>
+                        <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}"
+                            class="action-button" style="display: flex; gap:8px; background-color: #6e76c1">
+                            <i class="fas fa-tasks"></i>
+                            Новое задание
+                        </a>
                     </div>
                     <div class="assignments-filters"
                         style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <label>
-                            Статус:
-                            <select id="filter-status">
-                                <option value="">Все</option>
-                                <option value="В ожидании">В ожидании</option>
-                                <option value="Активно">Активно</option>
-                                <option value="Выполнено">Выполнено</option>
-                            </select>
-                        </label>
-
                         <label>
                             Класс:
                             <select id="filter-class">
@@ -80,7 +74,6 @@
                                     <div class="card-header">
                                         <h4 class="assignment-title">{{ $assignment->title }}</h4>
                                         <div class="header-controls">
-                                            <span class="assignment-status">{{ $assignment->status_name }}</span>
                                             <button class="action-button">Подробнее</button>
                                         </div>
                                     </div>
@@ -117,7 +110,7 @@
                                             </span>
                                         </div>
                                         <div class="card-actions">
-                                            <a href="{{ route('assignments.edit', $assignment->id, $assignment->class_id) }}"
+                                            <a href="{{ route('assignments.edit', ['id' => $assignment->id, 'class_id' => $assignment->class_id, 'return_url' => url()->current()]) }}"
                                                 class="btn edit-btn">Изменить</a>
                                             <button class="btn delete-btn delete-button" type="button"
                                                 data-id="{{ $assignment->id }}" data-name="{{ $assignment->title }}"
@@ -139,7 +132,7 @@
         </main>
     </div>
 
-    <a href="{{ route('assignments.create') }}" class="floating-btn">
+    <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}" class="floating-btn">
         <button>
             <i class="fas fa-plus"></i>
         </button>
@@ -150,7 +143,6 @@
         document.addEventListener("DOMContentLoaded", function() {
             const cards = document.querySelectorAll(".assignment-card");
 
-            // Разворачивание/сворачивание деталей карточки
             cards.forEach((card) => {
                 const toggleBtn = card.querySelector(".action-button");
                 const cardDetails = card.querySelector(".card-details");
@@ -162,30 +154,25 @@
                 });
             });
 
-            // Фильтры
-            const filterStatus = document.getElementById("filter-status");
             const filterClass = document.getElementById("filter-class");
             const filterType = document.getElementById("filter-type");
 
             function filterAssignments() {
-                const statusVal = filterStatus.value.trim();
                 const classVal = filterClass.value.trim();
                 const typeVal = filterType.value.trim();
 
                 let hasVisibleCards = false;
 
                 cards.forEach(card => {
-                    const cardStatus = card.querySelector(".assignment-status")?.textContent.trim() || "";
                     const cardClass = card.querySelector(".assignment-details span:first-child")
                         ?.textContent.replace('Класс: ', '').trim() || "";
                     const cardTypesText = card.querySelector(".assignment-details span:nth-child(3)")
                         ?.textContent.replace('Типы вопросов:', '').trim() || "";
 
-                    const statusMatch = !statusVal || cardStatus === statusVal;
                     const classMatch = !classVal || cardClass === classVal;
                     const typeMatch = !typeVal || cardTypesText.includes(typeVal);
 
-                    if (statusMatch && classMatch && typeMatch) {
+                    if (classMatch && typeMatch) {
                         card.style.display = "block";
                         hasVisibleCards = true;
                     } else {
@@ -202,7 +189,6 @@
             }
 
 
-            filterStatus.addEventListener("change", filterAssignments);
             filterClass.addEventListener("change", filterAssignments);
             filterType.addEventListener("change", filterAssignments);
 

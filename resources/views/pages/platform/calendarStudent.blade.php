@@ -18,17 +18,15 @@
 
         <main>
             <div class="main-platform">
-
-                <div class="filters-calendar">
-                    <select id="filter-calendar-class">
-                        <option value="">Все классы</option>
-                        @foreach ($classes as $class)
-                            <option value="{{ $class->id }}">{{ $class->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-
                 <div id="calendar">
+                    <div class="filters-calendar">
+                        <select id="filter-calendar-class">
+                            <option value="">Все классы</option>
+                            @foreach ($classes as $class)
+                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="calendar-header">
                         <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
                         <h2 id="current-month"></h2>
@@ -163,7 +161,7 @@
                     item.className = "assignment-item";
 
                     const link = document.createElement("a");
-                    link.href = `/student/assignments/${assignment.id}`;
+                    link.href = `/assignment/${assignment.id}`;
                     link.textContent = assignment.title;
                     link.style.display = "block";
                     link.style.fontWeight = "600";

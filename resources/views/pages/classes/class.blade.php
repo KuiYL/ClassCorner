@@ -43,20 +43,12 @@
                 <div class="assignments-container">
                     <div class="assignments-header">
                         <h3>Мои задания</h3>
-                        <a class="new-assignment-btn" href="{{ route('assignments.create', $class->id) }}">Добавить
+                        <a class="new-assignment-btn"
+                            href="{{ route('assignments.create', ['classId' => $class->id, 'return_url' => url()->current()]) }}">Добавить
                             задание</a>
                     </div>
                     <div class="assignments-filters"
                         style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <label>
-                            Статус:
-                            <select id="filter-status">
-                                <option value="">Все</option>
-                                <option value="В ожидании">В ожидании</option>
-                                <option value="Активно">Активно</option>
-                                <option value="Выполнено">Выполнено</option>
-                            </select>
-                        </label>
 
                         <label>
                             Тип вопроса:
@@ -81,14 +73,13 @@
                                     <div class="card-header">
                                         <h4 class="assignment-title">{{ $assignment->title }}</h4>
                                         <div class="header-controls">
-                                            <span class="assignment-status">{{ $assignment->status_name }}</span>
                                             <button class="action-button">Подробнее</button>
                                         </div>
                                     </div>
                                     <div class="card-details hidden">
-                                        <p class="assignment-description">{{ $assignment->description }}</p>
+                                        <p class="assignment-description">
+                                            {{ Str::limit($assignment->description, 100) }}</p>
                                         <div class="assignment-details">
-                                            <span>Класс: {{ $assignment->class->name ?? 'Без класса' }}</span>
                                             <span>Дедлайн: {{ $assignment->due_date }}</span>
                                             @php
                                                 $typeTranslations = [
@@ -121,7 +112,7 @@
                                             <div class="card-actions">
                                                 <a href="{{ route('assignments.show', $assignment->id) }}"
                                                     class="btn view-btn">Перейти</a>
-                                                <a href="{{ route('assignments.edit', $assignment->id, $assignment->class_id) }}"
+                                                <a href="{{ route('assignments.edit', ['id' => $assignment->id, 'class_id' => $assignment->class_id, 'return_url' => url()->current()]) }}"
                                                     class="btn edit-btn">Изменить</a>
                                                 <button class="btn delete-btn delete-button" type="button"
                                                     data-id="{{ $assignment->id }}"
@@ -155,7 +146,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @forelse ($students->skip(1) as $student)
+                            @forelse ($students->filter(fn($student) => $student->id !== $class->teacher->id) as $student)
                                 <tr>
                                     <td>{{ $student->name }}</td>
                                     <td>{{ $student->progress }}%</td>
@@ -189,12 +180,13 @@
                 </div>
         </main>
     </div>
-
-    <a href="{{ route('assignments.create', $class->id) }}" class="floating-btn">
+    <a href="{{ route('assignments.create', ['classId' => $class->id, 'return_url' => url()->current()]) }}"
+        class="floating-btn">
         <button>
             <i class="fas fa-plus"></i>
         </button>
     </a>
+
     @include('layout.modal-delete')
 
     <script>
@@ -212,24 +204,21 @@
                 });
             });
 
-            const filterStatus = document.getElementById("filter-status");
+
             const filterType = document.getElementById("filter-type");
 
             function filterAssignments() {
-                const statusVal = filterStatus.value.trim();
                 const typeVal = filterType.value.trim();
 
                 let hasVisibleCards = false;
 
                 cards.forEach(card => {
-                    const cardStatus = card.querySelector(".assignment-status")?.textContent.trim() || "";
-                    const cardTypesText = card.querySelector(".assignment-details span:nth-child(3)")
+                    const cardTypesText = card.querySelector(".assignment-details span:nth-child(2)")
                         ?.textContent.replace('Типы вопросов:', '').trim() || "";
 
-                    const statusMatch = !statusVal || cardStatus === statusVal;
                     const typeMatch = !typeVal || cardTypesText.includes(typeVal);
 
-                    if (statusMatch && typeMatch) {
+                    if (typeMatch) {
                         card.style.display = "block";
                         hasVisibleCards = true;
                     } else {
@@ -246,7 +235,6 @@
             }
 
 
-            filterStatus.addEventListener("change", filterAssignments);
             filterType.addEventListener("change", filterAssignments);
 
             filterAssignments();
@@ -259,12 +247,10 @@
             const resultsList = document.getElementById('search-results');
             const emailInput = document.getElementById('invite-student-email');
 
-            // === Открытие окна ===
             openBtn.addEventListener('click', () => {
                 modal.classList.remove('hidden');
             });
 
-            // === Закрытие окна ===
             closeBtns.forEach(btn => {
                 btn.addEventListener('click', () => {
                     modal.classList.add('hidden');
@@ -274,10 +260,8 @@
                 });
             });
 
-            // === Список студентов из PHP переданный как JSON ===
             const availableStudents = @json($availableStudents);
 
-            // === Поиск студентов при вводе текста ===
             searchInput.addEventListener('input', () => {
                 const query = searchInput.value.trim().toLowerCase();
                 resultsList.innerHTML = '';

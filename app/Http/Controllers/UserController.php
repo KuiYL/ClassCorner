@@ -103,6 +103,11 @@ class UserController extends Controller
         $request->validate([
             'current_password' => 'required',
             'password' => 'required|min:6|confirmed',
+        ], [
+            'current_password.required' => 'Поле "Текущий пароль" обязательно для заполнения.',
+            'password.required' => 'Поле "Новый пароль" обязательно для заполнения.',
+            'password.min' => 'Поле "Новый пароль" должно содержать не менее 6 символов.',
+            'password.confirmed' => 'Поле "Новый пароль" и "Подтверждение пароля" не совпадают.',
         ]);
 
         $user = User::findOrFail(auth()->id());
@@ -127,6 +132,15 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'surname' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email,' . auth()->id(),
+        ], [
+            'name.required' => 'Поле "Имя" обязательно для заполнения.',
+            'name.max' => 'Поле "Имя" должно содержать не более 255 символов.',
+            'surname.required' => 'Поле "Фамилия" обязательно для заполнения.',
+            'surname.max' => 'Поле "Фамилия" должно содержать не более 255 символов.',
+            'email.required' => 'Поле "Email" обязательно для заполнения.',
+            'email.email' => 'Поле "Email" должно быть корректным адресом электронной почты.',
+            'email.max' => 'Поле "Email" должно содержать не более 255 символов.',
+            'email.unique' => 'Такой Email уже зарегистрирован.',
         ]);
 
         $user = User::findOrFail(auth()->id());
@@ -139,6 +153,7 @@ class UserController extends Controller
         return redirect()->route('user.profile')
             ->with('success', 'Информация обновлена.');
     }
+
 
     public function destroy($userId)
     {

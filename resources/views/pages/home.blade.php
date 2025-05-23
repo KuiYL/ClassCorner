@@ -29,10 +29,10 @@
                     стандартного обучения.
                 </p>
                 <div class="buttons">
-                    <a href="#" class="action-button">Попробовать бесплатно</a>
+                    <a href="{{ route('choiceLogin') }}" class="action-button">Попробовать бесплатно</a>
 
-                    <a href="#" class="extra-button"> <img src="{{ 'images/arrow-right button.svg' }}"
-                            alt=""></a>
+                    <a href="{{ route('about') }}" class="extra-button"> <img
+                            src="{{ 'images/arrow-right button.svg' }}" alt=""></a>
 
                     <p>Узнайте больше</p>
                 </div>

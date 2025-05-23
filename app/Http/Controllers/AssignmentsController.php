@@ -15,6 +15,13 @@ class AssignmentsController extends Controller
                 'description' => 'required|string',
                 'due_date' => 'required|date',
                 'class_id' => 'required|exists:classes,id',
+            ], [
+                'title.required' => 'Название задания обязательно для заполнения.',
+                'description.required' => 'Описание задания обязательно для заполнения.',
+                'due_date.required' => 'Дата сдачи задания обязательна для заполнения.',
+                'due_date.date' => 'Дата сдачи должна быть корректной датой.',
+                'class_id.required' => 'Выберите класс для задания.',
+                'class_id.exists' => 'Выбранный класс не существует.',
             ]);
 
             $fields = json_decode($request->input('fields_json'), true);
@@ -51,14 +58,15 @@ class AssignmentsController extends Controller
                 'options' => json_encode($fields),
                 'status' => 'pending',
             ]);
-
-            return redirect()->back()->with('success', 'Задание успешно создано!');
+            $returnUrl = $request->input('return_url', route('user.assignments'));
+            return redirect($returnUrl)->with('success', 'Задание успешно создано!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
+
 
     public function update(Request $request, $id)
     {
@@ -68,6 +76,13 @@ class AssignmentsController extends Controller
                 'description' => 'required|string',
                 'due_date' => 'required|date',
                 'class_id' => 'required|exists:classes,id',
+            ], [
+                'title.required' => 'Название задания обязательно для заполнения.',
+                'description.required' => 'Описание задания обязательно для заполнения.',
+                'due_date.required' => 'Дата сдачи задания обязательна для заполнения.',
+                'due_date.date' => 'Дата сдачи должна быть корректной датой.',
+                'class_id.required' => 'Выберите класс для задания.',
+                'class_id.exists' => 'Выбранный класс не существует.',
             ]);
 
             $fields = json_decode($request->input('fields_json'), true);
@@ -103,8 +118,8 @@ class AssignmentsController extends Controller
                 'class_id' => $request->input('class_id'),
                 'options' => json_encode($fields),
             ]);
-
-            return redirect()->back()->with('success', 'Задание успешно обновлено!');
+            $returnUrl = $request->input('return_url', route('user.assignments'));
+            return redirect($returnUrl)->with('success', 'Задание успешно обновлено!');
         } catch (\Illuminate\Validation\ValidationException $e) {
             return redirect()->back()->withErrors($e->errors())->withInput();
         } catch (\Exception $e) {
@@ -118,6 +133,6 @@ class AssignmentsController extends Controller
         $assignment = Assignments::findOrFail($id);
         $assignment->delete();
 
-        return redirect()->route('user.assignments')->with('success', 'Задание успешно удалено.');
+        return redirect()->back()->with('success', 'Задание успешно удалено.');
     }
 }

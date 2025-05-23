@@ -54,7 +54,7 @@
                 <h3>Мои классы</h3>
                 @auth
                     @if (auth()->user()->role === 'teacher' || auth()->user()->role === 'admin')
-                        <a href="{{ route('classes.create') }}">
+                        <a href="{{ route('classes.create', ['return_url' => url()->current()]) }}">
                             <i class="fas fa-plus"></i>
                         </a>
                     @endif

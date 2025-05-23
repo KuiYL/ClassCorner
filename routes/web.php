@@ -4,7 +4,9 @@ use App\Http\Controllers\AssignmentsController;
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\ClassesController;
 use App\Http\Controllers\PagesController;
+use App\Http\Controllers\StudentAssignmentsController;
 use App\Http\Controllers\UserController;
+use App\Models\StudentAssignments;
 use Illuminate\Support\Facades\Route;
 
 // Публичные маршруты
@@ -55,6 +57,10 @@ Route::middleware('auth')->group(function () {
     Route::put('/assignments/update/{id}/{classId?}', [AssignmentsController::class, 'update'])->name('assignments.update');
     Route::delete('/assignments/{id}', [AssignmentsController::class, 'destroy'])->name('assignments.destroy');
     Route::get('/assignment/{id}', [PagesController::class, 'showAssignmentPage'])->name('assignments.show');
+    Route::post('/assignment/{id}/submit', [StudentAssignmentsController::class, 'submitAnswer'])->name('assignment.submit.answer');
+    Route::get('/assignments/to-grade', [PagesController::class, 'showAssignmentsToGrade'])->name('assignments.to.grade');
+    Route::get('/assignment/{id}/grade', [PagesController::class, 'gradeForm'])->name('assignment.grade.form');
+    Route::post('/assignment/{id}/grade', [StudentAssignmentsController::class, 'saveGrade'])->name('assignment.grade.save');
 
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
     Route::put('/user/edit-profile', [UserController::class, 'updateInfo'])->name('user.edit-profile');

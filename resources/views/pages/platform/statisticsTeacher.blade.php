@@ -32,7 +32,7 @@
         </main>
     </div>
 
-    <a href="{{ route('assignments.create') }}" class="floating-btn">
+    <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}" class="floating-btn">
         <button>
             <i class="fas fa-plus"></i>
         </button>
@@ -41,7 +41,6 @@
 
     <script>
         document.addEventListener("DOMContentLoaded", () => {
-            // Линейный график
             const lineCtx = document.getElementById('lineChart').getContext('2d');
             new Chart(lineCtx, {
                 type: 'line',

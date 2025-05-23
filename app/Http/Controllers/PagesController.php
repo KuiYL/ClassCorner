@@ -295,10 +295,8 @@ class PagesController extends Controller
                 return view('pages.platform.dashboardAdmin', compact('user'));
 
             case 'student':
-                // Получаем классы, в которых состоит студент
                 $classes = $this->getUserClasses($user);
 
-                // Получаем все задания из этих классов
                 $assignments = [];
 
                 foreach ($classes as $class) {
@@ -462,40 +460,99 @@ class PagesController extends Controller
 
         $role = $user->role;
 
-        $assignments = $role === 'teacher'
-            ? $class->assignments()->where('teacher_id', $user->id)->get()
-            : [];
+        if ($role == 'teacher') {
+            $assignments = $role === 'teacher'
+                ? $class->assignments()->where('teacher_id', $user->id)->get()
+                : [];
 
-        $students = $role === 'teacher' || $role === 'admin'
-            ? $class->students
-            : [];
+            $students = $role === 'teacher' || $role === 'admin'
+                ? $class->students
+                : [];
 
-        $availableStudents = User::query()
-            ->where('role', 'student')
-            ->whereDoesntHave('classes', function ($query) use ($classId) {
-                $query->where('class_id', $classId);
-            })
-            ->get();
+            $availableStudents = User::query()
+                ->where('role', 'student')
+                ->whereDoesntHave('classes', function ($query) use ($classId) {
+                    $query->where('class_id', $classId);
+                })
+                ->get();
 
-        $classes = $this->getUserClasses($user);
+            $classes = $this->getUserClasses($user);
 
-        return view('pages.classes.class', compact(
-            'class',
-            'assignments',
-            'students',
-            'role',
-            'user',
-            'classes',
-            'availableStudents'
-        ));
+            return view('pages.classes.class', compact(
+                'class',
+                'assignments',
+                'students',
+                'role',
+                'user',
+                'classes',
+                'availableStudents'
+            ));
+        } else {
+            $assignments = [];
+            $classes = $this->getUserClasses($user);
+
+            foreach ($class->assignments as $assignment) {
+                $submission = StudentAssignments::where('user_id', $user->id)
+                    ->where('assignment_id', $assignment->id)
+                    ->first();
+
+                $assignments[] = [
+                    'assignment' => $assignment,
+                    'submission' => $submission,
+                ];
+            }
+
+            $completedAssignments = count(array_filter($assignments, fn($a) => in_array($a['submission']?->status, ['submitted', 'graded'])));
+
+            return view('pages.classes.classStudent', compact('class', 'assignments', 'completedAssignments', 'classes', 'user'));
+        }
     }
 
     public function showAssignmentPage($id)
     {
         $user = $this->getAuthenticatedUser();
+        $role = $user->role;
         $classes = $this->getUserClasses($user);
-        $assignment = Assignments::with('class')->findOrFail($id);
-        $assignmentFields = json_decode($assignment->options, true);
-        return view('pages.assignments.assignment', compact('user', 'classes', 'assignment', 'assignmentFields'));
+
+        if ($role == 'teacher') {
+            $assignment = Assignments::with('class')->findOrFail($id);
+            $assignmentFields = json_decode($assignment->options, true);
+            return view('pages.assignments.assignment', compact('user', 'classes', 'assignment', 'assignmentFields'));
+        } else if ($role == 'student') {
+            $assignment = Assignments::with('class')->findOrFail($id);
+            $assignmentFields = json_decode($assignment->options, true);
+            return view('pages.assignments.assignmentStudent', compact('user', 'classes', 'assignment', 'assignmentFields'));
+        }
+    }
+
+    public function showAssignmentsToGrade()
+    {
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                $assignmentsToGrade = $this->getUserAssignmentsToGrade($user);
+
+                return view('pages.assignments.assignmensToGrade', compact('user', 'classes', 'assignmentsToGrade'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            default:
+                abort(403, 'Нет доступа');
+        }
+    }
+
+    public function gradeForm($id)
+    {
+        $user = $this->getAuthenticatedUser();
+        $role = $user->role;
+        $classes = $this->getUserClasses($user);
+        if ($role == 'teacher') {
+            $assignment = Assignments::with('class')->findOrFail($id);
+            $assignmentFields = json_decode($assignment->options, true);
+            return view('pages.assignments.gradeForm', compact('user', 'classes', 'assignment', 'assignmentFields'));
+        } else if ($role == 'student') {
+            return redirect()->back();
+        }
     }
 }

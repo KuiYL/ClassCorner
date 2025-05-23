@@ -133,7 +133,8 @@
                                             </span>
                                         </div>
                                         <div class="card-actions">
-                                            <a href="" class="btn view-btn">Посмотреть</a>
+                                            <a href="{{ route('assignments.show', $item['assignment']->id) }}"
+                                                class="btn view-btn">Посмотреть</a>
                                         </div>
                                     </div>
                                 </div>

@@ -9,11 +9,21 @@ class ClassesController extends Controller
 {
     public function store(Request $request)
     {
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'teacher_id' => 'required|exists:users,id',
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'teacher_id' => 'required|exists:users,id',
+            ],
+            [
+                'name.required' => 'Поле "Название" обязательно для заполнения.',
+                'name.string' => 'Поле "Название" должно быть строкой.',
+                'name.max' => 'Поле "Название" не может быть длиннее 255 символов.',
+                'description.string' => 'Поле "Описание" должно быть строкой.',
+                'teacher_id.required' => 'Поле "Преподаватель" обязательно для заполнения.',
+                'teacher_id.exists' => 'Выбранное значение для "Преподаватель" некорректно.',
+            ]
+        );
 
         $class = new Classes();
         $class->name = $validated['name'];
@@ -21,20 +31,31 @@ class ClassesController extends Controller
         $class->teacher_id = $validated['teacher_id'];
         $class->save();
         $class->students()->attach($validated['teacher_id'], ['status' => 'approved']);
-        return redirect()->route('user.classes')->with('success', 'Класс успешно создан');
+
+        $returnUrl = $request->input('return_url', route('user.classes'));
+        return redirect($returnUrl)->with('success', 'Класс успешно создан');
     }
 
     public function update(Request $request, $id)
     {
         $class = Classes::findOrFail($id);
-        $validated = $request->validate([
-            'name' => 'required|string|max:255',
-            'description' => 'nullable|string',
-        ]);
+        $validated = $request->validate(
+            [
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+            ],
+            [
+                'name.required' => 'Поле "Название" обязательно для заполнения.',
+                'name.string' => 'Поле "Название" должно быть строкой.',
+                'name.max' => 'Поле "Название" не может быть длиннее 255 символов.',
+                'description.string' => 'Поле "Описание" должно быть строкой.',
+            ]
+        );
 
         $class->update($validated);
 
-        return redirect()->route('user.classes')->with('success', 'Класс успешно обновлен.');
+        $returnUrl = $request->input('return_url', route('user.classes'));
+        return redirect($returnUrl)->with('success', 'Класс успешно обновлен.');
     }
 
     public function destroy($id)
@@ -42,6 +63,6 @@ class ClassesController extends Controller
         $class = Classes::findOrFail($id);
         $class->delete();
 
-        return redirect()->route('user.classes')->with('success', 'Класс успешно удален.');
+        return redirect()->back()->with('success', 'Класс успешно удален.');
     }
 }

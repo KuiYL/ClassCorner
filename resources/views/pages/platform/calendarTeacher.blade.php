@@ -17,15 +17,16 @@
         @include('layout.topbar')
         <main>
             <div class="main-platform">
-                <div class="filters-calendar">
-                    <select id="filter-calendar-class">
-                        <option value="">Все классы</option>
-                        @foreach ($classes as $class)
-                            <option value="{{ $class->id }}">{{ $class->name }}</option>
-                        @endforeach
-                    </select>
-                </div>
+
                 <div id="calendar">
+                    <div class="filters-calendar">
+                        <select id="filter-calendar-class">
+                            <option value="">Все классы</option>
+                            @foreach ($classes as $class)
+                                <option value="{{ $class->id }}">{{ $class->name }}</option>
+                            @endforeach
+                        </select>
+                    </div>
                     <div class="calendar-header">
                         <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
                         <h2 id="current-month"></h2>
@@ -39,7 +40,7 @@
         </main>
     </div>
 
-    <a href="{{ route('assignments.create') }}" class="floating-btn">
+    <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}" class="floating-btn">
         <button>
             <i class="fas fa-plus"></i>
         </button>
@@ -158,8 +159,10 @@
                 addBtn.textContent = "Добавить задание";
                 addBtn.className = "add-btn";
                 addBtn.onclick = () => {
-                    window.location.href = `/assignments/create?date=${dateKey}`;
+                    const currentUrl = encodeURIComponent(window.location.href);
+                    window.location.href = `/assignments/create?date=${dateKey}&return_url=${currentUrl}`;
                 };
+
                 actions.appendChild(addBtn);
 
                 if (dayAssignments.length > 0) {
@@ -193,7 +196,6 @@
                 closeButton.onclick = () => modal.remove();
                 modalContent.appendChild(closeButton);
 
-                // === Добавляем заголовок с количеством заданий ===
                 const title = document.createElement("h3");
                 title.textContent = `Задания (${assigs.length})`;
                 title.style.marginBottom = "15px";
@@ -205,9 +207,8 @@
                     const item = document.createElement("div");
                     item.className = "assignment-item";
 
-                    // Заголовок задания с ссылкой
                     const link = document.createElement("a");
-                    link.href = `/assignments/${assignment.id}`;
+                    link.href = `/assignment/${assignment.id}`;
                     link.textContent = assignment.title;
                     link.style.display = "block";
                     link.style.fontWeight = "600";
@@ -215,7 +216,6 @@
                     link.style.textDecoration = "none";
                     link.style.color = "#333";
 
-                    // Класс
                     const classLink = document.createElement("a");
                     classLink.href = `/class/${assignment.class_id}`;
                     classLink.textContent =

@@ -1524,10 +1524,13 @@ button.confirm-button:hover {
 }
 
 .no-assignments-message {
-    text-align: center;
-    color: #888;
-    font-size: 1.2rem;
-    margin-top: 2rem;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #fefefe;
+    border: 1px solid #eee;
+    border-left: 4px solid #e74c3c;
+    color: #333;
+    border-radius: 8px;
 }
 
 .no-assignments-message.hidden {
@@ -2460,7 +2463,7 @@ main.profile-container {
     border: none;
     border-radius: 6px;
     cursor: pointer;
-    font-weight: bold;
+    font-weight: 500;
     transition: background-color 0.3s ease;
 }
 
@@ -2468,7 +2471,6 @@ main.profile-container {
     background-color: #616EBD;
 }
 
-/* === Модальное окно (overlay) === */
 .modal-invite {
     position: fixed;
     top: 0;
@@ -2490,7 +2492,6 @@ main.profile-container {
     pointer-events: auto;
 }
 
-/* === Содержимое модального окна с анимацией появления === */
 .modal-invite-content {
     background-color: #fff;
     padding: 2rem;
@@ -2513,7 +2514,6 @@ main.profile-container {
     opacity: 1;
 }
 
-/* === Заголовок === */
 .modal-invite-content h3 {
     margin: 0 0 1rem 0;
     font-size: 1.5rem;
@@ -2521,7 +2521,6 @@ main.profile-container {
     font-weight: bold;
 }
 
-/* === Кнопка закрытия (крестик) === */
 .modal-invite-content .close-btn {
     position: absolute;
     top: 16px;
@@ -2537,7 +2536,6 @@ main.profile-container {
     color: #555;
 }
 
-/* === Поле поиска студентов === */
 #search-student {
     width: 100%;
     padding: 0.7rem 1rem;
@@ -2553,7 +2551,6 @@ main.profile-container {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-/* === Результаты поиска студентов === */
 .search-results {
     list-style: none;
     padding: 0;
@@ -2576,7 +2573,6 @@ main.profile-container {
     color: #333;
 }
 
-/* === Форма отправки email === */
 #invite-student-form {
     display: flex;
     flex-direction: column;
@@ -2600,7 +2596,6 @@ main.profile-container {
     box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
 }
 
-/* === Кнопки === */
 .modal-invite .btn {
     padding: 0.7rem 1.5rem;
     font-size: 1rem;
@@ -2626,6 +2621,17 @@ main.profile-container {
 
 .modal-invite .btn:active {
     transform: translateY(0);
+}
+
+.modal-invite .actions {
+    margin-top: 10px;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.modal-invite .actions form {
+    margin: 0;
 }
 
 .alert-success {
@@ -2714,20 +2720,12 @@ main.profile-container {
     display: block;
 }
 
-.assignment-status {
-    padding: 4px 10px;
-    border-radius: 5px;
-    font-size: 0.8rem;
-    font-weight: bold;
-    color: white;
-}
-
 .assignment-status.not-submitted {
     margin-left: 0.75rem;
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 500;
     color: #b91c1c;
     background-color: #fee2e2;
 }
@@ -2738,7 +2736,7 @@ main.profile-container {
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 500;
 }
 
 .assignment-status.completed {
@@ -2747,13 +2745,12 @@ main.profile-container {
     padding: 0.25rem 0.5rem;
     border-radius: 9999px;
     font-size: 0.875rem;
-    font-weight: 700;
+    font-weight: 500;
     box-shadow: 0 0 6px rgba(22, 163, 74, 0.3);
     background-color: #dcfce7;
 
 }
 
-/* === Фильтры === */
 .assignments-filters {
     margin: 1rem 0;
 }
@@ -2777,7 +2774,6 @@ main.profile-container {
     min-width: 180px;
 }
 
-/* === Задания с прокруткой === */
 .assignments-scrollable {
     max-height: 400px;
     overflow-y: auto;
@@ -2787,7 +2783,6 @@ main.profile-container {
     background-color: #fcfcfc;
 }
 
-/* === Карточка задания === */
 .assignment-card {
     display: flex;
     justify-content: space-between;
@@ -2820,38 +2815,12 @@ main.profile-container {
     margin: 4px 0;
 }
 
-.assignment-status {
-    font-weight: bold;
-    text-align: right;
-    font-size: 0.9rem;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    border-radius: 5px;
-    display: inline-block;
-    width: max-content;
-}
-
-.assignment-card.status-not-submitted .assignment-status {
-    background-color: #e74c3c;
-    color: white;
-}
-
-.assignment-card.status-submitted .assignment-status {
-    background-color: #f39c12;
-    color: white;
-}
-
-.assignment-card.status-graded .assignment-status {
-    background-color: #27ae60;
-    color: white;
-}
-
 .assignment-actions a {
     display: block;
     text-align: center;
     margin-top: 8px;
 }
-/* === Фильтры === */
+
 .assignments-filters {
     margin-bottom: 1rem;
 }
@@ -2880,7 +2849,6 @@ main.profile-container {
     outline: none;
 }
 
-/* === Карточки заданий === */
 .assignments {
     margin-top: 1rem;
 }
@@ -2918,7 +2886,6 @@ main.profile-container {
 
 .assignment-status {
     font-size: 0.85rem;
-    text-transform: uppercase;
     font-weight: bold;
     padding: 0.3rem 0.6rem;
     border-radius: 4px;
@@ -2926,7 +2893,6 @@ main.profile-container {
     width: max-content;
 }
 
-/* === Стили по статусу === */
 .assignment-card.status-not_submitted .assignment-status {
     background-color: #555EB1;
 }
@@ -2939,11 +2905,294 @@ main.profile-container {
     background-color: #27ae60;
 }
 
-/* === Прокрутка при большом количестве заданий === */
 .assignments-scrollable {
     max-height: 400px;
     overflow-y: auto;
     border: 1px solid #eee;
     border-radius: 8px;
     padding: 0.5rem;
+}
+
+.assignment-form {
+    max-width: 1000px;
+    width: 100%;
+    margin: 2rem auto;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
+    padding: 2rem;
+}
+
+.assignment-form form {
+    max-width: none;
+    margin-bottom: 0;
+}
+
+.assignment-form h2 {
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    color: #333;
+}
+
+.assignment-form h3 {
+    font-size: 1.4rem;
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+    color: #555EB1;
+}
+
+.assignment-form .form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+    min-width: 400px;
+    flex: 1;
+}
+
+.assignment-form .form-group.full {
+    grid-column: span 2;
+}
+
+.assignment-form .form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.assignment-form .form-group input,
+.assignment-form .form-group textarea,
+.assignment-form .form-group select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    transition: border-color 0.3s ease;
+    margin-top: 0.5rem;
+}
+
+.assignment-form .form-group input:focus,
+.assignment-form .form-group textarea:focus,
+.assignment-form .form-group select:focus {
+    border-color: #555EB1;
+    outline: none;
+}
+
+.assignment-form .form-divider {
+    margin: 2rem 0;
+    border: none;
+    height: 1px;
+    background: #eee;
+}
+
+.assignment-form .fields-container {
+    margin-top: 1rem;
+}
+
+.assignment-form .field {
+    background-color: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    position: relative;
+    transition: transform 0.2s ease;
+}
+
+.assignment-form .field:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+}
+
+.assignment-form .field h4 {
+    margin: 0 0 1rem 0;
+    font-size: 1rem;
+    color: #333;
+}
+
+.assignment-form .field .form-group:first-child {
+    margin-bottom: 1rem;
+}
+
+.assignment-form .field .form-group:nth-child(2) {
+    margin-bottom: 1rem;
+}
+
+.assignment-form .options-container {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.options-container.hidden {
+    display: none;
+}
+
+.assignment-form .option {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.assignment-form .option input[type="text"] {
+    flex: 1;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 1rem;
+}
+
+.assignment-form .option button.remove-option-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.assignment-form .option button.remove-option-btn:hover {
+    background-color: #c0392b;
+}
+
+.assignment-form .add-field-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: auto;
+    min-width: 200px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 8px;
+    background-color: #3d8b48;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    margin: 1rem auto;
+}
+
+.assignment-form .add-field-btn:hover {
+    background-color: #246d2d;
+}
+
+.assignment-form .remove-field-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 0.4rem 0.6rem;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.assignment-form .remove-field-btn:hover {
+    background-color: #c0392b;
+}
+
+.assignment-form .add-option-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background-color: #6E76C1;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    font-size: 0.95rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.assignment-form .add-option-btn:hover {
+    background-color: #555EB1;
+}
+
+
+.assignment-form .btn.primary.large.full-width {
+    margin-top: 15px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    padding: 0.75rem;
+    font-size: 1.1rem;
+    border-radius: 8px;
+    background-color: #6E76C1;
+    color: white;
+    border: none;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+}
+
+.assignment-form .btn.primary.large.full-width:hover {
+    background-color: #555EB1;
+}
+
+.assignment-form .option input[type="text"] {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    min-width: 200px;
+}
+
+.assignment-form .option input[type="radio"],
+.assignment-form .option input[type="checkbox"] {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    width: auto;
+}
+
+.assignment-form .remove-option-btn {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.4rem 0.6rem;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background-color 0.2s ease;
+}
+
+.assignment-form .remove-option-btn:hover {
+    background-color: #c0392b;
+}
+
+.validation-toast {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    background-color: #e74c3c;
+    color: white;
+    padding: 1rem 1.5rem;
+    border-radius: 8px;
+    font-size: 1rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    transform: translateY(20px);
+}
+
+.validation-toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.form-group input.error,
+.form-group textarea.error,
+.form-group select.error {
+    border-color: #e74c3c !important;
 }

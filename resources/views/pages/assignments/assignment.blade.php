@@ -73,8 +73,10 @@
                         </div>
 
                         <div class="card-footer">
-                            <a href="{{ route('assignments.edit', [$assignment->id, $assignment->class_id]) }}"
-                                class="btn btn-edit"><i class="fas fa-edit"></i> Изменить</a>
+                            <a href="{{ route('assignments.edit', ['id' => $assignment->id, 'class_id' => $assignment->class_id, 'return_url' => url()->current()]) }}"
+                                class="btn btn-edit">
+                                <i class="fas fa-edit"></i> Изменить
+                            </a>
                             <button class="btn btn-delete delete-button" type="button" data-id="{{ $assignment->id }}"
                                 data-name="{{ $assignment->title }}" data-type="assignment">
                                 <i class="fas fa-trash"></i> Удалить
