@@ -3,9 +3,12 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assignments;
+use App\Models\StudentAssignments;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
 
 class StudentAssignmentsController extends Controller
 {
@@ -91,5 +94,45 @@ class StudentAssignmentsController extends Controller
         }
     }
 
+    public function submitGrading(Request $request, $id)
+    {
+        try {
+            $messages = [
+                'grade.required' => 'Поле "Оценка" обязательно для заполнения.',
+                'grade.numeric' => 'Поле "Оценка" должно быть числом.',
+                'grade.min' => 'Оценка не может быть меньше 0.',
+                'grade.max' => 'Оценка не может быть больше 100.',
+                'feedback.string' => 'Поле "Комментарий" должно быть текстовым.',
+                'feedback.max' => 'Поле "Комментарий" не может превышать 1000 символов.',
+            ];
 
+            $validated = $request->validate([
+                'grade' => 'required|numeric|min:0|max:100',
+                'feedback' => 'nullable|string|max:1000',
+            ], $messages);
+
+            $user = auth()->user();
+
+            if ($user->role !== 'teacher') {
+                return back()->withErrors(['error' => 'У вас нет прав для оценки заданий']);
+            }
+
+            $studentAssignment = StudentAssignments::findOrFail($id);
+
+            $studentAssignment->update([
+                'grade' => $validated['grade'],
+                'feedback' => $validated['feedback'] ?? '',
+                'status' => 'graded',
+            ]);
+
+            return redirect()->route('assignments.to.grade')->with('success', 'Результаты успешно отправлены!');
+        } catch (ValidationException $e) {
+            return back()->withErrors($e->errors())->withInput();
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return back()->with('error', 'Задание не найдено.');
+        } catch (\Exception $e) {
+            Log::error('Ошибка при сохранении оценки: ' . $e->getMessage());
+            return back()->with('error', 'Произошла ошибка: ' . $e->getMessage());
+        }
+    }
 }

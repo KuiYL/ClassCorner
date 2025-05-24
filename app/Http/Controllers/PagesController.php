@@ -50,7 +50,7 @@ class PagesController extends Controller
     {
         return StudentAssignments::whereHas('assignment', function ($query) use ($user) {
             $query->where('teacher_id', $user->id);
-        })->where('status', 'submitted')->get();
+        })->whereIn('status', ['submitted', 'graded'])->get(); // ← Здесь изменение: whereIn
     }
 
     public function  showHomePage()
@@ -125,7 +125,7 @@ class PagesController extends Controller
             case 'teacher':
                 return $this->showDashboardTeacher($user);
             case 'admin':
-                return view('pages.platform.dashboardAdmin', compact('user'));
+                return $this->adminHome();
             case 'student':
                 return $this->showDashboardUser($user);
             default:
@@ -140,7 +140,9 @@ class PagesController extends Controller
 
         $classes = $this->getUserClasses($user);
         $assignmentsToGrade = $this->getUserAssignmentsToGrade($user);
+
         $teacherStudentsCount = $this->getTeacherStudentsCount($user);
+
         return view('pages.platform.dashboardTeacher', [
             'user' => $user,
             'classes' => $classes,
@@ -148,7 +150,7 @@ class PagesController extends Controller
             'activeClassesCount' => $classes->count(),
             'studentsCount' => $teacherStudentsCount,
             'assignmentsCount' => $assignmentsToGrade->count(),
-            'newAssignmentsCount' => $assignmentsToGrade->count(),
+            'newAssignmentsCount' => $assignmentsToGrade->where('status', 'submitted')->count(),
         ]);
     }
 
@@ -416,7 +418,11 @@ class PagesController extends Controller
     public function createAssignments($classId = null)
     {
         $user = $this->getAuthenticatedUser();
-        $classes = $this->getUserClasses($user);
+        if ($user->role === 'admin') {
+            $classes = Classes::all();
+        } else {
+            $classes = $this->getUserClasses($user);
+        }
 
         $selectedClass = $classId ? $classes->find($classId) : null;
         if ($classId && !$selectedClass) {
@@ -461,13 +467,48 @@ class PagesController extends Controller
         $role = $user->role;
 
         if ($role == 'teacher') {
-            $assignments = $role === 'teacher'
-                ? $class->assignments()->where('teacher_id', $user->id)->get()
-                : [];
+            $assignments = $class->assignments()->where('teacher_id', $user->id)->get();
 
-            $students = $role === 'teacher' || $role === 'admin'
-                ? $class->students
-                : [];
+            // Получаем всех студентов этого класса
+            $students = $class->students;
+
+            // Для каждого студента считаем прогресс
+            $studentProgress = $students->map(function ($student) use ($assignments) {
+                $totalAssignments = $assignments->count();
+                if ($totalAssignments === 0) {
+                    return [
+                        'student' => $student,
+                        'completed' => 0,
+                        'percent' => 0,
+                        'average_grade' => 0,
+                        'submissions' => [],
+                    ];
+                }
+
+                // Подсчёт завершённых заданий
+                $completedSubmissions = StudentAssignments::where('user_id', $student->id)
+                    ->whereIn('assignment_id', $assignments->pluck('id'))
+                    ->where('status', 'graded')
+                    ->get();
+
+                $completedCount = $completedSubmissions->count();
+                $percent = round(($completedCount / $totalAssignments) * 100);
+
+                // Средний балл
+                $grades = $completedSubmissions->pluck('grade')->filter(fn($g) => !is_null($g));
+                $averageGrade = $grades->isNotEmpty()
+                    ? round($grades->avg())
+                    : null;
+
+                return [
+                    'student' => $student,
+                    'completed' => $completedCount,
+                    'total' => $totalAssignments,
+                    'percent' => $percent,
+                    'average_grade' => $averageGrade,
+                    'submissions' => $completedSubmissions,
+                ];
+            });
 
             $availableStudents = User::query()
                 ->where('role', 'student')
@@ -485,7 +526,8 @@ class PagesController extends Controller
                 'role',
                 'user',
                 'classes',
-                'availableStudents'
+                'availableStudents',
+                'studentProgress'
             ));
         } else {
             $assignments = [];
@@ -547,12 +589,184 @@ class PagesController extends Controller
         $user = $this->getAuthenticatedUser();
         $role = $user->role;
         $classes = $this->getUserClasses($user);
-        if ($role == 'teacher') {
+
+        if ($role === 'teacher') {
             $assignment = Assignments::with('class')->findOrFail($id);
-            $assignmentFields = json_decode($assignment->options, true);
-            return view('pages.assignments.gradeForm', compact('user', 'classes', 'assignment', 'assignmentFields'));
-        } else if ($role == 'student') {
+            $studentAssignment = StudentAssignments::where('assignment_id', $id)
+                ->where('status', 'submitted')
+                ->firstOrFail();
+
+            $answers = json_decode($studentAssignment->student_answer, true) ?? [];
+            $assignmentFields = json_decode($assignment->options, true) ?? [];
+
+            $totalCorrect = 0;
+            $totalPossible = 0;
+            $detailedStats = [];
+
+            foreach ($answers as $index => $answer) {
+                if (in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
+                    $field = $assignmentFields[$index] ?? null;
+
+                    if ($field && isset($field['options']) && is_array($field['options'])) {
+                        $correctOptions = array_filter($field['options'], fn($opt) => $opt['isCorrect'] ?? false);
+                        $correctCountInField = count($correctOptions);
+
+                        $selectedCorrect = array_intersect_key(
+                            array_flip($answer['selected_options']),
+                            $correctOptions
+                        );
+                        $studentCorrectInField = count($selectedCorrect);
+
+                        $detailedStats[] = [
+                            'question' => $field['name'],
+                            'type' => $answer['type'],
+                            'correct_needed' => $correctCountInField,
+                            'correct_given' => $studentCorrectInField,
+                            'percent' => $correctCountInField > 0 ? round(($studentCorrectInField / $correctCountInField) * 100) : 100,
+                        ];
+
+                        $totalCorrect += $studentCorrectInField;
+                        $totalPossible += $correctCountInField;
+                    }
+                }
+            }
+
+            $percentCorrect = $totalPossible > 0 ? round(($totalCorrect / $totalPossible) * 100) : 100;
+            $autoGrade = $percentCorrect;
+
+            if ($percentCorrect >= 90) {
+                $autoFeedback = "Отличная работа! Все вопросы выполнены на высоком уровне.";
+            } elseif ($percentCorrect >= 70) {
+                $autoFeedback = "Хорошо выполнено. Есть небольшие ошибки.";
+            } elseif ($percentCorrect >= 50) {
+                $autoFeedback = "Работа выполнена удовлетворительно. Рекомендуется повторить материал.";
+            } else {
+                $autoFeedback = "Много ошибок. Рекомендую пересмотреть тему и попробовать снова.";
+            }
+
+            return view('pages.assignments.gradeForm', compact(
+                'user',
+                'assignment',
+                'assignmentFields',
+                'studentAssignment',
+                'answers',
+                'classes',
+                'percentCorrect',
+                'autoGrade',
+                'autoFeedback',
+                'detailedStats'
+            ));
+        }
+
+        return redirect()->back();
+    }
+
+    public function showAssignmentResult($id)
+    {
+        $user = auth()->user();
+        $classes = $this->getUserClasses($user);
+
+        $studentAssignment = StudentAssignments::with(['assignment.class', 'user'])->findOrFail($id);
+
+        if ($user->role !== 'teacher' && $user->id !== $studentAssignment->user_id) {
+            abort(403, 'У вас нет доступа к этому заданию');
+        }
+
+        $answers = json_decode($studentAssignment->student_answer, true) ?? [];
+        $assignmentFields = json_decode($studentAssignment->assignment->options, true) ?? [];
+
+        $correctCount = 0;
+        $totalCount = 0;
+
+        foreach ($answers as $index => $answer) {
+            if (in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
+                $field = $assignmentFields[$index] ?? null;
+                if ($field && isset($field['options']) && is_array($field['options'])) {
+                    foreach ($answer['selected_options'] as $optionIndex) {
+                        $totalCount++;
+                        if (
+                            isset($field['options'][$optionIndex]['isCorrect']) &&
+                            $field['options'][$optionIndex]['isCorrect']
+                        ) {
+                            $correctCount++;
+                        }
+                    }
+                }
+            }
+        }
+
+        $percentCorrect = $totalCount > 0 ? round(($correctCount / $totalCount) * 100) : 100;
+
+        return view('pages.assignments.showAssignmentResult', compact(
+            'studentAssignment',
+            'answers',
+            'assignmentFields',
+            'percentCorrect',
+            'classes',
+            'user'
+        ));
+    }
+
+    public function adminHome()
+    {
+        $user = $this->getAuthenticatedUser();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $role = $user->role;
+        if ($role !== 'admin') {
             return redirect()->back();
         }
+        $users = User::all();
+        $classes = Classes::withCount('students')->get();
+        $assignments = Assignments::with('class')->latest()->take(5)->get();
+
+        return view('pages.admin.dashboard', compact('users', 'classes', 'assignments', 'user'));
+    }
+
+    public function adminUsers()
+    {
+        $user = $this->getAuthenticatedUser();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $role = $user->role;
+        if ($role !== 'admin') {
+            return redirect()->back();
+        }
+        $users = User::paginate(10);
+        $classes = Classes::all();
+
+        return view('pages.admin.users', compact('users', 'user', 'role', 'classes'));
+    }
+
+    public function adminAssignments()
+    {
+        $user = $this->getAuthenticatedUser();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $role = $user->role;
+        if ($role !== 'admin') {
+            return redirect()->back();
+        }
+        $assignments = Assignments::with('class')->paginate(10);
+        $classes = Classes::all();
+
+        return view('pages.admin.assignments', compact('assignments', 'user', 'role', 'classes'));
+    }
+
+    public function adminClasses()
+    {
+        $user = $this->getAuthenticatedUser();
+        if (!$user) {
+            return redirect()->route('login');
+        }
+        $role = $user->role;
+        if ($role !== 'admin') {
+            return redirect()->back();
+        }
+        $classes = Classes::withCount('students')->paginate(10);
+        return view('pages.admin.classes', compact('classes', 'user', 'role'));
     }
 }

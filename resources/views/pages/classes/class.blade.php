@@ -134,33 +134,41 @@
 
                 <div class="table">
                     <div class="head">
-                        <h3>Студенты класса</h3>
-                        <button class="btn invite-student-btn">Пригласить ученика</button>
+                        <h3>Студенты</h3>
                     </div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Имя</th>
-                                <th>Количество-баллов</th>
-                                <th>Действия</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @forelse ($students->filter(fn($student) => $student->id !== $class->teacher->id) as $student)
+
+                    @if ($studentProgress->isNotEmpty())
+                        <table class="progress-table">
+                            <thead>
                                 <tr>
-                                    <td>{{ $student->name }}</td>
-                                    <td>{{ $student->progress }}%</td>
-                                    <td>
-                                        <a href="#">Подробнее</a>
-                                    </td>
+                                    <th>Имя</th>
+                                    <th>Выполнено</th>
+                                    <th>Средний балл</th>
+                                    <th>Прогресс</th>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="3" class="empty-message">Нет студентов.</td>
-                                </tr>
-                            @endforelse
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach ($studentProgress as $sp)
+                                    @if ($sp['student']->role == 'student')
+                                        <tr>
+                                            <td>{{ $sp['student']->name }} {{ $sp['student']->surname }}</td>
+                                            <td>{{ $sp['completed'] }} из {{ $sp['total'] }}</td>
+                                            <td>{{ $sp['average_grade'] ?? '-' }}</td>
+                                            <td>
+                                                <div class="progress-bar-container">
+                                                    <div class="progress-bar">
+                                                        {{ $sp['percent'] }}%
+                                                    </div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    @endif
+                                @endforeach
+                            </tbody>
+                        </table>
+                    @else
+                        <p>Нет студентов в этом классе.</p>
+                    @endif
                 </div>
 
                 <div id="invite-student-modal" class="modal-invite hidden">

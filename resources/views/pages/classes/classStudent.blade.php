@@ -119,7 +119,7 @@
                                             <span>
                                                 <i class="fas fa-clock"></i>
                                                 Дедлайн:
-                                                {{ \Carbon\Carbon::parse($item['assignment']->due_date)->format('d.m.Y H:i') }}
+                                                {{ \Carbon\Carbon::parse($item['assignment']->due_date)->format('d.m.Y') }}
                                             </span>
                                             @php
                                                 $typeTranslations = [
@@ -148,10 +148,19 @@
                                             </span>
                                         </div>
                                         <div class="card-actions">
-                                            <a href="{{ route('assignments.show', $item['assignment']->id) }}"
-                                                class="btn view-btn">
-                                                Перейти
-                                            </a>
+                                            @if ($status !== 'submitted')
+                                                @if ($status === 'graded' && !is_null($item['submission']->grade))
+                                                    <a href="{{ route('assignment.result', ['id' => $item['submission']->id]) }}"
+                                                        class="btn view-btn" style="display: flex; gap: 5px;">
+                                                        <i class="fas fa-eye"></i> Результаты
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('assignments.show', $item['assignment']->id) }}"
+                                                        class="btn view-btn" style="display: flex; gap: 5px;">
+                                                        <i class="fas fa-folder-open"></i> Перейти
+                                                    </a>
+                                                @endif
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

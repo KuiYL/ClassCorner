@@ -21,33 +21,42 @@
                     <div class="card">
                         <div class="card-header">
                             <h2>{{ $assignment->title }}</h2>
-                        </div>
-
-                        <div class="card-body">
-                            <p><strong>Класс:</strong> {{ optional($assignment->class)->name ?? 'Не указан' }}</p>
-                            <p><strong>Описание:</strong></p>
-                            <div class="description">
-                                {{ $assignment->description }}
-                            </div>
-
-                            <hr>
-
                             <div class="due-date-container">
-                                <i class="fas fa-calendar-alt"></i>
                                 <span class="due-date-label">Срок выполнения:</span>
                                 <strong class="due-date-value">
                                     {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y') }}
                                 </strong>
                             </div>
-
+                        </div>
+                        <div class="card-body">
+                            <div class="info">
+                                <div class="description">
+                                    {{ $assignment->description }}
+                                </div>
+                            </div>
                             <hr>
 
-                            <h3>Поля задания:</h3>
                             @if (count($assignmentFields))
                                 <div class="fields">
+                                    <h3>Поля задания:</h3>
+
                                     @foreach ($assignmentFields as $field)
                                         <div class="field-item">
                                             <h4>{{ $field['name'] }}</h4>
+
+                                            @if ($field['type'] === 'text')
+                                                <div class="field-type-box text-field">
+                                                    <p><strong>Тип:</strong> Текст</p>
+                                                    <p><em>Студент должен ввести свой ответ.</em></p>
+                                                </div>
+                                            @endif
+
+                                            @if ($field['type'] === 'file_upload')
+                                                <div class="field-type-box file-field">
+                                                    <p><strong>Тип:</strong> Загрузка файла</p>
+                                                    <p><em>Студент должен загрузить файл.</em></p>
+                                                </div>
+                                            @endif
 
                                             @if (in_array($field['type'], ['multiple_choice', 'single_choice']) && !empty($field['options']))
                                                 <ul class="options-list">
@@ -59,6 +68,9 @@
                                                                     disabled
                                                                     {{ $option['isCorrect'] ? 'checked' : '' }}>
                                                                 {{ $option['value'] }}
+                                                                @if ($option['isCorrect'])
+                                                                    <small class="correct">✅ Правильный</small>
+                                                                @endif
                                                             </label>
                                                         </li>
                                                     @endforeach
@@ -68,7 +80,7 @@
                                     @endforeach
                                 </div>
                             @else
-                                <p>Нет полей в задании.</p>
+                                <p class="no-fields">Нет полей в задании.</p>
                             @endif
                         </div>
 

@@ -60,7 +60,8 @@ Route::middleware('auth')->group(function () {
     Route::post('/assignment/{id}/submit', [StudentAssignmentsController::class, 'submitAnswer'])->name('assignment.submit.answer');
     Route::get('/assignments/to-grade', [PagesController::class, 'showAssignmentsToGrade'])->name('assignments.to.grade');
     Route::get('/assignment/{id}/grade', [PagesController::class, 'gradeForm'])->name('assignment.grade.form');
-    Route::post('/assignment/{id}/grade', [StudentAssignmentsController::class, 'saveGrade'])->name('assignment.grade.save');
+    Route::put('/assignment/{id}/grade', [StudentAssignmentsController::class, 'submitGrading'])->name('assignment.grade.save');
+    Route::get('/result/{id}', [PagesController::class, 'showAssignmentResult'])->name('assignment.result');
 
     Route::post('/logout', [UserController::class, 'logout'])->name('logout');
     Route::put('/user/edit-profile', [UserController::class, 'updateInfo'])->name('user.edit-profile');
@@ -70,4 +71,11 @@ Route::middleware('auth')->group(function () {
     Route::post('/classes/{class}/invite', [UserController::class, 'invite'])->name('classes.invite');
     Route::post('/invitations/{invitation}/accept', [UserController::class, 'accept'])->name('invitations.accept');
     Route::post('/invitations/{invitation}/decline', [UserController::class, 'decline'])->name('invitations.decline');
+});
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/admin', [PagesController::class, 'adminHome'])->name('admin.dashboard');
+    Route::get('/admin/users', [PagesController::class, 'adminUsers'])->name('admin.users');
+    Route::get('/admin/classes', [PagesController::class, 'adminClasses'])->name('admin.classes');
+    Route::get('/admin/assignments', [PagesController::class, 'adminAssignments'])->name('admin.assignments');
 });

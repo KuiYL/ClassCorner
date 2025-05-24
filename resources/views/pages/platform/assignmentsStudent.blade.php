@@ -133,8 +133,19 @@
                                             </span>
                                         </div>
                                         <div class="card-actions">
-                                            <a href="{{ route('assignments.show', $item['assignment']->id) }}"
-                                                class="btn view-btn">Посмотреть</a>
+                                            @if ($status !== 'submitted')
+                                                @if ($status === 'graded' && !is_null($item['submission']->grade))
+                                                    <a href="{{ route('assignment.result', ['id' => $item['submission']->id]) }}"
+                                                        class="btn view-btn" style="display: flex; gap: 5px;">
+                                                        <i class="fas fa-eye"></i> Результаты
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('assignments.show', $item['assignment']->id) }}"
+                                                        class="btn view-btn" style="display: flex; gap: 5px;">
+                                                        <i class="fas fa-folder-open"></i> Перейти
+                                                    </a>
+                                                @endif
+                                            @endif
                                         </div>
                                     </div>
                                 </div>

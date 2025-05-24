@@ -1,12 +1,4 @@
 <div class="header-app">
-    <div class="search">
-        <div class="block-input">
-            <div class="icon">
-                <i class="fas fa-search"></i>
-            </div>
-            <input type="text" placeholder="Поиск по классам, заданиям...">
-        </div>
-    </div>
     <div class="account">
         <a href="{{ route('user.profile') }}" class="settings" title="Настройки">
             <i class="fas fa-cog"></i>

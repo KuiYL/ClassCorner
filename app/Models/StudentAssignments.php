@@ -9,7 +9,7 @@ class StudentAssignments extends Model
 {
     use HasFactory;
 
-    protected $table = 'student_assignments'; // важно, если модель не соответствует имени таблицы
+    protected $table = 'student_assignments';
 
     protected $fillable = [
         'user_id',

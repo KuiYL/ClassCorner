@@ -78,7 +78,8 @@
                                         </div>
                                     </div>
                                     <div class="card-details hidden">
-                                        <p class="assignment-description">{{ $assignment->description }}</p>
+                                        <p class="assignment-description">
+                                            {{ Str::limit($assignment->description, 100) }}</p>
                                         <div class="assignment-details">
                                             <span>Класс: {{ $assignment->class->name ?? 'Без класса' }}</span>
                                             <span>Дедлайн: {{ $assignment->due_date }}</span>

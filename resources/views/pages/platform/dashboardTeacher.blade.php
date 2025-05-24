@@ -9,6 +9,27 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
+<style>
+    .assignment-card.status-submitted {
+        border-left: 5px solid #dc3545;
+    }
+
+    .assignment-card.status-graded {
+        border-left: 5px solid #28a745;
+    }
+
+    .assignment-card .action-button.check {
+        background-color: #007bff;
+    }
+
+    .assignment-card .action-button.view {
+        background-color: #6c757d;
+    }
+
+    .assignment-card .action-button:hover {
+        opacity: 0.9;
+    }
+</style>
 
 <body>
     @include('layout.sidebar', ['activePage' => 'dashboard'])
@@ -112,51 +133,73 @@
                 <div class="assignments">
                     <div class="head">
                         <h3>Задания на проверку</h3>
-                        <a href="#">Смотреть все</a>
+                        <a href="{{ route('assignments.to.grade') }}">Смотреть все</a>
                     </div>
+
                     <div class="assignments-filters">
                         <div class="filters-container">
                             <label>Фильтр по статусу:
                                 <select id="filter-status">
                                     <option value="">Все</option>
-                                    <option value="Срочно">Срочно</option>
-                                    <option value="Проверено">Проверено</option>
+                                    <option value="submitted">На проверку</option>
+                                    <option value="graded">Проверено</option>
                                 </select>
                             </label>
                         </div>
                     </div>
-                    <div class="assignments-scrollable">
+
+                    <div class="assignments-scrollable" id="assignments-list">
                         @forelse ($assignmentsToGrade as $assignment)
                             @php
                                 $status = $assignment->status ?? 'graded';
                                 $statusLabels = [
-                                    'submitted' => 'Срочно',
+                                    'submitted' => 'На проверку',
                                     'graded' => 'Проверено',
                                 ];
                             @endphp
 
-                            <div class="assignment-card status-{{ $status }}">
+                            <div class="assignment-card status-{{ $status }}" data-status="{{ $status }}">
                                 <div class="assignment-header">
-                                    <h4>{{ $assignment->assignment->title }}</h4>
+                                    <h4>{{ Str::limit($assignment->assignment->title, 40) }}</h4>
                                     <div class="assignment-meta">
-                                        <p><strong>Класс:</strong> <span class="assignment-class">
-                                                {{ $assignment->assignment->class->name }}
-                                            </span></p>
-                                        <p><strong>Работ:</strong> {{ $assignment->students_count }}</p>
+                                        <p><strong>Класс:</strong>
+                                            {{ Str::limit(optional($assignment->assignment->class)->name, 40) ?? 'Не указан' }}
+                                        </p>
+                                        <p><strong>Обучающийся:</strong>
+                                            @if ($assignment->user)
+                                                {{ $assignment->user->name }} {{ $assignment->user->surname }}
+                                            @else
+                                                Имя не найдено
+                                            @endif
+                                        </p>
                                     </div>
-                                    <div class="assignment-status">
-                                        {{ $statusLabels[$status] }}
-                                    </div>
+                                    <div class="assignment-status">{{ $statusLabels[$status] }}</div>
                                 </div>
-                                <button class="action-button check" title="Проверить"> Проверить
-                                </button>
+
+                                @if ($status === 'submitted')
+                                    <a href="{{ route('assignment.grade.form', $assignment->assignment->id) }}"
+                                        class="action-button">
+                                        Проверить
+                                    </a>
+                                @else
+                                    @if ($status === 'graded')
+                                        <a href="{{ route('assignment.result', ['id' => $assignment->id]) }}"
+                                            class="action-button">
+                                            Посмотреть
+                                        </a>
+                                    @else
+                                        <a href="{{ route('assignment.grade.form', $assignment->assignment->id) }}"
+                                            class="action-button">
+                                            Посмотреть
+                                        </a>
+                                    @endif
+                                @endif
                             </div>
                         @empty
-                            <p class="empty-message">У вас нет заданий на проверку.</p>
+                            <p class="empty-message">Нет заданий на проверку.</p>
                         @endforelse
                     </div>
                 </div>
-
             </div>
         </main>
     </div>
@@ -169,5 +212,20 @@
     @include('layout.modal-delete')
 
 </body>
+<script>
+    document.getElementById('filter-status').addEventListener('change', function() {
+        const selectedStatus = this.value;
+        const assignments = document.querySelectorAll('#assignments-list .assignment-card');
+
+        assignments.forEach(card => {
+            const cardStatus = card.getAttribute('data-status');
+            if (!selectedStatus || cardStatus === selectedStatus) {
+                card.style.display = 'flex';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    });
+</script>
 
 </html>

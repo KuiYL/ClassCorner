@@ -12,31 +12,59 @@
                 </div>
                 Главная
             </a>
-            <a href="{{ route('user.classes') }}" class="{{ $activePage === 'classes' ? 'item-active' : 'item' }}">
-                <div class="{{ $activePage === 'classes' ? 'icon-active' : 'icon' }}">
-                    <i class="fas fa-chalkboard-teacher"></i>
-                </div>
-                Мои классы
-            </a>
-            <a href="{{ route('user.assignments') }}" class="{{ $activePage === 'tasks' ? 'item-active' : 'item' }}">
-                <div class="{{ $activePage === 'tasks' ? 'icon-active' : 'icon' }}">
-                    <i class="fas fa-tasks"></i>
-                </div>
-                Задания
-            </a>
-            <a href="{{ route('user.calendar') }}" class="{{ $activePage === 'calendar' ? 'item-active' : 'item' }}">
-                <div class="{{ $activePage === 'calendar' ? 'icon-active' : 'icon' }}">
-                    <i class="fas fa-calendar-alt"></i>
-                </div>
-                Календарь
-            </a>
-            {{-- <a href="{{ route('user.statistics') }}"
+            @if ($user->role !== 'admin')
+                <a href="{{ route('user.classes') }}" class="{{ $activePage === 'classes' ? 'item-active' : 'item' }}">
+                    <div class="{{ $activePage === 'classes' ? 'icon-active' : 'icon' }}">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    Мои классы
+                </a>
+                <a href="{{ route('user.assignments') }}"
+                    class="{{ $activePage === 'tasks' ? 'item-active' : 'item' }}">
+                    <div class="{{ $activePage === 'tasks' ? 'icon-active' : 'icon' }}">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    Задания
+                </a>
+                <a href="{{ route('user.calendar') }}"
+                    class="{{ $activePage === 'calendar' ? 'item-active' : 'item' }}">
+                    <div class="{{ $activePage === 'calendar' ? 'icon-active' : 'icon' }}">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    Календарь
+                </a>
+                {{-- <a href="{{ route('user.statistics') }}"
                 class="{{ $activePage === 'statistics' ? 'item-active' : 'item' }}">
                 <div class="{{ $activePage === 'statistics' ? 'icon-active' : 'icon' }}">
                     <i class="fas fa-chart-pie"></i>
                 </div>
                 Статистика
             </a> --}}
+            @else
+                <a href="{{ route('admin.users') }}" class="{{ $activePage === 'users' ? 'item-active' : 'item' }}">
+                    <div class="{{ $activePage === 'users' ? 'icon-active' : 'icon' }}">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    Пользователи
+                </a>
+
+                <a href="{{ route('admin.classes') }}"
+                    class="{{ $activePage === 'classes' ? 'item-active' : 'item' }}">
+                    <div class="{{ $activePage === 'classes' ? 'icon-active' : 'icon' }}">
+                        <i class="fas fa-chalkboard-teacher"></i>
+                    </div>
+                    Классы
+                </a>
+
+                <a href="{{ route('admin.assignments') }}"
+                    class="{{ $activePage === 'assignments' ? 'item-active' : 'item' }}">
+                    <div class="{{ $activePage === 'assignments' ? 'icon-active' : 'icon' }}">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    Задания
+                </a>
+            @endif
+
             <a href="#" onclick="event.preventDefault(); document.getElementById('logoutForm').submit();"
                 class="item">
                 <div class="icon">

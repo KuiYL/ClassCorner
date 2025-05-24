@@ -11,14 +11,14 @@ class ClassesController extends Controller
     {
         $validated = $request->validate(
             [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:100',
                 'description' => 'nullable|string',
                 'teacher_id' => 'required|exists:users,id',
             ],
             [
                 'name.required' => 'Поле "Название" обязательно для заполнения.',
                 'name.string' => 'Поле "Название" должно быть строкой.',
-                'name.max' => 'Поле "Название" не может быть длиннее 255 символов.',
+                'name.max' => 'Поле "Название" не может быть длиннее 100 символов.',
                 'description.string' => 'Поле "Описание" должно быть строкой.',
                 'teacher_id.required' => 'Поле "Преподаватель" обязательно для заполнения.',
                 'teacher_id.exists' => 'Выбранное значение для "Преподаватель" некорректно.',
@@ -41,13 +41,13 @@ class ClassesController extends Controller
         $class = Classes::findOrFail($id);
         $validated = $request->validate(
             [
-                'name' => 'required|string|max:255',
+                'name' => 'required|string|max:100',
                 'description' => 'nullable|string',
             ],
             [
                 'name.required' => 'Поле "Название" обязательно для заполнения.',
                 'name.string' => 'Поле "Название" должно быть строкой.',
-                'name.max' => 'Поле "Название" не может быть длиннее 255 символов.',
+                'name.max' => 'Поле "Название" не может быть длиннее 100 символов.',
                 'description.string' => 'Поле "Описание" должно быть строкой.',
             ]
         );
