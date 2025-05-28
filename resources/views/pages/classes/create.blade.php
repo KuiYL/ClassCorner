@@ -1,57 +1,63 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить класс</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Создание Класса</title>
+    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
 
-<body class="bg-gray-50 font-sans">
+<body>
+    @include('layout.sidebar', ['activePage' => 'classes'])
 
-    <div class="max-w-7xl mx-auto p-6 bg-white shadow-md rounded-lg mt-8">
-        <h1 class="text-2xl font-bold text-gray-800">Добавить новый класс</h1>
+    <div class="topbar">
+        @include('layout.topbar')
+        <main>
+            <div class="main-platform">
 
-        <form action="{{ route('classes.store') }}" method="POST" class="mt-6">
-            @csrf
+                <form action="{{ route('classes.store') }}" method="POST" class="mt-6">
+                    @csrf
+                    <div class="head-block">
+                        <h2><span class="attention-title">Добавить</span> новый класс</h1>
+                    </div>
+                    <div class="form-group">
+                        <label for="name">Название класса <span>*</span></label>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}"
+                            class="{{ $errors->has('name') ? 'input-error' : '' }}">
+                        @error('name')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-            <div class="space-y-4">
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700">Название класса</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" required
-                        class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">
-                    @error('name')
-                        <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
+                    <div class="form-group">
+                        <label for="description">Описание (необязательно)</label>
+                        <textarea name="description" id="description" rows="4"
+                            class="{{ $errors->has('description') ? 'input-error' : '' }}">{{ old('description') }}</textarea>
+                        @error('description')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
 
-                <div>
-                    <label for="description" class="block text-sm font-medium text-gray-700">Описание
-                        (необязательно)</label>
-                    <textarea name="description" id="description" rows="4"
-                        class="mt-1 block w-full border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm">{{ old('description') }}</textarea>
-                    @error('description')
-                        <p class="mt-2 text-sm text-red-500">{{ $message }}</p>
-                    @enderror
-                </div>
+                    <div class="form-group">
+                        <label>Преподаватель <span>*</span></label>
+                        <p class="teacher-name">{{ auth()->user()->name }} {{ auth()->user()->surname }}</p>
+                        <input type="hidden" name="teacher_id" value="{{ auth()->user()->id }}">
+                        @error('teacher_id')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+                    <input type="hidden" name="return_url" value="{{ request('return_url', route('user.classes')) }}">
 
-                <div>
-                    <label class="block text-sm font-medium text-gray-700">Преподаватель</label>
-                    <p class="mt-1 text-gray-900">{{ auth()->user()->name }} {{ auth()->user()->surname }}</p>
-                    <input type="hidden" name="teacher_id" value="{{ auth()->user()->id }}">
-                </div>
-
-                <div class="mt-6">
-                    <button type="submit"
-                        class="w-full py-2 px-4 bg-indigo-600 text-white font-medium rounded-lg hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                        Создать класс
-                    </button>
-                </div>
+                    <button type="submit" class="action-button">Создать класс</button>
+                </form>
             </div>
-        </form>
+        </main>
     </div>
-
 </body>
 
 </html>

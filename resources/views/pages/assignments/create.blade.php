@@ -1,205 +1,321 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Добавить класс</title>
+    <title>Добавление задания для класса</title>
+    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
+
+    <script src="{{ asset('js/script.js') }}" defer></script>
 </head>
 
 <body>
-    <form id="assignment-form" action="{{ route('assignment.store') }}" method="POST">
-        @csrf
-        <!-- Основная информация о задании -->
-        <div>
-            <label>Название задания:</label>
-            <input type="text" id="title" name="title" required>
-        </div>
-        <div>
-            <label>Описание задания:</label>
-            <textarea id="description" name="description" required></textarea>
-        </div>
-        <div>
-            <label>Дата сдачи:</label>
-            <input type="date" id="due_date" name="due_date" required>
-        </div>
+    @include('layout.sidebar', ['activePage' => 'tasks'])
+    <div class="topbar">
+        @include('layout.topbar')
+        <main>
+            <div class="main-platform">
+                <div class="assignment-form">
+                    <form id="assignment-form" action="{{ route('assignment.store') }}" method="POST">
+                        @csrf
+                        <div class="form-layout">
+                            <div class="form-grid">
+                                <h2><span class="attention-title">Создать</span> новое задание</h2>
+                                <div class="form-group full">
+                                    <label for="title">Название задания:</label>
+                                    <input type="text" id="title" name="title" value="{{ old('title') }}"
+                                        class="{{ $errors->has('title') ? 'input-error error' : '' }}">
+                                    @error('title')
+                                        <div class="error-message">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="class_id">Выберите класс:</label>
+                                        <select id="class_id" name="class_id"
+                                            class="{{ $errors->has('class_id') ? 'input-error error' : '' }}">
+                                            <option value="">-- Выберите класс --</option>
+                                            @foreach ($classes as $class)
+                                                <option value="{{ $class->id }}"
+                                                    {{ old('class_id', $selectedClass?->id) == $class->id ? 'selected' : '' }}>
+                                                    {{ $class->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                        @error('class_id')
+                                            <div class="error-message">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="due_date">Дата сдачи:</label>
+                                        <input type="date" id="due_date" name="due_date"
+                                            value="{{ old('due_date') }}"
+                                            class="{{ $errors->has('due_date') ? 'input-error error' : '' }}">
+                                        @error('due_date')
+                                            <div class="error-message">{{ $message }}</div>
+                                        @enderror
+                                    </div>
+                                </div>
+                                <div class="form-group full">
+                                    <label for="description">Описание задания:</label>
+                                    <textarea id="description" name="description" rows="5"
+                                        class="{{ $errors->has('description') ? 'input-error error' : '' }}">{{ old('description') }}</textarea>
+                                    @error('description')
+                                        <div class="error-message">{{ $message }}</div>
+                                    @enderror
+                                </div>
+                            </div>
 
-        <!-- Динамические поля -->
-        <h3>Поля задания:</h3>
-        <div id="fields-container"></div>
-        <button type="button" id="add-field-btn">Добавить поле</button>
+                            <div class="form-fields-section">
+                                <h3>Конструктор задания</h3>
+                                <div class="fields-container" id="fields-container"></div>
+                                <button type="button" id="add-field-btn" class="btn primary add-field-btn">
+                                    <i class="fas fa-plus"></i> Добавить поле
+                                </button>
+                            </div>
+                        </div>
 
-        <!-- Кнопка отправки -->
-        <button type="submit">Сохранить задание</button>
-    </form>
+                        <input type="hidden" name="fields_json" id="fields-json">
+                        <input type="hidden" name="return_url"
+                            value="{{ request('return_url', route('user.assignments')) }}">
+
+                        <button type="submit" class="btn primary large full-width mt-2">
+                            Сохранить задание
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div id="validation-toast" class="validation-toast"></div>
+
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.getElementById('assignment-form');
-            const fieldsContainer = document.getElementById('fields-container');
-            const addFieldBtn = document.getElementById('add-field-btn');
-            const dueDateInput = document.getElementById('due_date');
+        document.addEventListener("DOMContentLoaded", function() {
+            const fieldsContainer = document.getElementById("fields-container");
+            const addFieldBtn = document.getElementById("add-field-btn");
+            const dueDateInput = document.getElementById("due_date");
+            const toast = document.getElementById("validation-toast");
 
-            const today = new Date().toISOString().split('T')[0];
-            dueDateInput.setAttribute('min', today);
-            // Список для хранения полей
-            let fields = [];
+            dueDateInput.setAttribute("min", new Date().toISOString().split("T")[0]);
 
-            // Добавить новое поле
-            addFieldBtn.addEventListener('click', function() {
-                const fieldIndex = fields.length;
-                fields.push({
-                    name: '',
-                    type: 'text',
-                    options: []
+            let fieldIndex = 0;
+
+            function updateOptionInputs(container, type) {
+                container.querySelectorAll(".option").forEach(option => {
+                    const radioOrCheckbox = option.querySelector(".correct-option");
+                    const isRadio = type === "single_choice";
+                    radioOrCheckbox.type = isRadio ? "radio" : "checkbox";
+                    radioOrCheckbox.name = isRadio ? `option-${fieldIndex}` : "";
                 });
+            }
 
-                const fieldDiv = document.createElement('div');
-                fieldDiv.className = 'field';
-                fieldDiv.dataset.index = fieldIndex;
+            function createFieldElement() {
+                const fieldDiv = document.createElement("div");
+                fieldDiv.className = "field";
+                fieldDiv.dataset.index = fieldIndex++;
 
                 fieldDiv.innerHTML = `
-            <label>Название поля:</label>
-            <input type="text" class="field-name" data-index="${fieldIndex}" required>
-            <label>Тип поля:</label>
-            <select class="field-type" data-index="${fieldIndex}">
-                <option value="text">Текст</option>
-                <option value="file_upload">Загрузка файла</option>
-                <option value="multiple_choice">Множественный выбор</option>
-                <option value="single_choice">Одиночный выбор</option>
-            </select>
-            <div class="options-container" data-index="${fieldIndex}" style="display: none;">
-                <label>Варианты:</label>
-                <div class="options-list"></div>
-                <button type="button" class="add-option-btn" data-index="${fieldIndex}">Добавить вариант</button>
-            </div>
-            <button type="button" class="remove-field-btn" data-index="${fieldIndex}">Удалить поле</button>
-        `;
+                    <div class="form-group">
+                        <label>Название вопроса:</label>
+                        <input type="text" class="field-name" placeholder="Введите вопрос">
+                    </div>
+                    <div class="form-group">
+                        <label>Тип вопроса:</label>
+                        <select class="field-type">
+                            <option value="text">Текстовый ответ</option>
+                            <option value="file_upload">Загрузка файла</option>
+                            <option value="multiple_choice">Множественный выбор</option>
+                            <option value="single_choice">Одиночный выбор</option>
+                        </select>
+                    </div>
+                    <div class="options-container hidden">
+                        <label>Варианты:</label>
+                        <div class="options-list"></div>
+                        <button type="button" class="btn secondary add-option-btn">
+                            <i class="fas fa-plus"></i> Добавить вариант
+                        </button>
+                    </div>
+                    <button type="button" class="remove-field-btn btn danger">Удалить поле</button>
+                `;
 
-                fieldsContainer.appendChild(fieldDiv);
+                const fieldTypeSelect = fieldDiv.querySelector(".field-type");
+                const optionsContainer = fieldDiv.querySelector(".options-container");
+                const optionsList = fieldDiv.querySelector(".options-list");
 
-                // События для нового поля
-                fieldDiv.querySelector('.field-type').addEventListener('change', handleTypeChange);
-                fieldDiv.querySelector('.add-option-btn').addEventListener('click', addOption);
-                fieldDiv.querySelector('.remove-field-btn').addEventListener('click', removeField);
-            });
-
-            // Обработчик изменения типа поля
-            function handleTypeChange(event) {
-                const index = event.target.dataset.index;
-                const type = event.target.value;
-                const optionsContainer = fieldsContainer.querySelector(`.options-container[data-index="${index}"]`);
-                const optionsList = optionsContainer.querySelector('.options-list');
-
-                if (type === 'multiple_choice' || type === 'single_choice') {
-                    optionsContainer.style.display = 'block';
-                    optionsList.innerHTML = ''; // Очищаем, чтобы избежать конфликтов
-                    fields[index].options = []; // Очищаем массив вариантов
-                } else {
-                    optionsContainer.style.display = 'none';
-                }
-
-                if (type === 'file_upload') {
-                    // Если тип - загрузка файла, генерируем поле для загрузки файла
-                    optionsList.innerHTML = `
-            <label>Загрузить файл:</label>
-            <input type="file" class="file-upload" data-index="${index}">
-        `;
-                    fields[index].options = []; // Очищаем варианты
-                } else {
-                    optionsList.innerHTML = ''; // Удаляем любые элементы, не относящиеся к выбранному типу
-                }
-
-                fields[index].type = type;
-            }
-
-
-            function addOption(event) {
-                const index = event.target.dataset.index; // Получаем индекс текущего поля
-                const type = fields[index].type;
-                const optionsContainer = fieldsContainer.querySelector(`.options-container[data-index="${index}"]`);
-                const optionsList = optionsContainer.querySelector('.options-list');
-                const optionIndex = fields[index].options.length;
-
-                fields[index].options.push({
-                    value: '',
-                    isCorrect: false
+                fieldTypeSelect.addEventListener("change", function() {
+                    const selectedType = this.value;
+                    if (selectedType === "single_choice" || selectedType === "multiple_choice") {
+                        optionsContainer.classList.remove("hidden");
+                        updateOptionInputs(optionsList, selectedType);
+                    } else {
+                        optionsContainer.classList.add("hidden");
+                    }
                 });
 
-                const optionDiv = document.createElement('div');
-                optionDiv.className = 'option';
-                optionDiv.dataset.optionIndex = optionIndex;
+                fieldDiv.querySelector(".add-option-btn").addEventListener("click", function() {
+                    const optionDiv = document.createElement("div");
+                    optionDiv.className = "option";
 
-                if (type === 'single_choice') {
+                    const isSingleChoice = fieldTypeSelect.value === "single_choice";
+
                     optionDiv.innerHTML = `
-            <input type="radio" name="single-choice-${index}" class="correct-option" data-field-index="${index}" data-option-index="${optionIndex}">
-            <input type="text" class="option-value" data-field-index="${index}" data-option-index="${optionIndex}" placeholder="Вариант ответа">
-            <button type="button" class="remove-option-btn" data-field-index="${index}" data-option-index="${optionIndex}">Удалить</button>
-        `;
-                } else {
-                    optionDiv.innerHTML = `
-            <input type="checkbox" class="correct-option" data-field-index="${index}" data-option-index="${optionIndex}">
-            <input type="text" class="option-value" data-field-index="${index}" data-option-index="${optionIndex}" placeholder="Вариант ответа">
-            <button type="button" class="remove-option-btn" data-field-index="${index}" data-option-index="${optionIndex}">Удалить</button>
-        `;
-                }
+                        <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option" name="option-${fieldIndex}">
+                        <input type="text" class="option-value" placeholder="Вариант ответа">
+                        <button type="button" class="remove-option-btn"><i class="fas fa-trash"></i></button>
+                    `;
 
-                optionsList.appendChild(optionDiv);
+                    optionDiv.querySelector(".remove-option-btn").addEventListener("click", function() {
+                        optionDiv.remove();
+                    });
 
-                // Обработчик изменения текста варианта
-                optionDiv.querySelector('.option-value').addEventListener('input', function(event) {
-                    const fieldIndex = event.target.dataset.fieldIndex;
-                    const optionIndex = event.target.dataset.optionIndex;
-                    fields[fieldIndex].options[optionIndex].value = event.target.value;
+                    optionDiv.querySelector(".correct-option").addEventListener("click", function(e) {
+                        if (fieldTypeSelect.value === "single_choice") {
+                            [...optionsList.querySelectorAll(".correct-option")].forEach(cb => cb
+                                .checked = false);
+                            e.target.checked = true;
+                        }
+                    });
+
+                    optionsList.appendChild(optionDiv);
+                    updateOptionInputs(optionsList, fieldTypeSelect.value);
+
+                    optionDiv.querySelector(".option-value").addEventListener("input", function(e) {
+                        const val = e.target.value.trim();
+                        e.target.classList.toggle("error", !val);
+                    });
                 });
 
-                // Обработчик изменения правильности ответа
-                if (type === 'single_choice') {
-                    optionDiv.querySelector('.correct-option').addEventListener('change', function(event) {
-                        const fieldIndex = event.target.dataset.fieldIndex;
-                        const optionIndex = event.target.dataset.optionIndex;
-                        fields[fieldIndex].options.forEach((option, idx) => {
-                            option.isCorrect = (idx ==
-                                optionIndex); // Только один вариант может быть правильным
-                        });
+                fieldDiv.querySelector(".remove-field-btn").addEventListener("click", function() {
+                    fieldDiv.remove();
+                });
+
+                return fieldDiv;
+            }
+
+            const savedFieldsJson = @json(old('fields_json'));
+            if (savedFieldsJson) {
+                try {
+                    const savedFields = JSON.parse(savedFieldsJson);
+                    savedFields.forEach(field => {
+                        const fieldDiv = createFieldElement();
+                        fieldDiv.querySelector(".field-name").value = field.name;
+                        fieldDiv.querySelector(".field-type").value = field.type;
+
+                        const optionsList = fieldDiv.querySelector(".options-list");
+                        const optionsContainer = fieldDiv.querySelector(".options-container");
+
+                        if (field.type === "single_choice" || field.type === "multiple_choice") {
+                            optionsContainer.classList.remove("hidden");
+                            field.options.forEach(opt => {
+                                const optionDiv = document.createElement("div");
+                                optionDiv.className = "option";
+
+                                const isSingleChoice = field.type === "single_choice";
+
+                                optionDiv.innerHTML = `
+                                    <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option" name="option-${fieldIndex}" ${opt.isCorrect ? 'checked' : ''}>
+                                    <input type="text" class="option-value" value="${opt.value}" placeholder="Вариант ответа">
+                                    <button type="button" class="remove-option-btn"><i class="fas fa-trash"></i></button>
+                                `;
+
+                                optionDiv.querySelector(".remove-option-btn").addEventListener(
+                                    "click",
+                                    function() {
+                                        optionDiv.remove();
+                                    });
+
+                                optionsList.appendChild(optionDiv);
+                            });
+
+                            updateOptionInputs(optionsList, field.type);
+                        }
+
+                        fieldsContainer.appendChild(fieldDiv);
                     });
-                } else {
-                    optionDiv.querySelector('.correct-option').addEventListener('change', function(event) {
-                        const fieldIndex = event.target.dataset.fieldIndex;
-                        const optionIndex = event.target.dataset.optionIndex;
-                        fields[fieldIndex].options[optionIndex].isCorrect = event.target.checked;
-                    });
+                } catch (e) {
+                    console.error("Ошибка восстановления данных:", e);
                 }
-
-                // Обработчик удаления варианта
-                optionDiv.querySelector('.remove-option-btn').addEventListener('click', removeOption);
             }
 
-
-            // Удалить вариант ответа
-            function removeOption(event) {
-                const fieldIndex = event.target.dataset.fieldIndex;
-                const optionIndex = event.target.dataset.optionIndex;
-                fields[fieldIndex].options.splice(optionIndex, 1);
-
-                // Удаляем элемент из DOM
-                const optionDiv = event.target.closest('.option');
-                optionDiv.remove();
-            }
-
-            // Удалить поле
-            function removeField(event) {
-                const index = event.target.dataset.index;
-                fields.splice(index, 1);
-
-                // Удаляем элемент из DOM
-                const fieldDiv = event.target.closest('.field');
-                fieldDiv.remove();
-            }
-
-            document.querySelector('form').addEventListener('submit', (event) => {
-                const formData = new FormData(event.target);
-                console.log([...formData.entries()]);
+            addFieldBtn.addEventListener("click", function() {
+                const newField = createFieldElement();
+                fieldsContainer.appendChild(newField);
             });
+
+            document.getElementById("assignment-form").addEventListener("submit", function(e) {
+                e.preventDefault();
+
+                let isValid = true;
+
+                document.querySelectorAll(".form-group .error").forEach(el => el.classList.remove("error"));
+
+                const filledFields = [];
+
+                document.querySelectorAll(".field").forEach(fieldDiv => {
+                    const nameInput = fieldDiv.querySelector(".field-name");
+                    const name = nameInput.value.trim();
+                    const type = fieldDiv.querySelector(".field-type").value;
+                    const optionsList = fieldDiv.querySelector(".options-list");
+
+                    if (!name) {
+                        nameInput.classList.add("error");
+                        showValidationError("Заполните название вопроса.");
+                        isValid = false;
+                    }
+
+                    const options = [...optionsList.querySelectorAll(".option")].map(optionDiv => {
+                        const input = optionDiv.querySelector(".option-value");
+                        const isChecked = optionDiv.querySelector(".correct-option")
+                            ?.checked || false;
+                        const value = input.value.trim();
+
+                        if (!value) {
+                            input.classList.add("error");
+                            showValidationError("Все варианты должны содержать текст.");
+                            isValid = false;
+                        }
+
+                        return {
+                            value,
+                            isCorrect: isChecked
+                        };
+                    });
+
+                    if ((type === "single_choice" || type === "multiple_choice") && options.length >
+                        0) {
+                        const hasCorrectAnswer = options.some(opt => opt.isCorrect);
+                        if (!hasCorrectAnswer) {
+                            showValidationError(
+                                `Выберите правильный вариант для вопроса "${name}"`);
+                            isValid = false;
+                        }
+                    }
+
+                    filledFields.push({
+                        name,
+                        type,
+                        options
+                    });
+                });
+
+                if (!isValid) return;
+
+                document.getElementById("fields-json").value = JSON.stringify(filledFields);
+                e.target.submit();
+            });
+
+            function showValidationError(message) {
+                toast.textContent = message;
+                toast.classList.add("show");
+                setTimeout(() => {
+                    toast.classList.remove("show");
+                }, 3000);
+            }
         });
     </script>
 </body>

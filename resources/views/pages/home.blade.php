@@ -29,10 +29,10 @@
                     стандартного обучения.
                 </p>
                 <div class="buttons">
-                    <a href="#" class="action-button">Попробовать бесплатно</a>
+                    <a href="{{ route('choiceLogin') }}" class="action-button">Попробовать бесплатно</a>
 
-                    <a href="#" class="extra-button"> <img src="{{ 'images/arrow-right button.svg' }}"
-                            alt=""></a>
+                    <a href="{{ route('about') }}" class="extra-button"> <img
+                            src="{{ 'images/arrow-right button.svg' }}" alt=""></a>
 
                     <p>Узнайте больше</p>
                 </div>
@@ -104,8 +104,8 @@
                 <div class="icon-box">
                     <img src="{{ 'images/document-code-benefits.svg' }}" alt="">
                     <div class="text">
-                        <h3>Искусственный интеллект</h3>
-                        <p>ИИ анализирует прогресс учеников и дает рекомендации для улучшения обучения.</p>
+                        <h3>Автоматическая проверка работ</h3>
+                        <p>Система автоматически оценивает выполненные задания и предоставляет результаты.</p>
                     </div>
                 </div>
             </div>

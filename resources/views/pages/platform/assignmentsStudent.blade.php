@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ваши задания</title>
+    <title>Мои задания</title>
     <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
     <script src="{{ asset('js/script.js') }}" defer></script>
     <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
 
@@ -20,29 +20,36 @@
 
         <main>
             <div class="main-platform">
+
                 <div class="banner-new-assignment">
                     <div class="wrapper">
                         <div>
-                            <h3>Задания на проверку</h3>
-                            <p>Проверьте ответы студентов и выставите оценки</p>
+                            <h3>Ваши задания</h3>
+                            <p>Выполняйте задания по вашим классам</p>
                         </div>
-                        <a href="{{ route('assignments.to.grade') }}" class="btn primary small">
-                            <i class="fas fa-arrow-right"></i>Перейти
+                        <a href="{{ route('user.classes') }}">
+                            <i class="fas fa-arrow-right"></i>
+                            Перейти к классам
                         </a>
                     </div>
                 </div>
 
                 <div class="assignments-container">
                     <div class="assignments-header">
-                        <h3>Мои задания</h3>
-                        <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}"
-                            class="action-button" style="display: flex; gap:8px; background-color: #6e76c1">
-                            <i class="fas fa-tasks"></i>
-                            Новое задание
-                        </a>
+                        <h3>Задания на выполнение</h3>
                     </div>
+
                     <div class="assignments-filters"
                         style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                        <label>
+                            Статус:
+                            <select id="filter-status">
+                                <option value="">Все</option>
+                                <option value="Не выполнено">Не выполнено</option>
+                                <option value="На проверке">На проверке</option>
+                                <option value="Выполнено">Выполнено</option>
+                            </select>
+                        </label>
                         <label>
                             Класс:
                             <select id="filter-class">
@@ -52,7 +59,6 @@
                                 @endforeach
                             </select>
                         </label>
-
                         <label>
                             Тип вопроса:
                             <select id="filter-type">
@@ -67,24 +73,40 @@
 
                     @if ($assignments->isEmpty())
                         <div class="assignments-empty">
-                            У вас пока нет заданий. Нажмите "Новое задание", чтобы создать.
+                            Нет доступных заданий.
                         </div>
                     @else
                         <div class="assignments-list">
-                            @foreach ($assignments as $assignment)
+                            @foreach ($assignments as $item)
                                 <div class="assignment-card">
+                                    @php
+                                        $status = 'not_submitted'; // Статус по умолчанию
+                                        if (!empty($item['submission'])) {
+                                            $status = $item['submission']->status;
+                                        }
+
+                                        $statusLabels = [
+                                            'not_submitted' => 'Не выполнено',
+                                            'submitted' => 'На проверке',
+                                            'graded' => 'Выполнено',
+                                        ];
+                                    @endphp
+
                                     <div class="card-header">
-                                        <h4 class="assignment-title">{{ $assignment->title }}</h4>
+                                        <h4 class="assignment-title">{{ $item['assignment']->title }}</h4>
                                         <div class="header-controls">
+                                            <span
+                                                class="assignment-status {{ $status === 'not_submitted' ? 'not-submitted' : ($status === 'submitted' ? 'submitted' : 'completed') }}">
+                                                {{ $statusLabels[$status] ?? 'Неизвестный статус' }}
+                                            </span>
                                             <button class="action-button">Подробнее</button>
                                         </div>
                                     </div>
                                     <div class="card-details hidden">
-                                        <p class="assignment-description">
-                                            {{ Str::limit($assignment->description, 100) }}</p>
+                                        <p class="assignment-description">{{ $item['assignment']->description }}</p>
                                         <div class="assignment-details">
-                                            <span>Класс: {{ $assignment->class->name ?? 'Без класса' }}</span>
-                                            <span>Дедлайн: {{ $assignment->due_date }}</span>
+                                            <span>Класс: {{ $item['class']->name }}</span>
+                                            <span>Дедлайн: {{ $item['assignment']->due_date }}</span>
                                             @php
                                                 $typeTranslations = [
                                                     'file_upload' => 'Загрузка файла',
@@ -93,7 +115,7 @@
                                                     'text' => 'Текстовый ответ',
                                                 ];
 
-                                                $decodedOptions = json_decode($assignment->options, true);
+                                                $decodedOptions = json_decode($item['assignment']->options, true);
                                                 $questionTypes = [];
 
                                                 if (!empty($decodedOptions)) {
@@ -113,13 +135,19 @@
                                             </span>
                                         </div>
                                         <div class="card-actions">
-                                            <a href="{{ route('assignments.edit', ['id' => $assignment->id, 'class_id' => $assignment->class_id, 'return_url' => url()->current()]) }}"
-                                                class="btn edit-btn">Изменить</a>
-                                            <button class="btn delete-btn delete-button" type="button"
-                                                data-id="{{ $assignment->id }}" data-name="{{ $assignment->title }}"
-                                                data-type="assignment">
-                                                Удалить
-                                            </button>
+                                            @if ($status !== 'submitted')
+                                                @if ($status === 'graded' && !is_null($item['submission']->grade))
+                                                    <a href="{{ route('assignment.result', ['id' => $item['submission']->id]) }}"
+                                                        class="btn view-btn" style="display: flex; gap: 5px;">
+                                                        <i class="fas fa-eye"></i> Результаты
+                                                    </a>
+                                                @else
+                                                    <a href="{{ route('assignments.show', $item['assignment']->id) }}"
+                                                        class="btn view-btn" style="display: flex; gap: 5px;">
+                                                        <i class="fas fa-folder-open"></i> Перейти
+                                                    </a>
+                                                @endif
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
@@ -135,17 +163,13 @@
         </main>
     </div>
 
-    <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}" class="floating-btn">
-        <button>
-            <i class="fas fa-plus"></i>
-        </button>
-    </a>
-    @include('layout.modal-delete')
+
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const cards = document.querySelectorAll(".assignment-card");
 
+            // Логика разворачивания деталей
             cards.forEach((card) => {
                 const toggleBtn = card.querySelector(".action-button");
                 const cardDetails = card.querySelector(".card-details");
@@ -157,25 +181,30 @@
                 });
             });
 
+            // Логика фильтрации
+            const filterStatus = document.getElementById("filter-status");
             const filterClass = document.getElementById("filter-class");
             const filterType = document.getElementById("filter-type");
+            const noAssignmentsMessage = document.querySelector(".no-assignments-message");
 
             function filterAssignments() {
+                const statusVal = filterStatus.value.trim();
                 const classVal = filterClass.value.trim();
                 const typeVal = filterType.value.trim();
-
                 let hasVisibleCards = false;
 
                 cards.forEach(card => {
+                    const cardStatus = card.querySelector(".assignment-status")?.textContent.trim() || "";
                     const cardClass = card.querySelector(".assignment-details span:first-child")
                         ?.textContent.replace('Класс: ', '').trim() || "";
                     const cardTypesText = card.querySelector(".assignment-details span:nth-child(3)")
                         ?.textContent.replace('Типы вопросов:', '').trim() || "";
 
+                    const statusMatch = !statusVal || cardStatus === statusVal;
                     const classMatch = !classVal || cardClass === classVal;
                     const typeMatch = !typeVal || cardTypesText.includes(typeVal);
 
-                    if (classMatch && typeMatch) {
+                    if (statusMatch && classMatch && typeMatch) {
                         card.style.display = "block";
                         hasVisibleCards = true;
                     } else {
@@ -183,22 +212,16 @@
                     }
                 });
 
-                const noAssignmentsMessage = document.querySelector(".no-assignments-message");
-                if (hasVisibleCards) {
-                    noAssignmentsMessage.classList.add("hidden");
-                } else {
-                    noAssignmentsMessage.classList.remove("hidden");
-                }
+                noAssignmentsMessage.classList.toggle("hidden", hasVisibleCards);
             }
 
-
+            filterStatus.addEventListener("change", filterAssignments);
             filterClass.addEventListener("change", filterAssignments);
             filterType.addEventListener("change", filterAssignments);
 
             filterAssignments();
         });
     </script>
-
 </body>
 
 </html>

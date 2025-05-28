@@ -37,4 +37,29 @@ class AvatarController extends Controller
 
         return redirect()->route('login')->with('status', 'Вы успешно выбрали аватар. Теперь войдите в систему.');
     }
+
+    public function storeWithID(Request $request)
+    {
+
+        $user = User::findOrFail(auth()->id());
+        if (!$user) {
+            return redirect()->route('register')->withErrors('Сессия истекла. Повторите регистрацию.');
+        }
+
+        $request->validate([
+            'avatar' => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
+            'default_avatar' => 'nullable|string',
+        ]);
+
+        if ($request->hasFile('avatar')) {
+            $filePath = $request->file('avatar')->store('avatars', 'public');
+            $user->avatar = $filePath;
+        } elseif ($request->default_avatar) {
+            $user->avatar = 'images/' . $request->default_avatar;
+        }
+
+        $user->save();
+
+        return redirect()->route('user.profile');
+    }
 }

@@ -9,6 +9,8 @@ class StudentAssignments extends Model
 {
     use HasFactory;
 
+    protected $table = 'student_assignments';
+
     protected $fillable = [
         'user_id',
         'assignment_id',
@@ -25,11 +27,11 @@ class StudentAssignments extends Model
 
     public function user()
     {
-        return $this->belongsTo(User::class);
+        return $this->belongsTo(User::class, 'user_id');
     }
 
     public function assignment()
     {
-        return $this->belongsTo(Assignments::class);
+        return $this->belongsTo(Assignments::class, 'assignment_id');
     }
 }

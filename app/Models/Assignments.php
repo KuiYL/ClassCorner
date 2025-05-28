@@ -17,6 +17,7 @@ class Assignments extends Model
         'class_id',
         'type',
         'options',
+        'status',
     ];
 
     protected $casts = [
@@ -41,6 +42,21 @@ class Assignments extends Model
     public function scopeActive($query)
     {
         return $query->where('status', 'active');
+    }
+    public function getStatusNameAttribute()
+    {
+        $statuses = [
+            'pending' => 'В ожидании',
+            'active' => 'Активно',
+            'completed' => 'Выполнено',
+        ];
+        return $statuses[$this->status] ?? $this->status;
+    }
+public function students()
+    {
+        return $this->belongsToMany(User::class, 'student_assignments', 'assignment_id', 'user_id')
+            ->withPivot(['status', 'grade', 'feedback', 'student_answer', 'file_path'])
+            ->withTimestamps();
     }
 
 }
