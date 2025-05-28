@@ -1020,7 +1020,7 @@ main {
     align-items: center;
     gap: 8px;
     padding: 8px 12px;
-    font-size: 0.9rem;
+    font-size: 0.8rem;
     color: #201c44;
     text-decoration: none;
     background: none;
@@ -3422,4 +3422,3 @@ main.profile-container {
 .grading-form textarea.form-control {
     resize: vertical;
 }
-

@@ -4,9 +4,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админка | @yield('title')</title>
+    <title>Админ панель | @yield('title')</title>
     <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
+    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
+
     <style>
         :root {
             --primary: #555eb1;

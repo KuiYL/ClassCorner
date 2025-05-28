@@ -135,6 +135,7 @@
                 <div class="table">
                     <div class="head">
                         <h3>Студенты</h3>
+                        <button class="btn invite-student-btn">Пригласить ученика</button>
                     </div>
 
                     @if ($studentProgress->isNotEmpty())
