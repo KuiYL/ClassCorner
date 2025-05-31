@@ -1,4 +1,4 @@
-@extends('pages.platform.layout', ['activePage' => 'classes', 'title' => {{ $class->name }}, 'quick_action' => 'null'])
+@extends('pages.platform.layout', ['activePage' => 'classes', 'title' => $class->name, 'quick_action' => 'null'])
 @section('content')
     <div class="main-platform">
         <div class="banner">

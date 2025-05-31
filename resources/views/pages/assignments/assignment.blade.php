@@ -1,4 +1,4 @@
-@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => {{ $assignment->title }}, 'quick_action' => 'null'])
+@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => $assignment->title, 'quick_action' => 'null'])
 @section('content')
     <div class="main-platform assignment-detail">
         <div class="assignment-detail">
