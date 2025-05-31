@@ -1,46 +1,16 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Статистика</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <script src="{{ asset('js/script.js') }}" defer></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
-</head>
-
-<body>
-    @include('layout.sidebar', ['activePage' => 'statistics'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-
-        <main>
-            <div class="charts-container">
-                <div class="chart-item">
-                    <canvas id="lineChart"></canvas>
-                </div>
-                <div class="chart-item">
-                    <canvas id="barChart"></canvas>
-                </div>
-                <div class="chart-item">
-                    <canvas id="pieChart"></canvas>
-                </div>
-            </div>
-        </main>
+@extends('pages.platform.layout', ['activePage' => 'statistics', 'title' => 'Статистика', 'quick_action' => 'assignments.create'])
+@section('content')
+    <div class="charts-container">
+        <div class="chart-item">
+            <canvas id="lineChart"></canvas>
+        </div>
+        <div class="chart-item">
+            <canvas id="barChart"></canvas>
+        </div>
+        <div class="chart-item">
+            <canvas id="pieChart"></canvas>
+        </div>
     </div>
-
-    <a href="{{ route('assignments.create', ['return_url' => url()->current()]) }}" class="floating-btn">
-        <button>
-            <i class="fas fa-plus"></i>
-        </button>
-    </a>
-    @include('layout.modal-delete')
-
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const lineCtx = document.getElementById('lineChart').getContext('2d');
@@ -129,6 +99,4 @@
             });
         });
     </script>
-</body>
-
-</html>
+@endsection

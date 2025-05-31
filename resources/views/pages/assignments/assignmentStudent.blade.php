@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $assignment->title }}</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
+@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => {{ $assignment->title }}, 'quick_action' => 'null'])
+@section('content')
     <style>
         :root {
             --bg: #f8f9fa;
@@ -144,95 +135,85 @@
             box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
         }
     </style>
-</head>
 
-<body>
-    @include('layout.sidebar', ['activePage' => 'assignments'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-        <main>
-            <div class="main-platform assignment-detail">
-                <div class="assignment-detail">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2>{{ $assignment->title }}</h2>
-                            <div class="due-date-container">
-                                <span class="due-date-label">Срок выполнения:</span>
-                                <strong class="due-date-value">
-                                    {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y') }}
-                                </strong>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="info">
-                                <div class="description">
-                                    {{ $assignment->description }}
-                                </div>
-                            </div>
-                            <hr>
-                            <form id="student-answer-form"
-                                action="{{ route('assignment.submit.answer', $assignment->id) }}" method="POST"
-                                enctype="multipart/form-data"
-                                style="display: block; max-width: none; margin-bottom: 0rem;">
-                                @csrf
-                                @if (count($assignmentFields))
-                                    <div class="fields">
-                                        <h3>Поля задания:</h3>
-                                        @foreach ($assignmentFields as $index => $field)
-                                            <div class="field-item">
-                                                <h4>{{ $field['name'] }}</h4>
-
-                                                @if ($field['type'] === 'text')
-                                                    <textarea name="answers[{{ $index }}][value]" rows="4" placeholder="Введите ваш ответ здесь..." required
-                                                        class="form-control"></textarea>
-                                                @elseif ($field['type'] === 'file_upload')
-                                                    <div class="file-upload-container">
-                                                        <input type="file" name="answers[{{ $index }}][file]"
-                                                            class="custom-file-input"
-                                                            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required>
-                                                        <label class="custom-file-label">
-                                                            <span class="custom-file-name">Выберите файл...</span>
-                                                            <i class="fas fa-cloud-upload-alt"></i>
-                                                        </label>
-                                                    </div>
-                                                    <small class="file-hint">
-                                                        Поддерживаемые форматы: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG.
-                                                        Максимальный размер файла — 10 МБ.
-                                                    </small>
-                                                @elseif (in_array($field['type'], ['multiple_choice', 'single_choice']) && !empty($field['options']))
-                                                    <ul class="options-list">
-                                                        @foreach ($field['options'] as $optionIndex => $option)
-                                                            <li>
-                                                                <label>
-                                                                    <input
-                                                                        type="{{ $field['type'] === 'single_choice' ? 'radio' : 'checkbox' }}"
-                                                                        name="answers[{{ $index }}][options][]"
-                                                                        value="{{ $optionIndex }}">
-                                                                    {{ $option['value'] }}
-                                                                </label>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                @endif
-
-                                                <input type="hidden" name="answers[{{ $index }}][type]"
-                                                    value="{{ $field['type'] }}">
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <p class="no-fields">Нет полей в задании.</p>
-                                @endif
-                                <button type="submit" class="action-button" style="display: flex; gap:6px">
-                                    <i class="fas fa-save"></i> Сохранить ответ
-                                </button>
-                            </form>
-                        </div>
+    <div class="main-platform assignment-detail">
+        <div class="assignment-detail">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ $assignment->title }}</h2>
+                    <div class="due-date-container">
+                        <span class="due-date-label">Срок выполнения:</span>
+                        <strong class="due-date-value">
+                            {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y') }}
+                        </strong>
                     </div>
                 </div>
+                <div class="card-body">
+                    <div class="info">
+                        <div class="description">
+                            {{ $assignment->description }}
+                        </div>
+                    </div>
+                    <hr>
+                    <form id="student-answer-form" action="{{ route('assignment.submit.answer', $assignment->id) }}"
+                        method="POST" enctype="multipart/form-data"
+                        style="display: block; max-width: none; margin-bottom: 0rem;">
+                        @csrf
+                        @if (count($assignmentFields))
+                            <div class="fields">
+                                <h3>Поля задания:</h3>
+                                @foreach ($assignmentFields as $index => $field)
+                                    <div class="field-item">
+                                        <h4>{{ $field['name'] }}</h4>
+
+                                        @if ($field['type'] === 'text')
+                                            <textarea name="answers[{{ $index }}][value]" rows="4" placeholder="Введите ваш ответ здесь..." required
+                                                class="form-control"></textarea>
+                                        @elseif ($field['type'] === 'file_upload')
+                                            <div class="file-upload-container">
+                                                <input type="file" name="answers[{{ $index }}][file]"
+                                                    class="custom-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                                                    required>
+                                                <label class="custom-file-label">
+                                                    <span class="custom-file-name">Выберите файл...</span>
+                                                    <i class="fas fa-cloud-upload-alt"></i>
+                                                </label>
+                                            </div>
+                                            <small class="file-hint">
+                                                Поддерживаемые форматы: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG.
+                                                Максимальный размер файла — 10 МБ.
+                                            </small>
+                                        @elseif (in_array($field['type'], ['multiple_choice', 'single_choice']) && !empty($field['options']))
+                                            <ul class="options-list">
+                                                @foreach ($field['options'] as $optionIndex => $option)
+                                                    <li>
+                                                        <label>
+                                                            <input
+                                                                type="{{ $field['type'] === 'single_choice' ? 'radio' : 'checkbox' }}"
+                                                                name="answers[{{ $index }}][options][]"
+                                                                value="{{ $optionIndex }}">
+                                                            {{ $option['value'] }}
+                                                        </label>
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @endif
+
+                                        <input type="hidden" name="answers[{{ $index }}][type]"
+                                            value="{{ $field['type'] }}">
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            <p class="no-fields">Нет полей в задании.</p>
+                        @endif
+                        <button type="submit" class="action-button" style="display: flex; gap:6px">
+                            <i class="fas fa-save"></i> Сохранить ответ
+                        </button>
+                    </form>
+                </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <script>
@@ -246,6 +227,4 @@
             });
         });
     </script>
-</body>
-
-</html>
+@endsection

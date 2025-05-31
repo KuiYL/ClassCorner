@@ -79,3 +79,4 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/admin/classes', [PagesController::class, 'adminClasses'])->name('admin.classes');
     Route::get('/admin/assignments', [PagesController::class, 'adminAssignments'])->name('admin.assignments');
 });
+

@@ -24,7 +24,7 @@
             <div class="first">
                 <div class="">
                     <h2 class="extra-banner-text">О компании</h2>
-                    <h1 class="head"><span class="banner-active">Классный Уголок</span></h1>
+                    <h1 class="head"><span class="banner-active">Учебный Уголок</span></h1>
                 </div>
                 <p class="info">Мы создаем условия для легкого взаимодействия между учителями и учениками, помогая
                     преподавателям управлять занятиями, разрабатывать и отслеживать задания, а учащимся — эффективно

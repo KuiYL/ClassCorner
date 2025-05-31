@@ -1,15 +1,5 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $studentAssignment->assignment->title }}</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="/css/layout.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
+@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => {{ $studentAssignment->assignment->title }}, 'quick_action' => 'null'])
+@section('content')
     <style>
         :root {
             --primary: #007bff;
@@ -194,87 +184,74 @@
             }
         }
     </style>
-</head>
 
-<body>
-    @include('layout.sidebar', ['activePage' => 'assignments'])
+    <div class="main-platform">
+        <div class="result-header">
+            <h2>Результат выполнения задания</h2>
+            <p><strong>Задание:</strong> {{ $studentAssignment->assignment->title }}</p>
+            <p><strong>Студент:</strong> {{ $studentAssignment->user->name }}
+                {{ $studentAssignment->user->surname }}</p>
+            <span class="badge bg-success">Проверено</span>
+        </div>
 
-    <div class="topbar">
-        @include('layout.topbar')
-
-        <main>
-            <div class="main-platform">
-                <div class="result-header">
-                    <h2>Результат выполнения задания</h2>
-                    <p><strong>Задание:</strong> {{ $studentAssignment->assignment->title }}</p>
-                    <p><strong>Студент:</strong> {{ $studentAssignment->user->name }}
-                        {{ $studentAssignment->user->surname }}</p>
-                    <span class="badge bg-success">Проверено</span>
+        <section class="assignment-details">
+            <h4>Информация о задании</h4>
+            <div class="info-grid">
+                <div class="info-item">
+                    <p><i class="fas fa-chalkboard-teacher"></i> <strong>Класс:</strong>
+                        {{ optional($studentAssignment->assignment->class)->name ?? 'Не указан' }}</p>
+                    <p><i class="fas fa-calendar-alt"></i> <strong>Дедлайн:</strong>
+                        {{ \Carbon\Carbon::parse($studentAssignment->assignment->due_date)->format('d.m.Y') }}
+                    </p>
                 </div>
-
-                <section class="assignment-details">
-                    <h4>Информация о задании</h4>
-                    <div class="info-grid">
-                        <div class="info-item">
-                            <p><i class="fas fa-chalkboard-teacher"></i> <strong>Класс:</strong>
-                                {{ optional($studentAssignment->assignment->class)->name ?? 'Не указан' }}</p>
-                            <p><i class="fas fa-calendar-alt"></i> <strong>Дедлайн:</strong>
-                                {{ \Carbon\Carbon::parse($studentAssignment->assignment->due_date)->format('d.m.Y') }}
-                            </p>
-                        </div>
-                        <div class="info-item">
-                            <p><i class="fas fa-percent"></i> <strong>Процент правильных:</strong>
-                                {{ $percentCorrect }}%</p>
-                            <p><i class="fas fa-star-half-alt"></i> <strong>Оценка:</strong>
-                                <strong style="color: var(--primary);">{{ $studentAssignment->grade }}</strong>/100
-                            </p>
-                        </div>
-                    </div>
-                </section>
-
-                @if ($user->role === 'teacher')
-                    <section class="grading-form">
-
-                        <form action="{{ route('assignment.grade.save', $studentAssignment->id) }}" method="POST"
-                            style="margin-bottom: 0px">
-                            @csrf
-                            @method('PUT')
-                            <div class="form-group">
-                                <label for="grade">Оценка (от 0 до 100):</label>
-                                <input type="number" name="grade" id="grade"
-                                    value="{{ old('grade', $studentAssignment->grade ?? $autoGrade) }}"
-                                    class="{{ $errors->has('grade') ? 'input-error' : '' }}" min="0"
-                                    max="100">
-
-                                @error('grade')
-                                    <span class="error-message">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            <div class="form-group">
-                                <label for="feedback">Комментарий:</label>
-                                <textarea name="feedback" id="feedback" rows="5" class="{{ $errors->has('feedback') ? 'input-error' : '' }}">{{ old('feedback', $studentAssignment->feedback ?? $autoFeedback) }}</textarea>
-
-                                @error('feedback')
-                                    <span class="error-message">{{ $message }}</span>
-                                @enderror
-                            </div>
-
-                            <button type="submit" class="action-button">
-                                Сохранить оценку
-                            </button>
-                        </form>
-
-                    </section>
-                @else
-                    <div class="feedback-section">
-                        <h4><i class="fas fa-comment-dots"></i> Комментарий преподавателя</h4>
-                        <textarea readonly>{{ $studentAssignment->feedback ?? 'Нет комментария' }}</textarea>
-                    </div>
-                @endif
+                <div class="info-item">
+                    <p><i class="fas fa-percent"></i> <strong>Процент правильных:</strong>
+                        {{ $percentCorrect }}%</p>
+                    <p><i class="fas fa-star-half-alt"></i> <strong>Оценка:</strong>
+                        <strong style="color: var(--primary);">{{ $studentAssignment->grade }}</strong>/100
+                    </p>
+                </div>
             </div>
-        </main>
-    </div>
-</body>
+        </section>
 
-</html>
+        @if ($user->role === 'teacher')
+            <section class="grading-form">
+
+                <form action="{{ route('assignment.grade.save', $studentAssignment->id) }}" method="POST"
+                    style="margin-bottom: 0px">
+                    @csrf
+                    @method('PUT')
+                    <div class="form-group">
+                        <label for="grade">Оценка (от 0 до 100):</label>
+                        <input type="number" name="grade" id="grade"
+                            value="{{ old('grade', $studentAssignment->grade ?? $autoGrade) }}"
+                            class="{{ $errors->has('grade') ? 'input-error' : '' }}" min="0" max="100">
+
+                        @error('grade')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <div class="form-group">
+                        <label for="feedback">Комментарий:</label>
+                        <textarea name="feedback" id="feedback" rows="5" class="{{ $errors->has('feedback') ? 'input-error' : '' }}">{{ old('feedback', $studentAssignment->feedback ?? $autoFeedback) }}</textarea>
+
+                        @error('feedback')
+                            <span class="error-message">{{ $message }}</span>
+                        @enderror
+                    </div>
+
+                    <button type="submit" class="action-button">
+                        Сохранить оценку
+                    </button>
+                </form>
+
+            </section>
+        @else
+            <div class="feedback-section">
+                <h4><i class="fas fa-comment-dots"></i> Комментарий преподавателя</h4>
+                <textarea readonly>{{ $studentAssignment->feedback ?? 'Нет комментария' }}</textarea>
+            </div>
+        @endif
+    </div>
+@endsection

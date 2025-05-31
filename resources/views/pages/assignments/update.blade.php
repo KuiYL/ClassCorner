@@ -1,101 +1,77 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => 'Обновление задания', 'quick_action' => 'null'])
+@section('content')
+    <div class="main-platform">
+        <div class="assignment-form">
+            <form id="assignment-form" action="{{ route('assignments.update', $assignment->id) }}" method="POST">
+                @csrf
+                @method('PUT')
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Обновление задания</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
-
-</head>
-
-<body>
-    @include('layout.sidebar', ['activePage' => 'tasks'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-        <main>
-            <div class="main-platform">
-                <div class="assignment-form">
-                    <form id="assignment-form" action="{{ route('assignments.update', $assignment->id) }}"
-                        method="POST">
-                        @csrf
-                        @method('PUT')
-
-                        <div class="form-layout">
-                            <div class="form-grid">
-                                <h2><span class="attention-title">Редактировать</span> задание</h2>
-                                <div class="form-group full">
-                                    <label for="title">Название задания:</label>
-                                    <input type="text" id="title" name="title"
-                                        value="{{ old('title', $assignment->title) }}"
-                                        class="{{ $errors->has('title') ? 'input-error error' : '' }}">
-                                    @error('title')
-                                        <div class="error-message">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="class_id">Выберите класс:</label>
-                                        <select id="class_id" name="class_id"
-                                            class="{{ $errors->has('class_id') ? 'input-error error' : '' }}">
-                                            <option value="">-- Выберите класс --</option>
-                                            @foreach ($classes as $class)
-                                                <option value="{{ $class->id }}"
-                                                    {{ old('class_id', $assignment->class_id) == $class->id ? 'selected' : '' }}>
-                                                    {{ $class->name }}
-                                                </option>
-                                            @endforeach
-                                        </select>
-                                        @error('class_id')
-                                            <div class="error-message">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                    <div class="form-group">
-                                        <label for="due_date">Дата сдачи:</label>
-                                        <input type="date" id="due_date" name="due_date"
-                                            value="{{ old('due_date', $assignment->due_date) }}"
-                                            class="{{ $errors->has('due_date') ? 'input-error error' : '' }}">
-                                        @error('due_date')
-                                            <div class="error-message">{{ $message }}</div>
-                                        @enderror
-                                    </div>
-                                </div>
-                                <div class="form-group full">
-                                    <label for="description">Описание задания:</label>
-                                    <textarea id="description" name="description" rows="5"
-                                        class="{{ $errors->has('description') ? 'input-error error' : '' }}">{{ old('description', $assignment->description) }}</textarea>
-                                    @error('description')
-                                        <div class="error-message">{{ $message }}</div>
-                                    @enderror
-                                </div>
+                <div class="form-layout">
+                    <div class="form-grid">
+                        <h2><span class="attention-title">Редактировать</span> задание</h2>
+                        <div class="form-group full">
+                            <label for="title">Название задания:</label>
+                            <input type="text" id="title" name="title"
+                                value="{{ old('title', $assignment->title) }}"
+                                class="{{ $errors->has('title') ? 'input-error error' : '' }}">
+                            @error('title')
+                                <div class="error-message">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="class_id">Выберите класс:</label>
+                                <select id="class_id" name="class_id"
+                                    class="{{ $errors->has('class_id') ? 'input-error error' : '' }}">
+                                    <option value="">-- Выберите класс --</option>
+                                    @foreach ($classes as $class)
+                                        <option value="{{ $class->id }}"
+                                            {{ old('class_id', $assignment->class_id) == $class->id ? 'selected' : '' }}>
+                                            {{ $class->name }}
+                                        </option>
+                                    @endforeach
+                                </select>
+                                @error('class_id')
+                                    <div class="error-message">{{ $message }}</div>
+                                @enderror
                             </div>
-
-                            <div class="form-fields-section">
-                                <h3>Конструктор задания</h3>
-                                <div class="fields-container" id="fields-container"></div>
-                                <button type="button" id="add-field-btn" class="btn primary add-field-btn">
-                                    <i class="fas fa-plus"></i> Добавить поле
-                                </button>
+                            <div class="form-group">
+                                <label for="due_date">Дата сдачи:</label>
+                                <input type="date" id="due_date" name="due_date"
+                                    value="{{ old('due_date', $assignment->due_date) }}"
+                                    class="{{ $errors->has('due_date') ? 'input-error error' : '' }}">
+                                @error('due_date')
+                                    <div class="error-message">{{ $message }}</div>
+                                @enderror
                             </div>
                         </div>
+                        <div class="form-group full">
+                            <label for="description">Описание задания:</label>
+                            <textarea id="description" name="description" rows="5"
+                                class="{{ $errors->has('description') ? 'input-error error' : '' }}">{{ old('description', $assignment->description) }}</textarea>
+                            @error('description')
+                                <div class="error-message">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
 
-                        <input type="hidden" name="fields_json" id="fields-json">
-                        <input type="hidden" name="return_url"
-                            value="{{ request('return_url', route('user.assignments')) }}">
-                        <button type="submit" class="btn primary large full-width mt-2">
-                            Сохранить задание
+                    <div class="form-fields-section">
+                        <h3>Конструктор задания</h3>
+                        <div class="fields-container" id="fields-container"></div>
+                        <button type="button" id="add-field-btn" class="btn primary add-field-btn">
+                            <i class="fas fa-plus"></i> Добавить поле
                         </button>
-                    </form>
+                    </div>
                 </div>
-            </div>
-        </main>
-    </div>
 
+                <input type="hidden" name="fields_json" id="fields-json">
+                <input type="hidden" name="return_url" value="{{ request('return_url', route('user.assignments')) }}">
+                <button type="submit" class="btn primary large full-width mt-2">
+                    Сохранить задание
+                </button>
+            </form>
+        </div>
+    </div>
     <div id="validation-toast" class="validation-toast"></div>
 
     <script>
@@ -170,7 +146,7 @@
                                 `;
 
                                 optionDiv.querySelector(".remove-option-btn").addEventListener("click",
-                                () => {
+                                    () => {
                                         optionDiv.remove();
                                     });
 
@@ -320,6 +296,4 @@
             }
         });
     </script>
-</body>
-
-</html>
+@endsection

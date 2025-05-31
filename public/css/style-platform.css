@@ -108,150 +108,33 @@ textarea {
     padding: 0;
 }
 
-.sidebar {
-    display: flex;
-    overflow-y: auto;
-    flex-direction: column;
-    border-right-width: 1px;
-    border-color: #E5E7EB;
-    width: 16rem;
-    background-color: #ffffff;
+aside {
+    font-family: "MontserratAlternates", sans-serif;
 }
 
-.sidebar .logo {
-    display: flex;
-    padding: 1rem;
-    margin-left: 0.75rem;
-    margin-left: 0.875rem;
-    align-items: center;
+.sidebar-link.active:hover {
+    background-color: transparent !important;
+    color: inherit !important;
 }
 
-.sidebar .logo img {
-    max-width: 200px;
-    width: 100%;
-    height: auto;
+.tooltip-inner {
+    max-width: 300px;
+    padding: 0.75rem 1rem;
+    font-size: 0.95rem;
 }
 
-.sidebar nav {
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    flex: 1 1 0%;
+.scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
 }
 
-.sidebar .items {
-    margin-top: 0.25rem;
-}
-
-.sidebar .items .item {
-    display: flex;
-    padding-top: 0.75rem;
-    padding-bottom: 0.5rem;
-    padding-left: 1.25rem;
-    padding-right: 0.75rem;
-    align-items: center;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    color: #374151;
-    min-height: 44px;
-}
-
-.sidebar .items .item:hover {
-    background-color: #F3F4F6;
-}
-
-.sidebar .items .item-active {
-    display: flex;
-    padding-top: 0.75rem;
-    padding-bottom: 0.5rem;
-    padding-left: 1.25rem;
-    padding-right: 0.75rem;
-    align-items: center;
-    border-radius: 0.5rem;
-    font-weight: 500;
-    background-color: #EEF2FF;
-    color: #6E76C1;
-    min-height: 44px;
-
-}
-
-.sidebar .items .item:hover {
-    background-color: #F3F4F6;
-}
-
-.sidebar .items .item-active .icon-active {
-    margin-right: 0.75rem;
-    color: #6E76C1;
-}
-
-.sidebar .items .item .icon {
-    margin-right: 0.75rem;
-    color: #6B7280;
-}
-
-.sidebar .classes {
-    margin-top: 2rem;
-    padding-left: 0.25rem;
-}
-
-.sidebar .classes .head {
-    display: flex;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    margin-bottom: 0.5rem;
-    justify-content: space-between;
-    align-items: center;
-}
-
-.sidebar .classes .head h3 {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    font-weight: 600;
-    letter-spacing: 0.05em;
-    color: #6B7280;
-    text-transform: uppercase;
-}
-
-.sidebar .classes .head a {
-    font-size: 0.75rem;
-    line-height: 1rem;
-    color: #6E76C1;
-}
-
-.sidebar .classes .head a:hover {
-    color: #3730A3;
-}
-
-.sidebar .classes .class {
-    margin-top: 0.5rem;
-    margin-top: 0.25rem;
-}
-
-.sidebar .classes .class a {
-    display: flex;
-    padding-top: 0.5rem;
-    padding-bottom: 0.5rem;
-    padding-left: 0.75rem;
-    padding-right: 0.75rem;
-    align-items: center;
-    border-radius: 0.5rem;
-    font-size: 0.875rem;
-    line-height: 1.25rem;
-    font-weight: 500;
-    color: #374151;
-}
-
-.sidebar .classes .class a:hover {
-    background-color: #F3F4F6;
-}
-
-.sidebar .classes .class span {
-    margin-right: 0.75rem;
+.scrollbar-thin::-webkit-scrollbar-track {
+    background: #ebefff;
     border-radius: 9999px;
-    width: 0.5rem;
-    height: 0.5rem;
-    background-color: #63a753;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+    background: #b7bef7;
+    border-radius: 9999px;
 }
 
 .topbar {
@@ -308,7 +191,7 @@ textarea {
 }
 
 .topbar .search input:focus {
-    border-color: #6E76C1;
+    border-color: #616EBD;
     box-shadow: 0 0 0 3px rgba(110, 118, 193, 0.3);
     background-color: #FFFFFF;
 }
