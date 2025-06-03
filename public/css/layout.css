@@ -454,7 +454,7 @@ form textarea:focus::placeholder {
     color: #6e76c1;
 }
 
-form input[type="file"] {
+.contact-form input[type="file"] {
     position: absolute;
     opacity: 0;
     pointer-events: none;
@@ -462,7 +462,7 @@ form input[type="file"] {
 }
 
 
-.file-upload-wrapper {
+.contact-form .file-upload-wrapper {
     display: flex;
     align-items: center;
     gap: 10px;
@@ -477,23 +477,23 @@ form input[type="file"] {
     transition: all 0.3s;
 }
 
-.file-upload-wrapper:hover {
+.contact-form .file-upload-wrapper:hover {
     background: #eef1ff;
     border-color: #6e76c1;
     box-shadow: 0 4px 10px rgba(110, 118, 193, 0.2);
 }
 
-.file-upload-wrapper img {
+.contact-form .file-upload-wrapper img {
     width: 20px;
     height: 20px;
     transition: transform 0.3s;
 }
 
-.file-upload-wrapper:hover img {
+.contact-form .file-upload-wrapper:hover img {
     transform: scale(1.1);
 }
 
-.file-upload-text {
+.contact-form .file-upload-text {
     font-size: 14px;
     color: #6e76c1;
     margin-top: 4px;
@@ -586,8 +586,9 @@ a .active {
 }
 
 .input-error {
-    border-color: #e74c3c;
-    background-color: #fce4e4;
+    border-color: #e53e3e !important;
+    background-color: #fff5f5;
+    outline: none;
 }
 
 .global-error {

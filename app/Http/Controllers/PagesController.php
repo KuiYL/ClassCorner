@@ -50,7 +50,7 @@ class PagesController extends Controller
     {
         return StudentAssignments::whereHas('assignment', function ($query) use ($user) {
             $query->where('teacher_id', $user->id);
-        })->whereIn('status', ['submitted', 'graded'])->get(); // ← Здесь изменение: whereIn
+        })->whereIn('status', ['submitted', 'graded'])->get();
     }
 
     public function  showHomePage()
@@ -469,10 +469,8 @@ class PagesController extends Controller
         if ($role == 'teacher') {
             $assignments = $class->assignments()->where('teacher_id', $user->id)->get();
 
-            // Получаем всех студентов этого класса
             $students = $class->students;
 
-            // Для каждого студента считаем прогресс
             $studentProgress = $students->map(function ($student) use ($assignments) {
                 $totalAssignments = $assignments->count();
                 if ($totalAssignments === 0) {
@@ -485,7 +483,6 @@ class PagesController extends Controller
                     ];
                 }
 
-                // Подсчёт завершённых заданий
                 $completedSubmissions = StudentAssignments::where('user_id', $student->id)
                     ->whereIn('assignment_id', $assignments->pluck('id'))
                     ->where('status', 'graded')
@@ -494,7 +491,6 @@ class PagesController extends Controller
                 $completedCount = $completedSubmissions->count();
                 $percent = round(($completedCount / $totalAssignments) * 100);
 
-                // Средний балл
                 $grades = $completedSubmissions->pluck('grade')->filter(fn($g) => !is_null($g));
                 $averageGrade = $grades->isNotEmpty()
                     ? round($grades->avg())
@@ -557,11 +553,30 @@ class PagesController extends Controller
         $classes = $this->getUserClasses($user);
 
         if ($role == 'teacher') {
-            $assignment = Assignments::with('class')->findOrFail($id);
+            $assignment = Assignments::with('studentAssignments')->findOrFail($id);
             $assignmentFields = json_decode($assignment->options, true);
-            return view('pages.assignments.assignment', compact('user', 'classes', 'assignment', 'assignmentFields'));
-        } else if ($role == 'student') {
-            $assignment = Assignments::with('class')->findOrFail($id);
+
+            $totalStudents = $assignment->students()->count();
+            $submissions = $assignment->studentAssignments;
+
+            $stats = [
+                'total_students' => $totalStudents,
+                'submitted_count' => $submissions->where('status', 'submitted')->count(),
+                'graded_count' => $submissions->where('status', 'graded')->count(),
+                'not_submitted_count' => $submissions->where('status', 'not_submitted')->count(),
+                'average_grade' => round($submissions->avg('grade'), 1) ?: 0,
+                'completed_count' => $submissions->whereIn('status', ['submitted', 'graded'])->count(),
+            ];
+
+            return view('pages.assignments.assignment', compact(
+                'user',
+                'classes',
+                'assignment',
+                'assignmentFields',
+                'stats'
+            ));
+        } else {
+            $assignment = Assignments::findOrFail($id);
             $assignmentFields = json_decode($assignment->options, true);
             return view('pages.assignments.assignmentStudent', compact('user', 'classes', 'assignment', 'assignmentFields'));
         }
@@ -673,34 +688,39 @@ class PagesController extends Controller
         }
 
         $answers = json_decode($studentAssignment->student_answer, true) ?? [];
-        $assignmentFields = json_decode($studentAssignment->assignment->options, true) ?? [];
+        $questions = json_decode($studentAssignment->assignment->options, true) ?? [];
 
-        $correctCount = 0;
-        $totalCount = 0;
+        $results = [];
 
-        foreach ($answers as $index => $answer) {
-            if (in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
-                $field = $assignmentFields[$index] ?? null;
-                if ($field && isset($field['options']) && is_array($field['options'])) {
-                    foreach ($answer['selected_options'] as $optionIndex) {
-                        $totalCount++;
-                        if (
-                            isset($field['options'][$optionIndex]['isCorrect']) &&
-                            $field['options'][$optionIndex]['isCorrect']
-                        ) {
-                            $correctCount++;
-                        }
-                    }
-                }
+        foreach ($questions as $index => $question) {
+            $answer = $answers[$index] ?? null;
+
+            $isCorrect = false;
+
+            if ($answer && in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
+                $selected = $answer['selected_options'] ?? [];
+                $correctIndices = array_keys(array_filter($question['options'] ?? [], fn($opt) => $opt['isCorrect'] ?? false));
+
+                $isCorrect = count(array_intersect($selected, $correctIndices)) === count($correctIndices) &&
+                    count($selected) === count($correctIndices);
             }
+
+            $results[] = [
+                'question_text' => $question['name'] ?? 'Без текста',
+                'type' => $question['type'] ?? 'text',
+                'options' => $question['options'] ?? [],
+                'student_answer' => $answer,
+                'isCorrect' => $isCorrect,
+            ];
         }
 
-        $percentCorrect = $totalCount > 0 ? round(($correctCount / $totalCount) * 100) : 100;
+        $percentCorrect = !empty($results)
+            ? round(collect($results)->where('isCorrect', true)->count() / count($results) * 100)
+            : 100;
 
         return view('pages.assignments.showAssignmentResult', compact(
             'studentAssignment',
-            'answers',
-            'assignmentFields',
+            'results',
             'percentCorrect',
             'classes',
             'user'

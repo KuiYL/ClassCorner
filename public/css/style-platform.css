@@ -57,7 +57,7 @@ body {
     display: flex;
     height: 100vh;
     overflow: hidden;
-    background-color: rgb(249 250 251);
+
 }
 
 .wrapper {
@@ -108,7 +108,9 @@ textarea {
     padding: 0;
 }
 
-aside {
+aside,
+.topbar,
+form {
     font-family: "MontserratAlternates", sans-serif;
 }
 
@@ -137,161 +139,65 @@ aside {
     border-radius: 9999px;
 }
 
-.topbar {
-    display: flex;
+main.position-relative {
+    margin-left: 0;
+}
+
+@media (min-width: 768px) {
+    main.position-relative {
+        margin-left: 250px;
+    }
+}
+
+.toast-enter {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.toast-enter-active {
+    opacity: 1;
+    transform: translateY(0);
+    transition: all 0.3s ease-out;
+}
+
+.toast-leave {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast-leave-active {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s ease-in;
+}
+
+.modal.show .modal-content {
+    opacity: 1 !important;
+    transform: scale(1);
+}
+
+.material-item {
+    transition: all 0.3s ease;
+}
+
+.material-item.fade-out {
+    opacity: 0;
+    transform: scale(0.95);
+}
+
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
     overflow: hidden;
-    flex-direction: column;
-    flex: 1 1 0%;
 }
 
-.topbar .header-app {
-    display: flex;
-    padding-top: 1rem;
-    padding-bottom: 1rem;
-    padding-left: 1.5rem;
-    padding-right: 1.5rem;
-    justify-content: flex-end;
-    align-items: center;
-    border-bottom-width: 1px;
-    border-color: #E5E7EB;
-    background-color: #ffffff;
+.truncate {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
-.topbar .search {
-    display: flex;
-    align-items: center;
-    width: 100%;
-    max-width: 400px;
-
-}
-
-.topbar .search button {
-    margin-right: 1rem;
-    color: #6B7280;
-}
-
-.topbar .search .block-input {
-    position: relative;
-    width: 100%;
-    max-width: 400px;
-    margin: 0 auto;
-}
-
-.topbar .search input {
-    display: block;
-    width: 100%;
-    padding: 0.75rem 1rem 0.75rem 3rem;
-    border-radius: 0.5rem;
-    border: 1px solid #D1D5DB;
-    background-color: #F9FAFB;
-    outline: none;
-    transition: border-color 0.2s, box-shadow 0.2s;
-    font-size: 1rem;
-    color: #374151;
-}
-
-.topbar .search input:focus {
-    border-color: #616EBD;
-    box-shadow: 0 0 0 3px rgba(110, 118, 193, 0.3);
-    background-color: #FFFFFF;
-}
-
-.topbar .search .icon {
-    position: absolute;
-    top: 50%;
-    left: 1rem;
-    transform: translateY(-50%);
-    font-size: 1.25rem;
-    color: #9CA3AF;
-    pointer-events: none;
-    transition: color 0.2s;
-}
-
-.topbar .search input:focus+.icon {
-    color: #6E76C1;
-}
-
-.topbar .account {
-    margin: 0.25rem;
-    display: flex;
-    align-items: center;
-    margin-left: 1rem;
-    position: relative;
-}
-
-.topbar .account img {
-    border-radius: 9999px;
-    width: 4rem;
-    height: 4rem;
-}
-
-.topbar .account .text {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    padding-right: 1rem;
-}
-
-.topbar .account .name {
-    font-weight: 500;
-    color: #111827;
-}
-
-.topbar .account .position {
-    font-weight: 500;
-    color: #1F2937;
-    color: 15px;
-}
-
-.topbar .account .settings {
-    position: absolute;
-    top: 2px;
-    right: -4px;
-    color: #9CA3AF;
-    font-size: 1.25rem;
-    text-decoration: none;
-    transition: color 0.3s ease;
-}
-
-.topbar .account .settings:hover {
-    color: #787d86;
-}
-
-.topbar .account .settings i {
-    display: block;
-}
-
-main {
-    display: flex;
-    justify-content: center;
-    align-items: flex-start;
-    overflow-y: auto;
-    padding: 2rem 1.5rem;
-    flex: 1 1 0%;
-    width: 100%;
-    background-image: url('../images/background-app.svg');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    min-height: 100vh;
-    box-sizing: border-box;
-}
-
-.main-platform {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    width: 100%;
-    max-width: 1200px;
-    padding: 1rem;
-    box-sizing: border-box;
-    margin-bottom: 7rem;
-}
-
-.main-platform>* {
-    width: 100%;
-    box-sizing: border-box;
-}
 
 .main-platform .banner {
     width: 100%;
@@ -666,7 +572,7 @@ main {
 .floating-btn button {
     display: flex;
     position: fixed;
-    right: 1.5rem;
+    right: 3rem;
     bottom: 1.5rem;
     justify-content: center;
     align-items: center;
@@ -921,99 +827,6 @@ main {
     color: #201c44;
 }
 
-.modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-}
-
-.modal.active {
-    background-color: rgba(0, 0, 0, 0.5);
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.modal-content {
-    background-color: #fff;
-    padding: 25px 30px;
-    border-radius: 8px;
-    width: 400px;
-    max-width: 90%;
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
-    text-align: center;
-    transform: scale(0.8);
-    opacity: 0;
-    transition: transform 0.3s ease, opacity 0.3s ease;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.modal.active .modal-content {
-    transform: scale(1);
-    opacity: 1;
-}
-
-button.cancel-button,
-button.confirm-button {
-    padding: 10px 20px;
-    font-size: 1rem;
-    border-radius: 5px;
-    border: none;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-button.cancel-button {
-    background-color: #e0e0e0;
-    color: #333;
-}
-
-button.cancel-button:hover {
-    background-color: #c7c7c7;
-}
-
-button.confirm-button {
-    background-color: #d9534f;
-    color: white;
-}
-
-button.confirm-button:hover {
-    background-color: #c9302c;
-}
-
-.main-platform form {
-    display: flex;
-    max-width: 680px;
-    margin-bottom: 10rem;
-}
-
-.main-platform form .head-block {
-    text-align: center;
-}
-
-.main-platform form .action-button {
-    max-width: 100%;
-    width: 100%;
-}
-
-.main-platform form .teacher-name {
-    font-size: 1.125rem;
-    font-weight: 600;
-    color: #4A5568;
-    margin-bottom: 0.5rem;
-    text-align: left;
-    letter-spacing: 0.5px;
-}
 
 .main-platform .table {
     margin-bottom: 2rem;
@@ -1763,7 +1576,6 @@ main.profile-container {
     height: 90px;
     object-fit: cover;
     border-radius: 50%;
-    border: 3px solid rgba(255, 255, 255, 0.8);
 }
 
 .profile-container .profile-info {
@@ -1896,7 +1708,7 @@ main.profile-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1000;
+    z-index: 1050;
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.2s ease, visibility 0.2s ease;
@@ -2168,210 +1980,6 @@ main.profile-container {
     border-radius: 8px;
 }
 
-.main-platform .assignment-detail {
-    max-width: 1000px;
-    margin: auto;
-}
-
-.main-platform .assignment-detail .card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
-    overflow: hidden;
-    transition: transform 0.3s ease;
-}
-
-.main-platform .assignment-detail .card:hover {
-    transform: translateY(-4px);
-}
-
-.main-platform .assignment-detail .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    background: linear-gradient(to right, #555EB1, #616EBD);
-    color: white;
-    border-bottom: none;
-}
-
-.main-platform .assignment-detail .card-header h2 {
-    font-size: 1.8rem;
-    margin: 0;
-    font-weight: 600;
-    max-width: 60%;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.main-platform .assignment-detail .card-body {
-    padding: 2rem;
-    background-color: #f9fafb;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.main-platform .assignment-detail .card-body .info {
-    background-color: #f9fafb;
-    display: flex;
-    flex-direction: column;
-    gap: 2px;
-    margin-bottom: 1rem;
-}
-
-.main-platform .assignment-detail .description {
-    word-break: break-word;
-    overflow-wrap: anywhere;
-    padding: 1rem;
-    border-left: 4px solid #616EBD;
-    border-radius: 8px;
-    font-size: 1rem;
-    color: #201;
-    line-height: 1.6;
-    margin-top: 1rem;
-}
-
-.due-date-container {
-    display: flex;
-    align-items: center;
-    font-size: 1.1rem;
-    padding: 0.6rem 0;
-    color: #fff;
-}
-
-.due-date-label {
-    font-weight: 500;
-    margin-right: 0.6rem;
-}
-
-.due-date-value {
-    background-color: #f2f1f5;
-    border-radius: 6px;
-    padding: 0.4rem 0.8rem;
-    font-weight: bold;
-    color: #111827;
-}
-
-.main-platform .assignment-detail .fields {
-    margin-top: 2rem;
-}
-
-.main-platform .assignment-detail .fields h3 {
-    margin-bottom: 1rem;
-}
-
-.main-platform .assignment-detail .field-item {
-    background-color: #ffffff;
-    border: 1px solid #e5e7eb;
-    padding: 1.6rem;
-    border-radius: 10px;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.04);
-    transition: box-shadow 0.3s ease;
-}
-
-.main-platform .assignment-detail .field-item:hover {
-    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
-}
-
-.main-platform .assignment-detail .field-item h4 {
-    font-size: 1.4rem;
-    color: #201c44;
-    margin-bottom: 1rem;
-}
-
-.main-platform .assignment-detail .field-item p {
-    margin-bottom: 0.6rem;
-    font-size: 1rem;
-    color: #4b5563;
-}
-
-.field-type-box {
-    background-color: #f3f4f6;
-    padding: 1rem 1.2rem;
-    border-radius: 8px;
-    border-left: 5px solid #555EB1;
-}
-
-.text-field {
-    border-left-color: #555EB1;
-}
-
-.file-field {
-    border-left-color: #555EB1;
-}
-
-.options-list {
-    list-style: none;
-    padding-left: 0;
-    margin-top: 1rem;
-}
-
-.options-list li {
-    margin-bottom: 1rem;
-}
-
-.options-list input[type="checkbox"],
-.options-list input[type="radio"] {
-    margin-right: 0.6rem;
-}
-
-.options-list label {
-    font-size: 1.1rem;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.correct {
-    color: #10b981;
-    font-weight: bold;
-    margin-left: 0.5rem;
-}
-
-/* Кнопки */
-.main-platform .assignment-detail .card-footer {
-    padding: 1.5rem 2rem;
-    background-color: #f3f4f6;
-    border-top: 1px solid #e5e7eb;
-    text-align: right;
-}
-
-.main-platform .assignment-detail .btn {
-    padding: 0.6rem 1.4rem;
-    border-radius: 6px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all 0.3s ease-in-out;
-    display: inline-block;
-    border: none;
-    font-size: 1rem;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-}
-
-.main-platform .assignment-detail .btn:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-.main-platform .assignment-detail .btn-edit {
-    background-color: #555EB1;
-    color: white;
-}
-
-.main-platform .assignment-detail .btn-edit:hover {
-    background-color: #616EBD;
-}
-
-.main-platform .assignment-detail .btn-delete {
-    background-color: #ef4444;
-    color: white;
-}
-
-.main-platform .assignment-detail .btn-delete:hover {
-    background-color: #dc2626;
-}
 
 .invite-student-btn {
     padding: 0.5rem 1rem;
@@ -2850,263 +2458,6 @@ main.profile-container {
     padding: 0.5rem;
 }
 
-.assignment-form {
-    max-width: 1000px;
-    width: 100%;
-    margin: 2rem auto;
-    background-color: #fff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.07);
-    padding: 2rem;
-}
-
-.assignment-form form {
-    max-width: none;
-    margin-bottom: 0;
-}
-
-.assignment-form h2 {
-    font-size: 1.8rem;
-    margin-bottom: 1.5rem;
-    color: #333;
-    word-break: break-word;
-    overflow-wrap: anywhere;
-}
-
-.assignment-form h3 {
-    font-size: 1.4rem;
-    margin-top: 2rem;
-    margin-bottom: 1rem;
-    color: #555EB1;
-}
-
-.assignment-form .form-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 1.5rem;
-    align-items: start;
-    min-width: 400px;
-    flex: 1;
-}
-
-.assignment-form .form-group.full {
-    grid-column: span 2;
-}
-
-.assignment-form .form-group label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #555;
-}
-
-.assignment-form .form-group input,
-.assignment-form .form-group textarea,
-.assignment-form .form-group select {
-    width: 100%;
-    padding: 0.75rem;
-    border: 1px solid #ccc;
-    border-radius: 8px;
-    font-size: 1rem;
-    transition: border-color 0.3s ease;
-    margin-top: 0.5rem;
-}
-
-.assignment-form .form-group input:focus,
-.assignment-form .form-group textarea:focus,
-.assignment-form .form-group select:focus {
-    border-color: #555EB1;
-    outline: none;
-}
-
-.assignment-form .form-divider {
-    margin: 2rem 0;
-    border: none;
-    height: 1px;
-    background: #eee;
-}
-
-.assignment-form .fields-container {
-    margin-top: 1rem;
-}
-
-.assignment-form .field {
-    background-color: #f9f9f9;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 1rem;
-    margin-bottom: 1rem;
-    position: relative;
-    transition: transform 0.2s ease;
-}
-
-.assignment-form .field:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-}
-
-.assignment-form .field h4 {
-    margin: 0 0 1rem 0;
-    font-size: 1rem;
-    color: #333;
-}
-
-.assignment-form .field .form-group:first-child {
-    margin-bottom: 1rem;
-}
-
-.assignment-form .field .form-group:nth-child(2) {
-    margin-bottom: 1rem;
-}
-
-.assignment-form .options-container {
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #eee;
-}
-
-.options-container.hidden {
-    display: none;
-}
-
-.assignment-form .option {
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    margin-bottom: 0.5rem;
-}
-
-.assignment-form .option input[type="text"] {
-    flex: 1;
-    padding: 0.5rem 0.75rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.assignment-form .option button.remove-option-btn {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.4rem 0.6rem;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-}
-
-.assignment-form .option button.remove-option-btn:hover {
-    background-color: #c0392b;
-}
-
-.assignment-form .add-field-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 0.5rem;
-    width: auto;
-    min-width: 200px;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    border-radius: 8px;
-    background-color: #3d8b48;
-    color: white;
-    border: none;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-    margin: 1rem auto;
-}
-
-.assignment-form .add-field-btn:hover {
-    background-color: #246d2d;
-}
-
-.assignment-form .remove-field-btn {
-    position: absolute;
-    top: 10px;
-    right: 10px;
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    padding: 0.4rem 0.6rem;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
-}
-
-.assignment-form .remove-field-btn:hover {
-    background-color: #c0392b;
-}
-
-.assignment-form .add-option-btn {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.5rem;
-    background-color: #6E76C1;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    font-size: 0.95rem;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.assignment-form .add-option-btn:hover {
-    background-color: #555EB1;
-}
-
-
-.assignment-form .btn.primary.large.full-width {
-    margin-top: 15px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    padding: 0.75rem;
-    font-size: 1.1rem;
-    border-radius: 8px;
-    background-color: #6E76C1;
-    color: white;
-    border: none;
-    transition: background-color 0.3s ease;
-    cursor: pointer;
-}
-
-.assignment-form .btn.primary.large.full-width:hover {
-    background-color: #555EB1;
-}
-
-.assignment-form .option input[type="text"] {
-    flex: 1;
-    padding: 0.6rem 1rem;
-    font-size: 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    min-width: 200px;
-}
-
-.assignment-form .option input[type="radio"],
-.assignment-form .option input[type="checkbox"] {
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    width: auto;
-}
-
-.assignment-form .remove-option-btn {
-    background-color: #e74c3c;
-    color: white;
-    border: none;
-    padding: 0.4rem 0.6rem;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 0.9rem;
-    transition: background-color 0.2s ease;
-}
-
-.assignment-form .remove-option-btn:hover {
-    background-color: #c0392b;
-}
 
 .validation-toast {
     position: fixed;
@@ -3134,174 +2485,4 @@ main.profile-container {
 .form-group textarea.error,
 .form-group select.error {
     border-color: #e74c3c !important;
-}
-
-.assignment-grade {
-    max-width: 1000px;
-}
-
-.assignment-grade .card {
-    background-color: #ffffff;
-    border-radius: 12px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-    overflow: hidden;
-    transition: transform 0.2s ease-in-out;
-}
-
-.assignment-grade .card:hover {
-    transform: translateY(-2px);
-}
-
-.assignment-grade .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 1.5rem 2rem;
-    background-color: #9CA4F2;
-    border-bottom: 1px solid #eaeaea;
-}
-
-.assignment-grade .card-header h2 {
-    font-size: 1.6rem;
-    color: #fff;
-}
-
-.assignment-grade .btn {
-    display: inline-block;
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    text-decoration: none;
-    font-weight: 500;
-    cursor: pointer;
-    transition: all 0.2s ease-in-out;
-}
-
-.assignment-grade .btn-secondary {
-    background-color: transparent;
-    color: #ffffff;
-    border: 1px solid #ffffff;
-}
-
-.assignment-grade .btn-secondary:hover {
-    background-color: #ffffff;
-    color: #6E76C1;
-    border-color: #6E76C1;
-}
-
-.assignment-grade .btn-primary {
-    background-color: #6E76C1;
-    color: white;
-    border: none;
-}
-
-.assignment-grade .btn-primary:hover {
-    background-color: #6E76C1;
-}
-
-.assignment-grade .card-body {
-    padding: 2rem;
-}
-
-.assignment-grade .assignment-info {
-    margin-bottom: 2rem;
-}
-
-.assignment-grade .assignment-info h4 {
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    color: #201c44;
-}
-
-.assignment-grade .info-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
-}
-
-.assignment-grade .info-item p {
-    margin-bottom: 0.5rem;
-}
-
-.assignment-grade .badge {
-    display: inline-block;
-    padding: 0.3rem 0.6rem;
-    font-size: 0.8rem;
-    border-radius: 4px;
-}
-
-.assignment-grade .bg-success {
-    background-color: #d4edda;
-    color: #155724;
-}
-
-.assignment-grade .bg-danger {
-    background-color: #f8d7da;
-    color: #721c24;
-}
-
-.assignment-grade .student-answers {
-    margin-bottom: 2rem;
-}
-
-.assignment-grade .student-answers h4 {
-    margin-bottom: 1rem;
-    font-size: 1.1rem;
-    color: #201c44;
-}
-
-.assignment-grade .student-answer {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background-color: #f9fbff;
-    border-left: 4px solid #555eb1;
-    border-radius: 6px;
-}
-
-.assignment-grade .correct {
-    color: #28a745;
-    font-weight: bold;
-}
-
-.assignment-grade .no-answer {
-    padding: 1rem;
-    background-color: #fff3cd;
-    border-left: 4px solid #ffc107;
-    border-radius: 6px;
-    color: #856404;
-}
-
-.grading-form {
-    margin-top: 2rem;
-    display: flex;
-    justify-content: center;
-}
-
-.grading-form form {
-    width: 100%;
-    max-width: 800px;
-    border-radius: 8px;
-    display: flex;
-    flex-direction: column;
-}
-
-.grading-form .form-group {
-    margin-bottom: 1.5rem;
-}
-
-.grading-form label {
-    display: block;
-    margin-bottom: 0.5rem;
-    font-weight: 500;
-}
-
-.grading-form .form-control {
-    width: 100%;
-    padding: 0.75rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-}
-
-.grading-form textarea.form-control {
-    resize: vertical;
 }

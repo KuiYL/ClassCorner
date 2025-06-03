@@ -16,7 +16,7 @@ class StudentAssignmentsController extends Controller
     {
         try {
             $assignment = Assignments::findOrFail($id);
-            $answers = $request->input('answers', []); // Получаем ответы
+            $answers = $request->input('answers', []);
 
             if (empty($answers)) {
                 return back()->withErrors(['answers' => 'Необходимо заполнить хотя бы одно поле.']);
@@ -125,7 +125,7 @@ class StudentAssignmentsController extends Controller
                 'status' => 'graded',
             ]);
 
-            return redirect()->route('assignments.to.grade')->with('success', 'Результаты успешно отправлены!');
+            return redirect()->back()->with('success', 'Результаты успешно отправлены!');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

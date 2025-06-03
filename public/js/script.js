@@ -284,70 +284,106 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
     // Логика для модального окна
-    const modal = document.getElementById('modal');
-    const modalTitle = document.getElementById('modalTitle');
-    const modalText = document.getElementById('modalText');
-    const deleteForm = document.getElementById('deleteForm');
-    const cancelDelete = document.getElementById('cancelDelete');
+    const modal = document.getElementById("modal");
+    const modalTitle = document.getElementById("modalTitle");
+    const modalText = document.getElementById("modalText");
+    const deleteForm = document.getElementById("deleteForm");
+    const cancelDeleteHeaderBtn = document.getElementById("cancelDeleteHeaderBtn");
+    const cancelDeleteFormBtn = document.getElementById("cancelDeleteFormBtn");
 
-    if (modal && modalTitle && modalText && deleteForm && cancelDelete) {
-        const openModal = (itemId, itemName, itemType) => {
-            let deleteUrl = '';
-            let entityName = '';
+    if (!modal || !modalTitle || !modalText || !deleteForm) return;
 
-            switch (itemType) {
-                case 'class':
-                    deleteUrl = `/classes/${itemId}`;
-                    entityName = 'класс';
-                    break;
-                case 'assignment':
-                    deleteUrl = `/assignments/${itemId}`;
-                    entityName = 'задание';
-                    break;
-                case 'user':
-                    deleteUrl = `/users/${itemId}`;
-                    entityName = 'пользователя';
-                    break;
-                default:
-                    console.error(`Неизвестный тип: ${itemType}`);
-                    return;
-            }
+    function openModal(itemId, itemName, itemType) {
+        let entityType = "";
+        switch (itemType) {
+            case "class":
+                entityType = "класс";
+                deleteForm.action = `/classes/${itemId}`;
+                break;
+            case "assignment":
+                entityType = "задание";
+                deleteForm.action = `/assignments/${itemId}`;
+                break;
+            case "user":
+                entityType = "пользователь";
+                deleteForm.action = `/users/${itemId}`;
+                break;
+            case "assignmentMaterial":
+                entityType = "материал";
+                deleteForm.action = `/assignment/material/${itemId}`;
+                break;
+            default:
+                console.error("Неизвестный тип:", itemType);
+                return;
+        }
 
-            deleteForm.action = deleteUrl;
-            modalTitle.textContent = `Удалить ${entityName}?`;
-            modalText.textContent = `Вы уверены, что хотите удалить ${entityName} "${itemName}"?`;
+        modalTitle.textContent = `Удалить ${entityType}?`;
+        modalText.textContent = `Вы уверены, что хотите удалить "${itemName}"?`;
 
-            modal.classList.add('active');
-        };
-
-        const closeModal = () => {
-            modal.classList.remove('active');
-
-            setTimeout(() => {
-                modal.style.pointerEvents = 'none';
-            }, 300);
-        };
-
-        document.querySelectorAll('.delete-button').forEach(button => {
-            button.addEventListener('click', () => {
-                const itemId = button.dataset.id;
-                const itemName = button.dataset.name;
-                const itemType = button.dataset.type;
-                openModal(itemId, itemName, itemType);
-                modal.style.pointerEvents = 'auto';
-            });
-        });
-
-        cancelDelete.addEventListener('click', () => {
-            closeModal();
-        });
-
-        modal.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                closeModal();
-            }
-        });
+        modal.style.display = "flex";
+        setTimeout(() => {
+            modal.classList.add("show");
+        }, 10);
     }
 
+    function closeModal() {
+        modal.classList.remove("show");
+        setTimeout(() => {
+            modal.style.display = "none";
+        }, 10);
+        deleteForm.action = "";
+    }
+
+    document.body.addEventListener("click", function (e) {
+        const btn = e.target.closest(".delete-button");
+        if (btn) {
+            const itemId = btn.dataset.id;
+            const itemName = btn.dataset.name;
+            const itemType = btn.dataset.type;
+            openModal(itemId, itemName, itemType);
+        }
+    });
+
+    cancelDeleteHeaderBtn.addEventListener("click", closeModal);
+    cancelDeleteFormBtn.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", function (e) {
+        if (e.target === modal) {
+            closeModal();
+        }
+    });
+
+    const formInputs = document.querySelectorAll("input, textarea, select");
+
+    formInputs.forEach(input => {
+        if (input.classList.contains("border-red-500") || input.classList.contains("input-error")) {
+            input.addEventListener("input", function () {
+                if (this.value.trim() !== "") {
+                    this.classList.remove("border-red-500", "input-error");
+
+                    const errorSpan = this.closest('.relative')?.nextElementSibling;
+                    if (errorSpan && errorSpan.classList.contains('text-red-500')) {
+                        errorSpan.style.display = 'none';
+                    }
+                }
+            });
+        }
+    });
+
+    const formSelects = document.querySelectorAll("select");
+    formSelects.forEach(select => {
+        if (select.classList.contains("border-red-500") || select.classList.contains("input-error")) {
+            select.addEventListener("change", function () {
+                if (this.value) {
+                    this.classList.remove("border-red-500", "input-error");
+
+                    const errorSpan = this.closest('.relative')?.nextElementSibling;
+                    if (errorSpan && errorSpan.classList.contains('text-red-500')) {
+                        errorSpan.style.display = 'none';
+                    }
+                }
+            });
+        }
+    });
 });
 

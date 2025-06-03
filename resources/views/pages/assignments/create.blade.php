@@ -1,75 +1,131 @@
-@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => 'Добавление задания', 'quick_action' => 'null'])
+@extends('pages.platform.layout', ['activePage' => 'null', 'title' => 'Добавление задания', 'quick_action' => 'null'])
 @section('content')
-    <div class="main-platform">
-        <div class="assignment-form">
-            <form id="assignment-form" action="{{ route('assignment.store') }}" method="POST">
-                @csrf
-                <div class="form-layout">
-                    <div class="form-grid">
-                        <h2><span class="attention-title">Создать</span> новое задание</h2>
-                        <div class="form-group full">
-                            <label for="title">Название задания:</label>
-                            <input type="text" id="title" name="title" value="{{ old('title') }}"
-                                class="{{ $errors->has('title') ? 'input-error error' : '' }}">
-                            @error('title')
-                                <div class="error-message">{{ $message }}</div>
-                            @enderror
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="class_id">Выберите класс:</label>
-                                <select id="class_id" name="class_id"
-                                    class="{{ $errors->has('class_id') ? 'input-error error' : '' }}">
-                                    <option value="">-- Выберите класс --</option>
-                                    @foreach ($classes as $class)
-                                        <option value="{{ $class->id }}"
-                                            {{ old('class_id', $selectedClass?->id) == $class->id ? 'selected' : '' }}>
-                                            {{ $class->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                @error('class_id')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
-                            </div>
-                            <div class="form-group">
-                                <label for="due_date">Дата сдачи:</label>
-                                <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}"
-                                    class="{{ $errors->has('due_date') ? 'input-error error' : '' }}">
-                                @error('due_date')
-                                    <div class="error-message">{{ $message }}</div>
-                                @enderror
-                            </div>
-                        </div>
-                        <div class="form-group full">
-                            <label for="description">Описание задания:</label>
-                            <textarea id="description" name="description" rows="5"
-                                class="{{ $errors->has('description') ? 'input-error error' : '' }}">{{ old('description') }}</textarea>
-                            @error('description')
-                                <div class="error-message">{{ $message }}</div>
-                            @enderror
-                        </div>
-                    </div>
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
+        <div class="bg-white px-6 py-4 border-b border-gray-200">
+            <h2
+                class="text-2xl font-bold text-gray-900 flex items-center transition-transform duration-300 hover:text-[#6E76C1]">
+                <i class="fas fa-book-open mr-2 text-[#6E76C1]"></i>
+                Создать новое задание
+            </h2>
+        </div>
 
-                    <div class="form-fields-section">
-                        <h3>Конструктор задания</h3>
-                        <div class="fields-container" id="fields-container"></div>
-                        <button type="button" id="add-field-btn" class="btn primary add-field-btn">
-                            <i class="fas fa-plus"></i> Добавить поле
-                        </button>
+        <form id="assignment-form" action="{{ route('assignment.store') }}" method="POST" class="p-6 space-y-6"
+            enctype="multipart/form-data">
+            @csrf
+            <div>
+                <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Название задания
+                    <span>*</span></label>
+                <div class="relative">
+                    <input type="text" id="title" name="title" value="{{ old('title') }}"
+                        class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200 {{ $errors->has('title') ? 'input-error error' : '' }}"
+                        placeholder="Введите название задания">
+                </div>
+                @error('title')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                    <label for="class_id" class="block text-sm font-medium text-gray-700 mb-1">Выберите класс
+                        <span>*</span></label>
+                    <div class="relative">
+                        <select id="class_id" name="class_id"
+                            class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200 {{ $errors->has('class_id') ? 'input-error error' : '' }}">
+                            <option value="">-- Выберите класс --</option>
+                            @foreach ($classes as $class)
+                                <option value="{{ $class->id }}"
+                                    {{ old('class_id', $selectedClass?->id) == $class->id ? 'selected' : '' }}>
+                                    {{ $class->name }}
+                                </option>
+                            @endforeach
+                        </select>
                     </div>
+                    @error('class_id')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
                 </div>
 
-                <input type="hidden" name="fields_json" id="fields-json">
-                <input type="hidden" name="return_url" value="{{ request('return_url', route('user.assignments')) }}">
+                <div>
+                    <label for="due_date" class="block text-sm font-medium text-gray-700 mb-1">Дата сдачи
+                        <span>*</span></label>
+                    <div class="relative">
 
-                <button type="submit" class="btn primary large full-width mt-2">
-                    Сохранить задание
+                        <input type="date" id="due_date" name="due_date" value="{{ old('due_date') }}"
+                            class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200 {{ $errors->has('due_date') ? 'input-error error' : '' }}">
+                    </div>
+                    @error('due_date')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+
+                <div>
+                    <label for="due_time" class="block text-sm font-medium text-gray-700 mb-1">Время сдачи
+                        <span>*</span></label>
+                    <div class="relative">
+
+                        <input type="time" id="due_time" name="due_time" value="{{ old('due_time', '23:59') }}"
+                            class="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200 {{ $errors->has('due_time') ? 'input-error error' : '' }}">
+                    </div>
+                    @error('due_time')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+
+            <div>
+                <label for="description" class="block text-sm font-medium text-gray-700 mb-1">Описание задания</label>
+                <textarea id="description" name="description" rows="4"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200 {{ $errors->has('description') ? 'input-error error' : '' }}"
+                    placeholder="Введите описание задания">{{ old('description') }}</textarea>
+                @error('description')
+                    <span class="error-message">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div>
+                <label for="materials" class="block text-sm font-medium text-gray-700 mb-1">Материалы для задания
+                    (необязательно)</label>
+                <input type="file" id="materials" name="materials[]" multiple
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
+                <small class="text-gray-500">Вы можете загрузить несколько файлов</small>
+                @error('materials')
+                    <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                @enderror
+            </div>
+            <div>
+                <h3 class="text-xl font-semibold text-gray-900 mb-3 transition-colors duration-300 hover:text-[#6E76C1]">
+                    Конструктор задания
+                </h3>
+                <div id="fields-container" class="space-y-4 mb-4"></div>
+                <button type="button" id="add-field-btn"
+                    class="inline-flex items-center px-4 py-2 bg-[#6E76C1] hover:bg-[#616EBD] text-white text-sm font-medium rounded-md shadow transition duration-200">
+                    <i class="fas fa-plus mr-2"></i> Добавить поле
                 </button>
-            </form>
-        </div>
+            </div>
+
+            <input type="hidden" name="fields_json" id="fields-json" value="{{ old('fields_json', '[]') }}">
+
+            <input type="hidden" name="return_url" value="{{ request('return_url', route('user.assignments')) }}">
+
+            <div class="pt-4 flex justify-between">
+                <a href="{{ url()->previous() }}"
+                    class="inline-flex justify-center px-6 py-3 items-center bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 transition duration-200">
+                    <i class="fas fa-arrow-left mr-2"></i> Назад
+                </a>
+                <button type="submit"
+                    class="inline-flex justify-center px-6 py-3 items-center bg-[#6E76C1] hover:bg-[#616EBD] text-white font-medium rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6E76C1] transition duration-200">
+                    <i class="fas fa-save mr-2"></i> Сохранить задание
+                </button>
+            </div>
+        </form>
     </div>
-    <div id="validation-toast" class="validation-toast"></div>
+
+    <div id="validation-toast"
+        class="fixed bottom-10 right-16 bg-gradient-to-r from-red-500 to-pink-600 text-white text-base font-medium py-3 px-5 rounded-lg shadow-lg flex items-center space-x-2 z-50 opacity-0 hidden transition-all duration-300 ease-in-out transform translate-y-4">
+        <i class="fas fa-exclamation-circle animate-bounce"></i>
+        <span>Пожалуйста, исправьте ошибки в форме.</span>
+    </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
@@ -83,41 +139,50 @@
             let fieldIndex = 0;
 
             function updateOptionInputs(container, type) {
-                container.querySelectorAll(".option").forEach(option => {
+                container.querySelectorAll(".option").forEach((option, index) => {
                     const radioOrCheckbox = option.querySelector(".correct-option");
+                    const namePrefix = `field-${container.closest(".field").dataset.index}`;
                     const isRadio = type === "single_choice";
+
                     radioOrCheckbox.type = isRadio ? "radio" : "checkbox";
-                    radioOrCheckbox.name = isRadio ? `option-${fieldIndex}` : "";
+                    radioOrCheckbox.name = isRadio ? `${namePrefix}-correct-answer` :
+                        `${namePrefix}-correct-answer-${index}`;
                 });
             }
 
             function createFieldElement() {
                 const fieldDiv = document.createElement("div");
-                fieldDiv.className = "field";
+                fieldDiv.className =
+                    "field bg-gray-50 p-4 rounded-lg border border-gray-200 relative group space-y-4";
                 fieldDiv.dataset.index = fieldIndex++;
 
                 fieldDiv.innerHTML = `
                     <div class="form-group">
-                        <label>Название вопроса:</label>
-                        <input type="text" class="field-name" placeholder="Введите вопрос">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Название вопроса:</label>
+                        <input type="text" class="field-name w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200" placeholder="Введите вопрос">
                     </div>
                     <div class="form-group">
-                        <label>Тип вопроса:</label>
-                        <select class="field-type">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Тип вопроса:</label>
+                        <select class="field-type w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
                             <option value="text">Текстовый ответ</option>
                             <option value="file_upload">Загрузка файла</option>
                             <option value="multiple_choice">Множественный выбор</option>
                             <option value="single_choice">Одиночный выбор</option>
                         </select>
                     </div>
-                    <div class="options-container hidden">
-                        <label>Варианты:</label>
-                        <div class="options-list"></div>
-                        <button type="button" class="btn secondary add-option-btn">
-                            <i class="fas fa-plus"></i> Добавить вариант
-                        </button>
+                    <div class="options-container hidden space-y-2">
+                        <div class="flex items-center justify-between">
+                            <label class="block text-sm font-medium text-gray-700">Варианты:</label>
+                            <button type="button"
+                                class="btn secondary add-option-btn inline-flex items-center px-3 py-1 bg-[#6E76C1] hover:bg-[#616EBD] text-white text-sm font-medium rounded shadow transition duration-200">
+                                <i class="fas fa-plus mr-1"></i> Добавить вариант
+                            </button>
+                        </div>
+                        <div class="options-list space-y-2"></div>
                     </div>
-                    <button type="button" class="remove-field-btn btn danger">Удалить поле</button>
+                    <button type="button" class="remove-field-btn btn danger inline-flex items-center px-3 py-1 bg-red-600 hover:bg-red-700 text-white text-sm font-medium rounded shadow transition duration-200">
+                        <i class="fas fa-trash mr-1"></i> Удалить поле
+                    </button>
                 `;
 
                 const fieldTypeSelect = fieldDiv.querySelector(".field-type");
@@ -126,24 +191,56 @@
 
                 fieldTypeSelect.addEventListener("change", function() {
                     const selectedType = this.value;
-                    if (selectedType === "single_choice" || selectedType === "multiple_choice") {
+                    const isSingleChoice = selectedType === "single_choice";
+                    const isMultipleChoice = selectedType === "multiple_choice";
+
+                    optionsList.innerHTML = "";
+
+                    if (isSingleChoice || isMultipleChoice) {
                         optionsContainer.classList.remove("hidden");
-                        updateOptionInputs(optionsList, selectedType);
+
+                        const optionDiv = document.createElement("div");
+                        optionDiv.className = "flex items-center gap-2";
+
+                        optionDiv.innerHTML = `
+                        <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option h-4 w-4 text-[#6E76C1] focus:ring-[#6E76C1] border-gray-300">
+                        <input type="text" class="option-value w-full px-3 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent" placeholder="Введите вариант">
+                        <button type="button" class="remove-option-btn inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
+                        `;
+
+                        optionDiv.querySelector(".remove-option-btn").addEventListener("click", function() {
+                            optionDiv.remove();
+                        });
+
+                        optionDiv.querySelector(".correct-option").addEventListener("click", function(e) {
+                            if (isSingleChoice) {
+                                [...optionsList.querySelectorAll(".correct-option")].forEach(cb =>
+                                    cb.checked = false);
+                                e.target.checked = true;
+                            }
+                        });
+
+                        optionsList.appendChild(optionDiv);
                     } else {
                         optionsContainer.classList.add("hidden");
                     }
                 });
 
+
                 fieldDiv.querySelector(".add-option-btn").addEventListener("click", function() {
                     const optionDiv = document.createElement("div");
-                    optionDiv.className = "option";
+                    optionDiv.className = "flex items-center gap-2";
 
                     const isSingleChoice = fieldTypeSelect.value === "single_choice";
 
                     optionDiv.innerHTML = `
-                        <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option" name="option-${fieldIndex}">
-                        <input type="text" class="option-value" placeholder="Вариант ответа">
-                        <button type="button" class="remove-option-btn"><i class="fas fa-trash"></i></button>
+                        <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option h-4 w-4 text-[#6E76C1] focus:ring-[#6E76C1] border-gray-300">
+                        <input type="text" class="option-value w-full px-3 py-1 border border-gray-300 rounded focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent" placeholder="Введите вариант">
+                        <button type="button" class="remove-option-btn inline-flex items-center justify-center h-8 w-8 rounded-full bg-red-100 text-red-600 hover:bg-red-200">
+                            <i class="fas fa-trash text-xs"></i>
+                        </button>
                     `;
 
                     optionDiv.querySelector(".remove-option-btn").addEventListener("click", function() {
@@ -190,13 +287,13 @@
                             optionsContainer.classList.remove("hidden");
                             field.options.forEach(opt => {
                                 const optionDiv = document.createElement("div");
-                                optionDiv.className = "option";
+                                optionDiv.className = "flex items-center gap-2";
 
                                 const isSingleChoice = field.type === "single_choice";
 
                                 optionDiv.innerHTML = `
-                                    <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option" name="option-${fieldIndex}" ${opt.isCorrect ? 'checked' : ''}>
-                                    <input type="text" class="option-value" value="${opt.value}" placeholder="Вариант ответа">
+                                    <input type="${isSingleChoice ? 'radio' : 'checkbox'}" class="correct-option h-4 w-4" name="option-${fieldIndex}" ${opt.isCorrect ? 'checked' : ''}>
+                                    <input type="text" class="option-value w-full px-3 py-1 border rounded" placeholder="Введите вариант">
                                     <button type="button" class="remove-option-btn"><i class="fas fa-trash"></i></button>
                                 `;
 
@@ -229,46 +326,65 @@
 
                 let isValid = true;
 
-                document.querySelectorAll(".form-group .error").forEach(el => el.classList.remove("error"));
+                document.querySelectorAll(".field-name, .option-value").forEach(el => {
+                    el.classList.remove("input-error");
+                });
 
                 const filledFields = [];
 
                 document.querySelectorAll(".field").forEach(fieldDiv => {
                     const nameInput = fieldDiv.querySelector(".field-name");
-                    const name = nameInput.value.trim();
-                    const type = fieldDiv.querySelector(".field-type").value;
+                    const typeSelect = fieldDiv.querySelector(".field-type");
                     const optionsList = fieldDiv.querySelector(".options-list");
 
+                    const name = nameInput.value.trim();
+                    const type = typeSelect.value;
+
                     if (!name) {
-                        nameInput.classList.add("error");
                         showValidationError("Заполните название вопроса.");
+                        nameInput.classList.add("input-error");
                         isValid = false;
                     }
 
-                    const options = [...optionsList.querySelectorAll(".option")].map(optionDiv => {
-                        const input = optionDiv.querySelector(".option-value");
-                        const isChecked = optionDiv.querySelector(".correct-option")
-                            ?.checked || false;
+                    const optionInputs = [...optionsList.querySelectorAll(".option-value")];
+                    let optionsValid = true;
+
+                    const options = optionInputs.map(input => {
                         const value = input.value.trim();
-
                         if (!value) {
-                            input.classList.add("error");
-                            showValidationError("Все варианты должны содержать текст.");
-                            isValid = false;
+                            input.classList.add("input-error");
+                            optionsValid = false;
+                        } else {
+                            input.classList.remove("input-error");
                         }
-
                         return {
                             value,
-                            isCorrect: isChecked
+                            isCorrect: input.closest(".flex")?.querySelector(
+                                ".correct-option")?.checked || false
                         };
                     });
 
+                    if (!optionsValid) {
+                        showValidationError("Все варианты должны быть заполнены.");
+                        isValid = false;
+                    }
+
                     if ((type === "single_choice" || type === "multiple_choice") && options.length >
                         0) {
+                        const hasAtLeastOneOption = options.some(opt => opt.value.trim());
+                        if (!hasAtLeastOneOption) {
+                            showValidationError("Добавьте хотя бы один вариант ответа.");
+                            isValid = false;
+                        }
+                    }
+
+                    if (type === "single_choice" && options.length > 0) {
                         const hasCorrectAnswer = options.some(opt => opt.isCorrect);
                         if (!hasCorrectAnswer) {
                             showValidationError(
-                                `Выберите правильный вариант для вопроса "${name}"`);
+                                `Выберите правильный вариант для вопроса "${name || 'без названия'}".`
+                            );
+                            optionInputs.forEach(input => input.classList.add("input-error"));
                             isValid = false;
                         }
                     }
@@ -288,9 +404,22 @@
 
             function showValidationError(message) {
                 toast.textContent = message;
-                toast.classList.add("show");
+
+                toast.classList.remove("hidden", "opacity-0");
+                toast.classList.add("toast-enter");
+
                 setTimeout(() => {
-                    toast.classList.remove("show");
+                    toast.classList.remove("toast-enter");
+                    toast.classList.add("toast-enter-active");
+                }, 10);
+
+                setTimeout(() => {
+                    toast.classList.remove("toast-enter-active");
+                    toast.classList.add("toast-leave");
+                    setTimeout(() => {
+                        toast.classList.remove("toast-leave", "hidden", "opacity-100");
+                        toast.classList.add("hidden");
+                    }, 300);
                 }, 3000);
             }
         });

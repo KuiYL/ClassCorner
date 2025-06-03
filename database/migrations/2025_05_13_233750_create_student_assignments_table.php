@@ -20,6 +20,8 @@ return new class extends Migration
             $table->integer('grade')->nullable();  // Оценка
             $table->text('feedback')->nullable();  // Отзыв
             $table->json('student_answer')->nullable();
+            $table->timestamp('submitted_at')->nullable();  // Когда студент сдал задание
+            $table->boolean('is_late')->default(false);
             $table->timestamps();
         });
     }

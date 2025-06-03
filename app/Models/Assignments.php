@@ -36,7 +36,7 @@ class Assignments extends Model
 
     public function studentAssignments()
     {
-        return $this->hasMany(StudentAssignments::class);
+        return $this->hasMany(StudentAssignments::class, 'assignment_id');
     }
 
     public function scopeActive($query)
@@ -52,11 +52,20 @@ class Assignments extends Model
         ];
         return $statuses[$this->status] ?? $this->status;
     }
-public function students()
+    public function students()
     {
         return $this->belongsToMany(User::class, 'student_assignments', 'assignment_id', 'user_id')
             ->withPivot(['status', 'grade', 'feedback', 'student_answer', 'file_path'])
             ->withTimestamps();
     }
 
+    public function materials()
+    {
+        return $this->hasMany(AssignmentMaterial::class, 'assignment_id');
+    }
+
+    public function getFields()
+    {
+        return json_decode($this->options, true) ?: [];
+    }
 }

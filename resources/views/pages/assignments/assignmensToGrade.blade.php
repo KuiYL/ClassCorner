@@ -1,4 +1,4 @@
-@extends('pages.platform.layout', ['activePage' => 'tasks', 'title' => 'Задания на проверку', 'quick_action' => 'null'])
+@extends('pages.platform.layout', ['activePage' => 'null', 'title' => 'Задания на проверку', 'quick_action' => 'null'])
 @section('content')
     <style>
         :root {
