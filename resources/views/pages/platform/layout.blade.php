@@ -25,6 +25,19 @@
 
         <main class="flex-grow-1 overflow-y-auto bg-white px-md-4 py-md-3">
             <div class="container-fluid p-3 p-md-4">
+                @if (session('success'))
+                    <div class="toast-notification success">
+                        <div class="toast-line"></div>
+                        {{ session('success') }}
+                    </div>
+                @endif
+
+                @if (session('error'))
+                    <div class="toast-notification error">
+                        <div class="toast-line"></div>
+                        {{ session('error') }}
+                    </div>
+                @endif
                 @yield('content')
             </div>
         </main>

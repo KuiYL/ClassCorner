@@ -257,30 +257,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Логика для выпадающего меню
-    const settingsIcons = document.querySelectorAll('.class-settings');
-
-    settingsIcons.forEach(settingsIcon => {
-        const settingsMenu = settingsIcon.querySelector('.settings-menu');
-
-        if (settingsMenu) {
-            settingsIcon.addEventListener('click', (e) => {
-                e.stopPropagation();
-                document.querySelectorAll('.settings-menu').forEach(menu => {
-                    if (menu !== settingsMenu) {
-                        menu.classList.remove('active');
-                    }
-                });
-                settingsMenu.classList.toggle('active');
-            });
-        }
-    });
-
-    document.addEventListener('click', () => {
-        document.querySelectorAll('.settings-menu').forEach(menu => {
-            menu.classList.remove('active');
-        });
-    });
 
 
     // Логика для модального окна
@@ -385,5 +361,18 @@ document.addEventListener('DOMContentLoaded', () => {
             });
         }
     });
+
+    const toast = document.querySelector(".toast-notification");
+    if (!toast) return;
+
+    toast.classList.add("show");
+
+    setTimeout(() => {
+        toast.style.opacity = "0";
+        toast.style.transform = "translateX(20px)";
+        setTimeout(() => {
+            toast.remove();
+        }, 400);
+    }, 3000);
 });
 

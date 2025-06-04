@@ -9,6 +9,8 @@ use App\Models\StudentAssignments;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -206,17 +208,51 @@ class PagesController extends Controller
         switch ($user->role) {
             case 'teacher':
                 $classes = $this->getUserClasses($user);
-                return view('pages.platform.classesTeacher', compact('user', 'classes'));
+                $classes = $user->classes;
+                $perPage = 6;
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $paginatedItems = new LengthAwarePaginator(
+                    Collection::make($classes)->forPage($currentPage, $perPage),
+                    count($classes),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.classes')]
+                );
+
+                return view('pages.platform.classesTeacher', compact('user', 'paginatedItems', 'classes'));
+
             case 'admin':
                 $classes = Classes::all();
-                return view('pages.platform.dashboardAdmin', compact('user'));
+                $perPage = 6;
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $paginatedItems = new LengthAwarePaginator(
+                    $classes->forPage($currentPage, $perPage),
+                    $classes->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.classes')]
+                );
+                return view('pages.platform.dashboardAdmin', compact('user', 'paginatedItems'));
+
             case 'student':
                 $classes = $this->getUserClasses($user);
                 $invitations = Invitation::where('invitee_email', $user->email)
                     ->where('status', 'pending')
                     ->with('class.teacher')
                     ->get();
-                return view('pages.platform.classesStudent', compact('user', 'classes', 'invitations'));
+
+                $perPage = 6;
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $paginatedItems = new LengthAwarePaginator(
+                    Collection::make($classes)->forPage($currentPage, $perPage),
+                    count($classes),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.classes')]
+                );
+
+                return view('pages.platform.classesStudent', compact('user', 'paginatedItems', 'invitations'));
+
             default:
                 abort(403, 'Нет доступа');
         }

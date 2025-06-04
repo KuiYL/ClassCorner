@@ -4,7 +4,7 @@
     <div class="container-fluid py-6 px-md-4">
 
         <div class="bg-white rounded-lg shadow-md border border-gray-200 mb-6">
-            <div class="p-6 bg-gradient-to-r from-[#6E76C1] to-blue-500 text-white rounded-t-lg">
+            <div class="p-6 bg-gradient-to-r from-[#6E76C1] to-[#9CA4F2] text-white rounded-t-lg">
                 <h2 class="text-3xl font-bold leading-tight">{{ $class->name }}</h2>
                 <p class="mt-2 text-sm opacity-90">{{ $class->description }}</p>
             </div>
@@ -315,37 +315,37 @@
                     resultsList.classList.add("hidden");
                 }
             });
-        });
 
-        const filterType = document.getElementById("filter-type");
-        const cards = document.querySelectorAll("#assignments-grid .card");
+            const filterType = document.getElementById("filter-type");
+            const cards = document.querySelectorAll("#assignments-grid .card");
 
-        if (!filterType || !cards.length) return;
+            if (!filterType || !cards.length) return;
 
-        filterType.addEventListener("change", function() {
-            const selectedType = this.value.trim();
+            filterType.addEventListener("change", function() {
+                const selectedType = this.value.trim();
 
-            let hasVisible = false;
+                let hasVisible = false;
 
-            cards.forEach(card => {
-                const cardTypes = card.dataset.types ? JSON.parse(card.dataset.types) : [];
+                cards.forEach(card => {
+                    const cardTypes = card.dataset.types ? JSON.parse(card.dataset.types) : [];
 
-                if (!selectedType || cardTypes.includes(selectedType)) {
-                    card.style.display = "block";
-                    hasVisible = true;
-                } else {
-                    card.style.display = "none";
-                }
+                    if (!selectedType || cardTypes.includes(selectedType)) {
+                        card.style.display = "block";
+                        hasVisible = true;
+                    } else {
+                        card.style.display = "none";
+                    }
+                });
+
+                const noResults = document.getElementById("no-results");
+                noResults.classList.toggle("hidden", hasVisible);
             });
 
-            const noResults = document.getElementById("no-results");
-            noResults.classList.toggle("hidden", hasVisible);
-        });
-
-        document.getElementById("clear-filter").addEventListener("click", function() {
-            filterType.value = "";
-            cards.forEach(card => card.style.display = "block");
-            document.getElementById("no-results").classList.add("hidden");
+            document.getElementById("clear-filter").addEventListener("click", function() {
+                filterType.value = "";
+                cards.forEach(card => card.style.display = "block");
+                document.getElementById("no-results").classList.add("hidden");
+            });
         });
     </script>
 @endsection

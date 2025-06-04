@@ -63,6 +63,6 @@ class ClassesController extends Controller
         $class = Classes::findOrFail($id);
         $class->delete();
 
-        return redirect()->back()->with('success', 'Класс успешно удален.');
+        return redirect()->route('user.classes')->with('success', 'Класс успешно удален.');
     }
 }
