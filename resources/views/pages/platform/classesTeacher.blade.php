@@ -31,7 +31,7 @@
                 <div class="flex-1 min-w-[200px]">
                     <label for="filter-name" class="block text-sm font-medium text-gray-700 mb-1">Фильтр по названию</label>
                     <input type="text" id="filter-name" placeholder="Например: Математика"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
+                        class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
                 </div>
 
                 <div class="self-end">

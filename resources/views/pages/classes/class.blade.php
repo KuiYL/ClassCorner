@@ -37,7 +37,7 @@
                     Задания
                 </h3>
                 <a href="{{ route('assignments.create', ['classId' => $class->id, 'return_url' => url()->current()]) }}"
-                    class="btn btn-primary bg-[#6E76C1] hover:bg-[#616EBD] rounded-md px-4 py-2 text-white">
+                    class="btn bg-[#6E76C1] outline-none hover:bg-[#616EBD] rounded-md px-4 py-2 text-white">
                     <i class="fas fa-plus mr-2"></i> Новое задание
                 </a>
             </div>
@@ -89,7 +89,7 @@
                                     </span>
                                 </div>
 
-                                <p class="text-sm text-gray-600 mt-2 line-clamp-2 overflow-hidden">
+                                <p class="text-sm text-gray-600 mt-2 truncate">
                                     {{ $assignment->description ?: 'Нет описания' }}
                                 </p>
 
@@ -142,7 +142,7 @@
                                         'id' => $assignment->id,
                                         'return_url' => url()->current(),
                                     ]) }}"
-                                        class="btn btn-sm btn-outline-info  text-[#6E76C1] hover:bg-[#6E76C1]/10 rounded-md px-3 py-1">
+                                        class="btn outline-none text-[#6E76C1] border-[#6E76C1] hover:bg-[#6E76C1] hover:text-gray-100 rounded-md px-3 py-1">
                                         <i class="fas fa-eye mr-1"></i> Просмотр
                                     </a>
                                     <button
@@ -177,7 +177,7 @@
                 <div class="card-header bg-white border-b border-gray-200 py-3 px-4 flex justify-between flex-wrap gap-3">
                     <h3 class="text-lg font-semibold text-gray-800">Студенты</h3>
                     <button type="button"
-                        class="btn btn-outline-secondary text-[#6E76C1] border-[#6E76C1] hover:bg-[#6E76C1]/10"
+                        class="btn btn-outline-secondary text-[#6E76C1] border-[#6E76C1] hover:bg-[#6E76C1]"
                         data-bs-toggle="modal" data-bs-target="#inviteStudentModal">
                         <i class="fas fa-user-plus mr-2"></i> Пригласить ученика
                     </button>
