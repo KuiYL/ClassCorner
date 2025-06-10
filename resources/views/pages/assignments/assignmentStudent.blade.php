@@ -1,238 +1,92 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('pages.platform.layout', ['activePage' => 'null', 'title' => $assignment->title, 'quick_action' => 'null'])
+@section('content')
+    <div class="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden border border-gray-200">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $assignment->title }}</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
+        <a href="{{ route('class.show', $assignment->class_id) }}"
+            class="inline-flex items-center px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-medium rounded-md transition duration-200 mt-6 ml-6">
+            <i class="fas fa-arrow-left mr-2"></i> Назад к списку
+        </a>
 
-    <style>
-        :root {
-            --bg: #f8f9fa;
-            --card-bg: #fff;
-            --primary: #007bff;
-            --success: #28a745;
-            --danger: #dc3545;
-            --text-dark: #212529;
-            --text-light: #6c757d;
-            --border-radius: 10px;
-            --shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
+        <div class="bg-white px-6 py-4 border-b border-gray-200 flex items-center justify-between">
+            <div class="flex-1 min-w-0">
+                <h2
+                    class="text-2xl font-bold text-gray-900 flex items-center transition-transform duration-300 hover:text-[#6E76C1]">
+                    <i class="fas fa-book-open mr-2 text-[#6E76C1]"></i>
+                    <span class="truncate max-w-xs sm:max-w-sm md:max-w-xl lg:max-w-2xl" title="{{ $assignment->title }}">
+                        {{ $assignment->title }}
+                    </span>
+                </h2>
+            </div>
+            <span class="ml-4 text-sm text-gray-500 shrink-0">
+                ID: {{ $assignment->id }}
+            </span>
+        </div>
 
-        .field-item {
-            background-color: #f9f9f9;
-            border-radius: var(--border-radius);
-            padding: 1.25rem;
-            box-shadow: var(--shadow);
-            transition: transform 0.2s ease;
-        }
-
-        .field-item:hover {
-            transform: translateY(-2px);
-        }
-
-        .field-type-box {
-            margin-top: 0.5rem;
-            padding: 0.75rem;
-            border-radius: var(--border-radius);
-            font-size: 0.9rem;
-            margin-bottom: 1rem;
-        }
-
-        .text-field {
-            background-color: #e9f7ef;
-            color: #155724;
-        }
-
-        .file-field {
-            background-color: #e3f2fd;
-            color: #0d47a1;
-        }
-
-        .options-list {
-            list-style: none;
-            padding-left: 0;
-            margin: 0;
-        }
-
-        .options-list li {
-            margin-bottom: 0.5rem;
-        }
-
-        .options-list label {
-            display: block;
-            padding: 0.5rem 0.75rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-
-        .options-list label:hover {
-            background-color: #f1f3f5;
-        }
-
-        .correct {
-            color: var(--success);
-            font-weight: bold;
-            margin-left: 0.5rem;
-        }
-
-        .file-upload-container {
-            position: relative;
-        }
-
-        .custom-file-input {
-            opacity: 0;
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            cursor: pointer;
-        }
-
-        .custom-file-label {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.75rem 1rem;
-            border: 1px solid #ced4da;
-            border-radius: var(--border-radius);
-            background-color: #fff;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .custom-file-label:hover {
-            background-color: #f1f3f5;
-        }
-
-        .custom-file-name {
-            color: var(--text-light);
-            font-size: 0.9rem;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .file-hint {
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-top: 0.5rem;
-            display: block;
-        }
-
-        textarea.form-control {
-            resize: vertical;
-            min-height: 100px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 0.75rem;
-            font-size: 1rem;
-            border: 1px solid #ced4da;
-            border-radius: var(--border-radius);
-            outline: none;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.2);
-        }
-    </style>
-</head>
-
-<body>
-    @include('layout.sidebar', ['activePage' => 'assignments'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-        <main>
-            <div class="main-platform assignment-detail">
-                <div class="assignment-detail">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2>{{ $assignment->title }}</h2>
-                            <div class="due-date-container">
-                                <span class="due-date-label">Срок выполнения:</span>
-                                <strong class="due-date-value">
-                                    {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y') }}
-                                </strong>
-                            </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="info">
-                                <div class="description">
-                                    {{ $assignment->description }}
-                                </div>
-                            </div>
-                            <hr>
-                            <form id="student-answer-form"
-                                action="{{ route('assignment.submit.answer', $assignment->id) }}" method="POST"
-                                enctype="multipart/form-data"
-                                style="display: block; max-width: none; margin-bottom: 0rem;">
-                                @csrf
-                                @if (count($assignmentFields))
-                                    <div class="fields">
-                                        <h3>Поля задания:</h3>
-                                        @foreach ($assignmentFields as $index => $field)
-                                            <div class="field-item">
-                                                <h4>{{ $field['name'] }}</h4>
-
-                                                @if ($field['type'] === 'text')
-                                                    <textarea name="answers[{{ $index }}][value]" rows="4" placeholder="Введите ваш ответ здесь..." required
-                                                        class="form-control"></textarea>
-                                                @elseif ($field['type'] === 'file_upload')
-                                                    <div class="file-upload-container">
-                                                        <input type="file" name="answers[{{ $index }}][file]"
-                                                            class="custom-file-input"
-                                                            accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png" required>
-                                                        <label class="custom-file-label">
-                                                            <span class="custom-file-name">Выберите файл...</span>
-                                                            <i class="fas fa-cloud-upload-alt"></i>
-                                                        </label>
-                                                    </div>
-                                                    <small class="file-hint">
-                                                        Поддерживаемые форматы: PDF, DOC, DOCX, TXT, JPG, JPEG, PNG.
-                                                        Максимальный размер файла — 10 МБ.
-                                                    </small>
-                                                @elseif (in_array($field['type'], ['multiple_choice', 'single_choice']) && !empty($field['options']))
-                                                    <ul class="options-list">
-                                                        @foreach ($field['options'] as $optionIndex => $option)
-                                                            <li>
-                                                                <label>
-                                                                    <input
-                                                                        type="{{ $field['type'] === 'single_choice' ? 'radio' : 'checkbox' }}"
-                                                                        name="answers[{{ $index }}][options][]"
-                                                                        value="{{ $optionIndex }}">
-                                                                    {{ $option['value'] }}
-                                                                </label>
-                                                            </li>
-                                                        @endforeach
-                                                    </ul>
-                                                @endif
-
-                                                <input type="hidden" name="answers[{{ $index }}][type]"
-                                                    value="{{ $field['type'] }}">
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                @else
-                                    <p class="no-fields">Нет полей в задании.</p>
-                                @endif
-                                <button type="submit" class="action-button" style="display: flex; gap:6px">
-                                    <i class="fas fa-save"></i> Сохранить ответ
-                                </button>
-                            </form>
-                        </div>
-                    </div>
+        <div class="p-6 space-y-6">
+            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Описание задания</label>
+                <div id="description-text" class="text-gray-800 line-clamp-3 overflow-hidden whitespace-pre-line">
+                    {{ $assignment->description ?: 'Нет описания' }}
                 </div>
             </div>
-        </main>
+
+            <div class="flex items-center gap-2 text-sm text-gray-600">
+                <i class="fas fa-calendar-check text-[#6E76C1]"></i>
+                <span class="font-medium">Срок выполнения:</span>
+                <strong class="ml-1">
+                    {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y H:i') }}
+                </strong>
+            </div>
+
+            @if (count($assignmentFields))
+                <div class="space-y-4">
+                    <h3 class="text-xl font-semibold text-gray-800">Поля задания</h3>
+                    <form id="student-answer-form" action="{{ route('assignment.submit.answer', $assignment->id) }}"
+                        method="POST" enctype="multipart/form-data">
+                        @csrf
+                        @foreach ($assignmentFields as $index => $field)
+                            <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
+                                <h4 class="font-medium text-gray-900 mb-3 truncate max-w-full">{{ $field['name'] }}</h4>
+
+                                @if ($field['type'] === 'text')
+                                    <textarea name="answers[{{ $index }}][value]" rows="4" placeholder="Введите ваш ответ здесь..." required
+                                        class="form-control w-full"></textarea>
+                                @elseif ($field['type'] === 'file_upload')
+                                    <div class="file-upload-container">
+                                        <input type="file" name="answers[{{ $index }}][file]"
+                                            class="custom-file-input" accept=".pdf,.doc,.docx,.txt,.jpg,.jpeg,.png"
+                                            required>
+                                        <label class="custom-file-label">
+                                            <span class="custom-file-name">Выберите файл...</span>
+                                        </label>
+                                    </div>
+                                @elseif (in_array($field['type'], ['multiple_choice', 'single_choice']))
+                                    <ul class="space-y-2 mt-2">
+                                        @foreach ($field['options'] as $optionIndex => $option)
+                                            <li>
+                                                <label class="flex items-center gap-2">
+                                                    <input
+                                                        type="{{ $field['type'] === 'single_choice' ? 'radio' : 'checkbox' }}"
+                                                        name="answers[{{ $index }}][options][]"
+                                                        value="{{ $optionIndex }}" class="form-checkbox">
+                                                    <span>{{ $option['value'] }}</span>
+                                                </label>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                @endif
+                                <input type="hidden" name="answers[{{ $index }}][type]"
+                                    value="{{ $field['type'] }}">
+                            </div>
+                        @endforeach
+                        <button type="submit"
+                            class="inline-flex justify-center px-6 py-3 items-center bg-[#6E76C1] hover:bg-[#616EBD] text-white font-medium rounded-lg shadow focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#6E76C1] transition duration-200">
+                            <i class="fas fa-save mr-2"></i>Сохранить ответ
+                        </button>
+                    </form>
+                </div>
+            @endif
+        </div>
     </div>
 
     <script>
@@ -246,6 +100,4 @@
             });
         });
     </script>
-</body>
-
-</html>
+@endsection

@@ -4,7 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Админ панель | @yield('title')</title>
+    <title>Платформа | {{ $title }}</title>
+
     <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
     <link rel="stylesheet" href="{{ asset('css/layout.css') }}">
     <link rel="stylesheet" href="{{ asset('css/adaptation.css') }}">
@@ -17,7 +18,7 @@
 
 <body class="d-md-flex vh-100 overflow-hidden bg-light">
 
-    @include('layout.sidebar', ['activePage' => 'admin'])
+    @include('layout.sidebar', ['activePage' => $activePage])
 
     <main class="d-flex flex-column w-100 overflow-y-auto px-md-4 py-md-3 position-relative">
         @include('layout.topbar')
@@ -52,9 +53,15 @@
             <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
         </div>
         <div class="offcanvas-body p-3">
-            @include('layout.sidebar-mobile', ['activePage' => 'admin'])
+            @include('layout.sidebar-mobile', ['activePage' => $activePage])
         </div>
     </div>
+
+    @if (auth()->user()->role === 'teacher' && $quick_action !== 'null')
+        <a href="{{ route($quick_action, ['return_url' => url()->current()]) }}" class="floating-btn">
+            <button><i class="fas fa-plus"></i></button>
+        </a>
+    @endif
 
     @include('layout.modal-delete')
 

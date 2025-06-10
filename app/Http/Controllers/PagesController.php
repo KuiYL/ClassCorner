@@ -9,6 +9,8 @@ use App\Models\StudentAssignments;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Log;
 
@@ -50,7 +52,7 @@ class PagesController extends Controller
     {
         return StudentAssignments::whereHas('assignment', function ($query) use ($user) {
             $query->where('teacher_id', $user->id);
-        })->whereIn('status', ['submitted', 'graded'])->get(); // ← Здесь изменение: whereIn
+        })->whereIn('status', ['submitted', 'graded'])->get();
     }
 
     public function  showHomePage()
@@ -206,17 +208,51 @@ class PagesController extends Controller
         switch ($user->role) {
             case 'teacher':
                 $classes = $this->getUserClasses($user);
-                return view('pages.platform.classesTeacher', compact('user', 'classes'));
+                $classes = $user->classes;
+                $perPage = 6;
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $paginatedItems = new LengthAwarePaginator(
+                    Collection::make($classes)->forPage($currentPage, $perPage),
+                    count($classes),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.classes')]
+                );
+
+                return view('pages.platform.classesTeacher', compact('user', 'paginatedItems', 'classes'));
+
             case 'admin':
                 $classes = Classes::all();
-                return view('pages.platform.dashboardAdmin', compact('user'));
+                $perPage = 6;
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $paginatedItems = new LengthAwarePaginator(
+                    $classes->forPage($currentPage, $perPage),
+                    $classes->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.classes')]
+                );
+                return view('pages.platform.dashboardAdmin', compact('user', 'paginatedItems'));
+
             case 'student':
                 $classes = $this->getUserClasses($user);
                 $invitations = Invitation::where('invitee_email', $user->email)
                     ->where('status', 'pending')
                     ->with('class.teacher')
                     ->get();
-                return view('pages.platform.classesStudent', compact('user', 'classes', 'invitations'));
+
+                $perPage = 6;
+                $currentPage = LengthAwarePaginator::resolveCurrentPage();
+                $paginatedItems = new LengthAwarePaginator(
+                    Collection::make($classes)->forPage($currentPage, $perPage),
+                    count($classes),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.classes')]
+                );
+
+                return view('pages.platform.classesStudent', compact('user', 'paginatedItems', 'invitations', 'classes'));
+
             default:
                 abort(403, 'Нет доступа');
         }
@@ -225,13 +261,24 @@ class PagesController extends Controller
     public function showAssignmentsPage()
     {
         $user = $this->getAuthenticatedUser();
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
         switch ($user->role) {
             case 'teacher':
                 $classes = $this->getUserClasses($user);
-                $assignments = Assignments::where('teacher_id', $user->id)->get();
+                $allAssignments = Assignments::where('teacher_id', $user->id)->get();
 
-                return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'assignments'));
+                $paginatedItems = new LengthAwarePaginator(
+                    $allAssignments->forPage($currentPage, $perPage),
+                    $allAssignments->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.assignments')]
+                );
+
+                return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'paginatedItems'));
+
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
@@ -273,25 +320,20 @@ class PagesController extends Controller
             case 'teacher':
                 $classes = $this->getUserClasses($user);
 
-                $assignments = Assignments::where('teacher_id', $user->id)
-                    ->with('class')
-                    ->orderBy('due_date')
-                    ->get()
-                    ->groupBy('due_date')
-                    ->map(function ($group) {
-                        return $group->map(function ($item) {
-                            return [
-                                'id' => $item->id,
-                                'title' => $item->title,
-                                'description' => $item->description,
-                                'due_date' => $item->due_date,
-                                'class_id' => $item->class_id,
-                                'class_name' => optional($item->class)->name,
-                            ];
-                        });
-                    });
+                $assignments = Assignments::where('teacher_id', $user->id)->with('class')->get();
 
-                return view('pages.platform.calendarTeacher', compact('user', 'classes', 'assignments'));
+                $assignmentData = $assignments->map(function ($assignment) {
+                    return [
+                        'id' => $assignment->id,
+                        'title' => $assignment->title,
+                        'description' => $assignment->description,
+                        'due_date' => $assignment->due_date,
+                        'class_id' => $assignment->class->id ?? null,
+                        'class_name' => $assignment->class->name ?? 'Без класса'
+                    ];
+                })->toArray();
+
+                return view('pages.platform.calendarTeacher', compact('user', 'classes', 'assignmentData'));
 
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
@@ -352,7 +394,36 @@ class PagesController extends Controller
                 $classes = $this->getUserClasses($user);
                 $assignments = Assignments::where('teacher_id', $user->id)->get();
 
-                return view('pages.platform.statisticsTeacher', compact('user', 'classes', 'assignments'));
+                $assignmentsByMonth = $assignments
+                    ->groupBy(function ($item) {
+                        return \Carbon\Carbon::parse($item->due_date)->format('m');
+                    })
+                    ->map(fn($group) => $group->count());
+
+                $studentCounts = [];
+                foreach ($classes as $class) {
+                    $studentCounts[$class->name] = $class->students()
+                        ->where('role', 'student')
+                        ->count();
+                }
+                $totalStudents = $this->getTeacherStudentsCount($user);
+                $assignmentTypes = $assignments->flatMap(fn($a) => json_decode($a->options, true))
+                    ->pluck('type')->filter()->countBy();
+
+                $totalStudents = array_sum($studentCounts);
+
+                $newAssignmentsCount = $assignments->where('created_at', '>=', now()->subDays(7))->count();
+
+                return view('pages.platform.statisticsTeacher', compact(
+                    'user',
+                    'classes',
+                    'assignments',
+                    'assignmentsByMonth',
+                    'studentCounts',
+                    'assignmentTypes',
+                    'totalStudents',
+                    'newAssignmentsCount'
+                ));
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
@@ -469,10 +540,8 @@ class PagesController extends Controller
         if ($role == 'teacher') {
             $assignments = $class->assignments()->where('teacher_id', $user->id)->get();
 
-            // Получаем всех студентов этого класса
             $students = $class->students;
 
-            // Для каждого студента считаем прогресс
             $studentProgress = $students->map(function ($student) use ($assignments) {
                 $totalAssignments = $assignments->count();
                 if ($totalAssignments === 0) {
@@ -485,7 +554,6 @@ class PagesController extends Controller
                     ];
                 }
 
-                // Подсчёт завершённых заданий
                 $completedSubmissions = StudentAssignments::where('user_id', $student->id)
                     ->whereIn('assignment_id', $assignments->pluck('id'))
                     ->where('status', 'graded')
@@ -494,7 +562,6 @@ class PagesController extends Controller
                 $completedCount = $completedSubmissions->count();
                 $percent = round(($completedCount / $totalAssignments) * 100);
 
-                // Средний балл
                 $grades = $completedSubmissions->pluck('grade')->filter(fn($g) => !is_null($g));
                 $averageGrade = $grades->isNotEmpty()
                     ? round($grades->avg())
@@ -557,11 +624,30 @@ class PagesController extends Controller
         $classes = $this->getUserClasses($user);
 
         if ($role == 'teacher') {
-            $assignment = Assignments::with('class')->findOrFail($id);
+            $assignment = Assignments::with('studentAssignments')->findOrFail($id);
             $assignmentFields = json_decode($assignment->options, true);
-            return view('pages.assignments.assignment', compact('user', 'classes', 'assignment', 'assignmentFields'));
-        } else if ($role == 'student') {
-            $assignment = Assignments::with('class')->findOrFail($id);
+
+            $totalStudents = $assignment->students()->count();
+            $submissions = $assignment->studentAssignments;
+
+            $stats = [
+                'total_students' => $totalStudents,
+                'submitted_count' => $submissions->where('status', 'submitted')->count(),
+                'graded_count' => $submissions->where('status', 'graded')->count(),
+                'not_submitted_count' => $submissions->where('status', 'not_submitted')->count(),
+                'average_grade' => round($submissions->avg('grade'), 1) ?: 0,
+                'completed_count' => $submissions->whereIn('status', ['submitted', 'graded'])->count(),
+            ];
+
+            return view('pages.assignments.assignment', compact(
+                'user',
+                'classes',
+                'assignment',
+                'assignmentFields',
+                'stats'
+            ));
+        } else {
+            $assignment = Assignments::findOrFail($id);
             $assignmentFields = json_decode($assignment->options, true);
             return view('pages.assignments.assignmentStudent', compact('user', 'classes', 'assignment', 'assignmentFields'));
         }
@@ -673,34 +759,39 @@ class PagesController extends Controller
         }
 
         $answers = json_decode($studentAssignment->student_answer, true) ?? [];
-        $assignmentFields = json_decode($studentAssignment->assignment->options, true) ?? [];
+        $questions = json_decode($studentAssignment->assignment->options, true) ?? [];
 
-        $correctCount = 0;
-        $totalCount = 0;
+        $results = [];
 
-        foreach ($answers as $index => $answer) {
-            if (in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
-                $field = $assignmentFields[$index] ?? null;
-                if ($field && isset($field['options']) && is_array($field['options'])) {
-                    foreach ($answer['selected_options'] as $optionIndex) {
-                        $totalCount++;
-                        if (
-                            isset($field['options'][$optionIndex]['isCorrect']) &&
-                            $field['options'][$optionIndex]['isCorrect']
-                        ) {
-                            $correctCount++;
-                        }
-                    }
-                }
+        foreach ($questions as $index => $question) {
+            $answer = $answers[$index] ?? null;
+
+            $isCorrect = false;
+
+            if ($answer && in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
+                $selected = $answer['selected_options'] ?? [];
+                $correctIndices = array_keys(array_filter($question['options'] ?? [], fn($opt) => $opt['isCorrect'] ?? false));
+
+                $isCorrect = count(array_intersect($selected, $correctIndices)) === count($correctIndices) &&
+                    count($selected) === count($correctIndices);
             }
+
+            $results[] = [
+                'question_text' => $question['name'] ?? 'Без текста',
+                'type' => $question['type'] ?? 'text',
+                'options' => $question['options'] ?? [],
+                'student_answer' => $answer,
+                'isCorrect' => $isCorrect,
+            ];
         }
 
-        $percentCorrect = $totalCount > 0 ? round(($correctCount / $totalCount) * 100) : 100;
+        $percentCorrect = !empty($results)
+            ? round(collect($results)->where('isCorrect', true)->count() / count($results) * 100)
+            : 100;
 
         return view('pages.assignments.showAssignmentResult', compact(
             'studentAssignment',
-            'answers',
-            'assignmentFields',
+            'results',
             'percentCorrect',
             'classes',
             'user'

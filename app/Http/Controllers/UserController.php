@@ -16,23 +16,13 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
+                'required','string','max:255','regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
             ],
             'surname' => [
-                'required',
-                'string',
-                'max:255',
-                'regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
+                'required','string','max:255','regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => [
-                'required',
-                'string',
-                'min:8',
-                'confirmed',
+            'password' => ['required','string','min:8','confirmed',
                 'regex:/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/',
             ],
         ], [

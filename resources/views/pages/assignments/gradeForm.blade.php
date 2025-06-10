@@ -1,222 +1,188 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('pages.platform.layout', ['activePage' => 'null', 'title' => $studentAssignment->assignment->title, 'quick_action' => 'null'])
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $studentAssignment->assignment->title }}</title>
-    <link rel="stylesheet" href="/css/style-platform.css">
-    <link rel="stylesheet" href="/css/layout.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
-</head>
-<style>
-    .grading-table {
-        width: 100%;
-        border-collapse: collapse;
-        margin-top: 1rem;
-    }
-
-    .grading-table thead {
-        background-color: #f1f3f5;
-    }
-
-    .grading-table th,
-    .grading-table td {
-        padding: 0.75rem;
-        text-align: left;
-        border-bottom: 1px solid #dee2e6;
-    }
-
-    .grading-table tr:hover {
-        background-color: #f8f9fa;
-    }
-</style>
-
-<body>
-    @include('layout.sidebar', ['activePage' => 'assignments'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-
-        <main>
-            <div class="main-platform">
-                <div class="assignment-grade">
-                    <div class="card">
-                        <div class="card-header">
-                            <h2>Проверка задания</h2>
-                            <a href="{{ route('assignments.to.grade') }}" class="btn btn-secondary">Назад</a>
-                        </div>
-
-                        <div class="card-body">
-                            <section class="assignment-info">
-                                <h4>Информация о задании</h4>
-                                <div class="info-grid">
-                                    <div class="info-item">
-                                        <p><strong>Заголовок:</strong> {{ $studentAssignment->assignment->title }}</p>
-                                        <p><strong>Студент:</strong> {{ $studentAssignment->user->name }}
-                                            {{ $studentAssignment->user->surname }}</p>
-                                    </div>
-                                    <div class="info-item">
-                                        <p><strong>Класс:</strong>
-                                            {{ optional($studentAssignment->assignment->class)->name ?? 'Не указан' }}
-                                        </p>
-                                        <p>
-                                            <strong>Статус:</strong>
-                                            <span
-                                                class="badge
-                                                {{ $studentAssignment->status === 'submitted' ? 'bg-danger' : 'bg-success' }}">
-                                                {{ $studentAssignment->status === 'submitted' ? 'На проверке' : 'Проверено' }}
-                                            </span>
-                                        </p>
-                                    </div>
-                                </div>
-                            </section>
-                            @php
-                                $questionTypes = [
-                                    'text' => 'Текст',
-                                    'file_upload' => 'Загрузка файла',
-                                    'single_choice' => 'Один вариант',
-                                    'multiple_choice' => 'Несколько вариантов',
-                                ];
-                            @endphp
-
-                            <section class="student-answers">
-                                <h4>Ответ студента</h4>
-                                @if (isset($percentCorrect))
-                                    <div class="grading-stats">
-                                        <p><strong>Процент правильных ответов:</strong> {{ $percentCorrect }}%</p>
-                                    </div>
-                                @endif
-                                @if (!empty($answers))
-                                    @foreach ($answers as $index => $answer)
-                                        <div class="student-answer">
-                                            <p><strong>Тип:</strong>
-                                                {{ $questionTypes[$answer['type']] ?? 'Неизвестный тип' }}</p>
-
-                                            @if ($answer['type'] === 'text')
-                                                <p>{{ $answer['value'] ?? 'Без текста' }}</p>
-                                            @elseif ($answer['type'] === 'file_upload')
-                                                <p>
-                                                    <a href="{{ asset('storage/' . $answer['file_path']) }}"
-                                                        target="_blank">
-                                                        {{ $answer['file_name'] }}
-                                                    </a>
-                                                </p>
-                                            @elseif (in_array($answer['type'], ['single_choice', 'multiple_choice']))
-                                                @if (isset($assignmentFields[$index]))
-                                                    @php
-                                                        $field = $assignmentFields[$index];
-                                                    @endphp
-
-                                                    @if (!empty($field['options']) && is_array($field['options']))
-                                                        <ul>
-                                                            @foreach ($field['options'] as $optionIndex => $option)
-                                                                @php
-                                                                    $isSelected = in_array(
-                                                                        (string) $optionIndex,
-                                                                        $answer['selected_options'],
-                                                                    );
-                                                                    $isCorrect = $option['isCorrect'] ?? false;
-                                                                @endphp
-
-                                                                <li style="color: {{ $isCorrect ? 'green' : 'red' }};">
-                                                                    {{ $option['value'] }}
-
-                                                                    @if ($isSelected)
-                                                                        <small class="correct"
-                                                                            style="color: {{ $isCorrect ? 'green' : 'red' }}">
-                                                                            {{ $isCorrect ? '✅ Выбран и правильный' : '❌ Выбран, но неверный' }}
-                                                                        </small>
-                                                                    @else
-                                                                        @if ($isCorrect)
-                                                                            <small class="correct"
-                                                                                style="color: green;">📌 Пропущен
-                                                                                правильный вариант</small>
-                                                                        @endif
-                                                                    @endif
-                                                                </li>
-                                                            @endforeach
-                                                        </ul>
-                                                    @else
-                                                        <p>Нет доступных вариантов.</p>
-                                                    @endif
-                                                @endif
-                                            @endif
-                                        </div>
-                                    @endforeach
-                                @else
-                                    <p class="no-answer">Ответ не предоставлен.</p>
-                                @endif
-                            </section>
-
-                            @if (!empty($detailedStats))
-                                <section class="grading-details">
-                                    <h4>Детали по каждому вопросу:</h4>
-                                    <table class="grading-table">
-                                        <thead>
-                                            <tr>
-                                                <th>Вопрос</th>
-                                                <th>Тип</th>
-                                                <th>Правильных нужно</th>
-                                                <th>Выбрано верно</th>
-                                                <th>Процент</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @foreach ($detailedStats as $stat)
-                                                <tr>
-                                                    <td>{{ $stat['question'] }}</td>
-                                                    <td>{{ $questionTypes[$stat['type']] ?? 'Неизвестный тип' }}</td>
-                                                    <td>{{ $stat['correct_needed'] }}</td>
-                                                    <td>{{ $stat['correct_given'] }}</td>
-                                                    <td>{{ $stat['percent'] }}%</td>
-                                                </tr>
-                                            @endforeach
-                                        </tbody>
-                                    </table>
-                                </section>
-                            @endif
-                            <section class="grading-form">
-
-                                <form action="{{ route('assignment.grade.save', $studentAssignment->id) }}"
-                                    method="POST" style="margin-bottom: 0px">
-                                    @csrf
-                                    @method('PUT')
-                                    <div class="form-group">
-                                        <label for="grade">Оценка (от 0 до 100):</label>
-                                        <input type="number" name="grade" id="grade"
-                                            value="{{ old('grade', $studentAssignment->grade ?? $autoGrade) }}"
-                                            class="{{ $errors->has('grade') ? 'input-error' : '' }}" min="0"
-                                            max="100">
-
-                                        @error('grade')
-                                            <span class="error-message">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <div class="form-group">
-                                        <label for="feedback">Комментарий:</label>
-                                        <textarea name="feedback" id="feedback" rows="5" class="{{ $errors->has('feedback') ? 'input-error' : '' }}">{{ old('feedback', $studentAssignment->feedback ?? $autoFeedback) }}</textarea>
-
-                                        @error('feedback')
-                                            <span class="error-message">{{ $message }}</span>
-                                        @enderror
-                                    </div>
-
-                                    <button type="submit" class="action-button">
-                                        Сохранить оценку
-                                    </button>
-                                </form>
-
-                            </section>
-                        </div>
-                    </div>
-                </div>
+@section('content')
+    <div class="main-platform mx-auto bg-white rounded-2xl shadow-lg p-8 max-w-6xl">
+        <div class="result-header text-center mb-10">
+            <h1 class="text-3xl font-extrabold text-gray-900 tracking-tight">
+                Проверка задания
+            </h1>
+            <p class="mt-3 text-lg text-gray-600 font-medium">
+                <span class="font-semibold">Задание:</span> {{ $studentAssignment->assignment->title }}
+            </p>
+            <p class="mt-2 text-sm text-gray-500 flex items-center justify-center gap-3">
+                <i class="fas fa-user text-[#6E76C1]"></i>
+                <span class="font-semibold text-gray-700">
+                    {{ $studentAssignment->user->name }} {{ $studentAssignment->user->surname }}
+                </span>
+                <span
+                    class="px-3 py-1 rounded-full text-xs font-semibold {{ $studentAssignment->status === 'submitted' ? 'bg-red-200 text-red-700' : 'bg-green-200 text-green-800' }}">
+                    {{ $studentAssignment->status === 'submitted' ? 'На проверке' : 'Проверено' }}
+                </span>
+            </p>
+            <div class="mt-6">
+                <a href="{{ route('assignments.to.grade') }}"
+                    class="inline-block bg-gray-200 hover:bg-gray-300 text-gray-700 px-4 py-2 rounded-md transition">
+                    Назад
+                </a>
             </div>
-        </main>
-    </div>
-</body>
+        </div>
 
-</html>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+            <!-- Левая большая колонка с ответами -->
+            <div class="md:col-span-2 space-y-8">
+                <section>
+                    <h3 class="text-lg font-semibold text-gray-700 mb-6 border-b border-gray-200 pb-3">Ответ студента</h3>
+
+                    @if (isset($percentCorrect))
+                        <p class="mb-6 font-medium text-gray-800">Процент правильных ответов: <span
+                                class="text-[#6E76C1]">{{ $percentCorrect }}%</span></p>
+                    @endif
+
+                    @if (!empty($answers))
+                        @foreach ($answers as $index => $answer)
+                            <article class="bg-gray-50 border border-gray-200 rounded-xl shadow-sm p-6">
+                                <p class="font-semibold text-gray-700 mb-3">Тип:
+                                    {{ $questionTypes[$answer['type']] ?? 'Неизвестный тип' }}</p>
+
+                                @if ($answer['type'] === 'text')
+                                    <p class="text-gray-800 whitespace-pre-wrap">{{ $answer['value'] ?? 'Без текста' }}</p>
+                                @elseif ($answer['type'] === 'file_upload')
+                                    <p>
+                                        <a href="{{ asset('storage/' . $answer['file_path']) }}" target="_blank"
+                                            class="text-blue-600 hover:underline font-medium">
+                                            {{ $answer['file_name'] }}
+                                        </a>
+                                    </p>
+                                @elseif (in_array($answer['type'], ['single_choice', 'multiple_choice']))
+                                    @if (isset($assignmentFields[$index]))
+                                        @php $field = $assignmentFields[$index]; @endphp
+                                        @if (!empty($field['options']) && is_array($field['options']))
+                                            <ul class="list-disc ml-5 space-y-1">
+                                                @foreach ($field['options'] as $optionIndex => $option)
+                                                    @php
+                                                        $isSelected = in_array(
+                                                            (string) $optionIndex,
+                                                            $answer['selected_options'],
+                                                        );
+                                                        $isCorrect = $option['isCorrect'] ?? false;
+                                                    @endphp
+                                                    <li
+                                                        class="{{ $isCorrect ? 'text-green-600' : 'text-red-600' }} leading-snug">
+                                                        {{ $option['value'] }}
+                                                        @if ($isSelected)
+                                                            <small
+                                                                class="{{ $isCorrect ? 'text-green-600' : 'text-red-600' }} ml-2">
+                                                                {{ $isCorrect ? '✅ Выбран и правильный' : '❌ Выбран, но неверный' }}
+                                                            </small>
+                                                        @elseif ($isCorrect)
+                                                            <small class="text-green-600 ml-2">📌 Пропущен правильный
+                                                                вариант</small>
+                                                        @endif
+                                                    </li>
+                                                @endforeach
+                                            </ul>
+                                        @else
+                                            <p class="text-gray-500 italic">Нет доступных вариантов.</p>
+                                        @endif
+                                    @endif
+                                @endif
+                            </article>
+                        @endforeach
+                    @else
+                        <p class="text-center text-red-600 italic py-6">Ответ не предоставлен.</p>
+                    @endif
+                </section>
+
+                @if (!empty($detailedStats))
+                    <section>
+                        <h3 class="text-lg font-semibold text-gray-700 mb-6 border-b border-gray-200 pb-3">Детали по каждому
+                            вопросу</h3>
+                        <div class="overflow-x-auto rounded-lg shadow-sm border border-gray-200 bg-white">
+                            <table class="w-full text-left text-sm text-gray-700">
+                                <thead class="bg-gray-100 border-b border-gray-300">
+                                    <tr>
+                                        <th class="px-4 py-2">Вопрос</th>
+                                        <th class="px-4 py-2">Тип</th>
+                                        <th class="px-4 py-2">Правильных нужно</th>
+                                        <th class="px-4 py-2">Выбрано верно</th>
+                                        <th class="px-4 py-2">Процент</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($detailedStats as $stat)
+                                        <tr class="border-b border-gray-200 hover:bg-gray-50">
+                                            <td class="px-4 py-2">{{ $stat['question'] }}</td>
+                                            <td class="px-4 py-2">{{ $questionTypes[$stat['type']] ?? 'Неизвестный тип' }}
+                                            </td>
+                                            <td class="px-4 py-2">{{ $stat['correct_needed'] }}</td>
+                                            <td class="px-4 py-2">{{ $stat['correct_given'] }}</td>
+                                            <td class="px-4 py-2">{{ $stat['percent'] }}%</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+                @endif
+            </div>
+
+            <!-- Правая колонка с деталями и формой оценки -->
+            <aside class="space-y-8">
+                <section class="bg-white border border-gray-200 rounded-xl shadow p-6">
+                    <h3 class="text-lg font-semibold text-gray-700 mb-6 border-b border-gray-200 pb-3">Информация о задании
+                    </h3>
+                    <ul class="space-y-5 text-gray-700">
+                        <li class="flex items-center gap-4">
+                            <i class="fas fa-chalkboard-teacher text-[#6E76C1] text-xl"></i>
+                            <div>
+                                <p class="text-sm text-gray-500">Класс</p>
+                                <p class="font-medium text-gray-800">
+                                    {{ optional($studentAssignment->assignment->class)->name ?? 'Не указан' }}</p>
+                            </div>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <i class="fas fa-calendar-alt text-[#6E76C1] text-xl"></i>
+                            <div>
+                                <p class="text-sm text-gray-500">Дедлайн</p>
+                                <p class="font-medium text-gray-800">
+                                    {{ \Carbon\Carbon::parse($studentAssignment->assignment->due_date)->format('d.m.Y') }}
+                                </p>
+                            </div>
+                        </li>
+                        <li class="flex items-center gap-4">
+                            <i class="fas fa-user text-green-600 text-xl"></i>
+                            <div>
+                                <p class="text-sm text-[#6E76C1]">Автор</p>
+                                <p class="font-medium text-gray-800">
+                                    {{ $studentAssignment->assignment->teacher->name ?? 'Неизвестный преподаватель' }}</p>
+                            </div>
+                        </li>
+                    </ul>
+                </section>
+
+                <section class="bg-white border border-gray-200 rounded-xl shadow p-6">
+                    <form action="{{ route('assignment.grade.save', $studentAssignment->id) }}" method="POST">
+                        @csrf
+                        @method('PUT')
+
+                        <h4 class="text-base font-semibold text-gray-700 mb-4">Итоговая оценка</h4>
+                        <input type="number" name="grade" min="0" max="100"
+                            value="{{ old('grade', $studentAssignment->grade) }}"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 focus:outline-none focus:ring-2 focus:ring-[#6E76C1]"
+                            placeholder="Введите оценку (0-100)" required>
+
+                        <h4 class="text-base font-semibold text-gray-700 mb-4">Комментарий от преподавателя</h4>
+                        <textarea name="feedback" rows="5"
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 mb-4 resize-y focus:outline-none focus:ring-2 focus:ring-[#6E76C1]"
+                            placeholder="Введите комментарий">{{ old('feedback', $studentAssignment->feedback) }}</textarea>
+
+                        <button type="submit"
+                            class="w-full bg-[#6E76C1] text-white font-semibold py-2 rounded-md hover:bg-[#5a65b0] transition">
+                            Сохранить оценку
+                        </button>
+                    </form>
+                </section>
+            </aside>
+        </div>
+    </div>
+@endsection

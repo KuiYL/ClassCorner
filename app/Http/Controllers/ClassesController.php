@@ -62,7 +62,8 @@ class ClassesController extends Controller
     {
         $class = Classes::findOrFail($id);
         $class->delete();
+        $returnUrl = request('return_url') ?: url()->previous();
 
-        return redirect()->back()->with('success', 'Класс успешно удален.');
+        return redirect()->to($returnUrl)->with('success', 'Класс успешно удален.');
     }
 }

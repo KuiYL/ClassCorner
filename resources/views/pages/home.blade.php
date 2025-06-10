@@ -29,7 +29,7 @@
                     стандартного обучения.
                 </p>
                 <div class="buttons">
-                    <a href="{{ route('choiceLogin') }}" class="action-button">Попробовать бесплатно</a>
+                    <a href="{{ route('choiceLogin') }}" class="action-button">Перейти к платформе</a>
 
                     <a href="{{ route('about') }}" class="extra-button"> <img
                             src="{{ 'images/arrow-right button.svg' }}" alt=""></a>
@@ -51,7 +51,7 @@
             <div class="second">
                 <div class="head-block">
                     <p>Кто мы такие</p>
-                    <h2>Почему <span class="attention-title">Классный Уголок?</span></h2>
+                    <h2>Почему <span class="attention-title">Учебный Уголок?</span></h2>
                 </div>
                 <div class="list-info">
                     <div class="info">

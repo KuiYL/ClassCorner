@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssignmentMaterial;
 use App\Models\Assignments;
+use App\Models\ClassUser;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 
 class AssignmentsController extends Controller
 {
@@ -12,18 +17,34 @@ class AssignmentsController extends Controller
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'due_date' => 'required|date',
                 'class_id' => 'required|exists:classes,id',
+                'description' => 'nullable|string',
+                'due_date' => 'required|date|after_or_equal:today',
+                'due_time' => 'required',
+                'fields_json' => 'nullable|json',
+                'materials' => 'nullable|array',
+                'materials.*' => 'file|mimes:pdf,jpeg,jpg,png,doc,docx,xls,xlsx,csv,ppt,pptx,txt,zip,rar|max:10240'
             ], [
-                'title.required' => 'Название задания обязательно для заполнения.',
-                'description.required' => 'Описание задания обязательно для заполнения.',
-                'due_date.required' => 'Дата сдачи задания обязательна для заполнения.',
-                'due_date.date' => 'Дата сдачи должна быть корректной датой.',
-                'class_id.required' => 'Выберите класс для задания.',
+                'title.required' => 'Поле "Название задания" обязательно для заполнения.',
+                'title.string' => 'Поле "Название задания" должно быть строкой.',
+                'title.max' => 'Поле "Название задания" не должно превышать 255 символов.',
+                'class_id.required' => 'Поле "Класс" обязательно для заполнения.',
                 'class_id.exists' => 'Выбранный класс не существует.',
+                'description.string' => 'Поле "Описание" должно быть строкой.',
+                'due_date.required' => 'Поле "Дата сдачи" обязательно для заполнения.',
+                'due_date.date' => 'Поле "Дата сдачи" должно быть корректной датой.',
+                'due_date.after_or_equal' => 'Дата сдачи не может быть раньше сегодняшней даты.',
+                'due_time.required' => 'Поле "Время сдачи" обязательно для заполнения.',
+                'fields_json.json' => 'Ошибка в структуре данных полей задания.',
             ]);
-
+            $dueDateTime = $request->input('due_date') . ' ' . $request->input('due_time');
+            try {
+                $dueDateTime = new \DateTime($dueDateTime);
+            } catch (\Exception $e) {
+                return back()
+                    ->withErrors(['due_time' => 'Некорректное значение времени.'])
+                    ->withInput($request->all());
+            }
             $fields = json_decode($request->input('fields_json'), true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -52,16 +73,43 @@ class AssignmentsController extends Controller
             $assignment = Assignments::create([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
-                'due_date' => $validated['due_date'],
+                'due_date' => $dueDateTime,
                 'teacher_id' => $user->role == 'teacher' ? $user->id : null,
                 'class_id' => $request->input('class_id'),
                 'options' => json_encode($fields),
-                'status' => 'pending',
             ]);
+
+            if ($request->hasFile('materials')) {
+                foreach ($request->file('materials') as $file) {
+                    $filename = $file->getClientOriginalName();
+                    $filePath = $file->storeAs('assignments/' . $assignment->id, $filename, 'public');
+
+                    AssignmentMaterial::create([
+                        'assignment_id' => $assignment->id,
+                        'file_name' => $filename,
+                        'file_path' => $filePath,
+                    ]);
+                }
+            }
+
+            $classUsers = ClassUser::with('user')
+                ->where('class_id', $request->input('class_id'))
+                ->get();
+            foreach ($classUsers as $student) {
+                $this->createNotification(
+                    $student->id,
+                    'Новое задание',
+                    'Задание "' . $assignment->title . '" добавлено.',
+                    'assignment_created'
+                );
+            }
+
             $returnUrl = $request->input('return_url', route('user.assignments'));
             return redirect($returnUrl)->with('success', 'Задание успешно создано!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
+            return redirect()->back()
+                ->withErrors($e->errors())
+                ->withInput($request->all());
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
@@ -73,18 +121,34 @@ class AssignmentsController extends Controller
         try {
             $validated = $request->validate([
                 'title' => 'required|string|max:255',
-                'description' => 'required|string',
-                'due_date' => 'required|date',
                 'class_id' => 'required|exists:classes,id',
+                'description' => 'nullable|string',
+                'due_date' => 'required|date|after_or_equal:today',
+                'due_time' => 'required',
+                'fields_json' => 'nullable|json',
+                'materials' => 'nullable|array',
+                'materials.*' => 'file|mimes:pdf,jpeg,jpg,png,doc,docx,xls,xlsx,csv,ppt,pptx,txt,zip,rar|max:10240'
             ], [
-                'title.required' => 'Название задания обязательно для заполнения.',
-                'description.required' => 'Описание задания обязательно для заполнения.',
-                'due_date.required' => 'Дата сдачи задания обязательна для заполнения.',
-                'due_date.date' => 'Дата сдачи должна быть корректной датой.',
-                'class_id.required' => 'Выберите класс для задания.',
+                'title.required' => 'Поле "Название задания" обязательно для заполнения.',
+                'title.string' => 'Поле "Название задания" должно быть строкой.',
+                'title.max' => 'Поле "Название задания" не должно превышать 255 символов.',
+                'class_id.required' => 'Поле "Класс" обязательно для заполнения.',
                 'class_id.exists' => 'Выбранный класс не существует.',
+                'description.string' => 'Поле "Описание" должно быть строкой.',
+                'due_date.required' => 'Поле "Дата сдачи" обязательно для заполнения.',
+                'due_date.date' => 'Поле "Дата сдачи" должно быть корректной датой.',
+                'due_date.after_or_equal' => 'Дата сдачи не может быть раньше сегодняшней даты.',
+                'due_time.required' => 'Поле "Время сдачи" обязательно для заполнения.',
+                'fields_json.json' => 'Ошибка в структуре данных полей задания.',
             ]);
-
+            $dueDateTime = $request->input('due_date') . ' ' . $request->input('due_time');
+            try {
+                $dueDateTime = new \DateTime($dueDateTime);
+            } catch (\Exception $e) {
+                return back()
+                    ->withErrors(['due_time' => 'Некорректное значение времени.'])
+                    ->withInput($request->all());
+            }
             $fields = json_decode($request->input('fields_json'), true);
 
             if (json_last_error() !== JSON_ERROR_NONE) {
@@ -114,25 +178,58 @@ class AssignmentsController extends Controller
             $assignment->update([
                 'title' => $validated['title'],
                 'description' => $validated['description'],
-                'due_date' => $validated['due_date'],
+                'due_date' => $dueDateTime,
                 'class_id' => $request->input('class_id'),
                 'options' => json_encode($fields),
             ]);
+
+            if ($request->hasFile('materials')) {
+                foreach ($request->file('materials') as $file) {
+                    $filename = $file->getClientOriginalName();
+                    $filePath = $file->storeAs('assignments/' . $assignment->id, $filename, 'public');
+
+                    AssignmentMaterial::create([
+                        'assignment_id' => $assignment->id,
+                        'file_name' => $filename,
+                        'file_path' => $filePath,
+                    ]);
+                }
+            }
             $returnUrl = $request->input('return_url', route('user.assignments'));
             return redirect($returnUrl)->with('success', 'Задание успешно обновлено!');
         } catch (\Illuminate\Validation\ValidationException $e) {
-            return redirect()->back()->withErrors($e->errors())->withInput();
+            return redirect()->back()->withErrors($e->errors())->withInput($request->all());;
         } catch (\Exception $e) {
             return redirect()->back()->with('error', $e->getMessage());
         }
     }
-
 
     public function destroy($id)
     {
         $assignment = Assignments::findOrFail($id);
         $assignment->delete();
 
-        return redirect()->back()->with('success', 'Задание успешно удалено.');
+        $returnUrl = request('return_url') ?: url()->previous();
+
+        return redirect()->to($returnUrl)->with('success', 'Задание успешно удалено.');
+    }
+
+    public function deleteMaterial($id)
+    {
+        $material = AssignmentMaterial::findOrFail($id);
+        Storage::disk('public')->delete($material->file_path);
+        $material->delete();
+
+        return redirect()->back()->with('success', 'Материал успешно удалено.');
+    }
+
+    public function createNotification($userId, $title, $message, $type = 'general')
+    {
+        Notification::create([
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+        ]);
     }
 }

@@ -53,7 +53,6 @@
 html,
 body {
     width: 100%;
-
     font-family: "MontserratAlternates", sans-serif;
     display: flex;
     flex-direction: column;

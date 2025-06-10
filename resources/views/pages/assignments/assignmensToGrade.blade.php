@@ -1,267 +1,140 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('pages.platform.layout', ['activePage' => 'null', 'title' => 'Задания на проверку', 'quick_action' => 'null'])
+@section('content')
+    <div class="container-fluid py-6 px-md-4">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Задания на проверку</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <script src="{{ asset('js/script.js') }}" defer></script>
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
+        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
+            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
+                <i class="fas fa-tasks mr-3 text-[#6E76C1]"></i> Задания на проверку
+            </h2>
+            <p class="mt-1 text-sm text-gray-500">Проверьте ответы учеников и выставите оценки</p>
+        </div>
 
-</head>
+        <div class="mb-6 flex flex-wrap gap-4 sm:gap-6">
+            <div class="flex-1 min-w-[200px]">
+                <label for="filter-class" class="block text-sm font-medium text-gray-700 mb-1">Фильтр по классу</label>
+                <select id="filter-class"
+                    class="form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
+                    <option value="">Все классы</option>
+                    @foreach ($classes as $class)
+                        <option value="{{ $class->name }}">{{ $class->name }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-<body>
-    @include('layout.sidebar', ['activePage' => 'assignments'])
+            <div class="self-end">
+                <button id="clear-filter"
+                    class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition duration-200">
+                    Сбросить фильтр
+                </button>
+            </div>
+        </div>
 
-    <div class="topbar">
-        @include('layout.topbar')
+        <div id="no-assignments-message"
+            class="hidden mb-6 p-6 bg-gray-50 border border-dashed border-gray-300 rounded-lg text-center">
+            <i class="fas fa-book-open text-gray-300 text-4xl mb-2"></i>
+            <p class="text-gray-500">Нет заданий, соответствующих фильтрам.</p>
+        </div>
 
-        <main>
-            <div class="main-platform">
-                <div class="banner-new-assignment">
-                    <div class="wrapper">
-                        <div>
-                            <h3>Задания на проверку</h3>
-                            <p>Выберите задание для выставления оценок</p>
-                        </div>
-                        <a href="{{ route('user.assignments') }}">
-                            <i class="fas fa-arrow-left"></i>
-                            Вернуться
+        <div id="assignments-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach ($assignmentsToGrade as $assignment)
+                @php
+                    $totalStudents = $assignment['class']->students()->count();
+                    $submissionsCount = $assignment['assignment']->studentAssignments
+                        ->whereIn('status', ['submitted', 'graded'])
+                        ->count();
+                @endphp
+
+                <div class="assignment-card bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-[#6E76C1] transition-all duration-300 hover:shadow-md"
+                    data-class="{{ $assignment['class']->name }}" data-type="">
+                    <div class="p-4 bg-gradient-to-r from-[#6E76C1] to-blue-500 flex justify-between items-start">
+                        <h4 class="font-semibold text-lg text-white truncate">{{ $assignment['assignment']->title }}</h4>
+                        <a href="{{ route('assignments.show', [
+                            'id' => $assignment['assignment']->id,
+                            'return_url' => url()->current(),
+                        ]) }}"
+                            class="inline-flex items-center ml-2 px-3 py-1 text-xs bg-white/20 text-white font-medium rounded-md hover:bg-white/30 transition duration-200">
+                            Подробнее <i class="fas fa-arrow-right ml-1 text-sm"></i>
                         </a>
                     </div>
-                </div>
-                @if (session('success'))
-                    <div class="alert-success">{{ session('success') }}</div>
-                @endif
 
-                @if (session('error'))
-                    <div class="alert-error">{{ session('error') }}</div>
-                @endif
-                <div class="assignments-container">
-
-                    <div class="assignments-header">
-                        <h3>Список заданий на проверку</h3>
-                    </div>
-
-                    <div class="assignments-filters"
-                        style="margin-bottom: 1rem; display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                        <label>
-                            Фильтр по статусу:
-                            <select id="filter-status">
-                                <option value="">Все</option>
-                                <option value="На проверке">На проверку</option>
-                                <option value="Проверено">Проверено</option>
-                            </select>
-                        </label>
-
-                        <label>
-                            Класс:
-                            <select id="filter-class">
-                                <option value="">Все</option>
-                                @foreach ($classes as $class)
-                                    <option value="{{ $class->name }}">{{ $class->name }}</option>
-                                @endforeach
-                            </select>
-                        </label>
-                    </div>
-
-                    @if ($assignmentsToGrade->isEmpty())
-                        <div class="assignments-empty">
-                            У вас нет заданий на проверку.
+                    <div class="p-4 pt-3 pb-3 space-y-2">
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-chalkboard-teacher mr-2 text-[#6E76C1]"></i>
+                            {{ $assignment['class']->name }}
                         </div>
-                    @else
-                        <div class="assignments-list">
-                            @foreach ($assignmentsToGrade as $assignment)
-                                @php
-                                    $status = $assignment['submission']
-                                        ? $assignment['submission']->status
-                                        : 'not_submitted';
-                                    $statusLabels = [
-                                        'not_submitted' => 'Не выполнено',
-                                        'submitted' => 'На проверке',
-                                        'graded' => 'Выполнено',
-                                    ];
-                                    $badgeColor = '';
-                                    switch ($status) {
-                                        case 'not_submitted':
-                                            $badgeColor = 'red';
-                                            break;
-                                        case 'submitted':
-                                            $badgeColor = 'yellow';
-                                            break;
-                                        case 'graded':
-                                            $badgeColor = 'green';
-                                            break;
-                                        default:
-                                            $badgeColor = 'gray';
-                                    }
-                                @endphp
-                                <div class="assignment-card"
-                                    data-class="{{ optional($assignment->assignment->class)->name }}">
-                                    <div class="card-header">
-                                        <h4 class="assignment-title">{{ $assignment->assignment->title }}</h4>
-                                        <div class="header-controls">
-                                            <span class="badge status-badge status-{{ $assignment->status }}">
-                                                {{ $assignment->status === 'submitted' ? 'На проверке' : 'Проверено' }}
-                                            </span>
-                                            <button type="button" class="action-button"
-                                                style="display: flex; gap:6px;">
-                                                <i class="fas fa-eye"></i> Подробнее
-                                            </button>
-                                            @if ($assignment->status === 'submitted')
-                                                <a href="{{ route('assignment.grade.form', $assignment->assignment->id) }}"
-                                                    class="action-button">
-                                                    Проверить
-                                                </a>
-                                            @else
-                                                <a href="{{ route('assignment.result', ['id' => $assignment->id]) }}"
-                                                    class="action-button">
-                                                    Посмотреть
-                                                </a>
-                                            @endif
-                                        </div>
-                                    </div>
-                                    <div class="card-details hidden">
-                                        <p class="assignment-description">
-                                            {{ Str::limit($assignment->assignment->description, 100) }}
-                                        </p>
-                                        <div class="assignment-details">
-                                            <span>Класс:
-                                                {{ optional($assignment->assignment->class)->name ?? 'Не указан' }}</span>
-                                            <span>Работ: {{ $assignment->students_count }}</span>
-                                            @php
-                                                $typeTranslations = [
-                                                    'file_upload' => 'Загрузка файла',
-                                                    'multiple_choice' => 'Множественный выбор',
-                                                    'single_choice' => 'Один выбор',
-                                                    'text' => 'Текстовый ответ',
-                                                ];
-                                                $decodedOptions = json_decode($assignment->assignment->options, true);
-                                                $questionTypes = [];
-                                                if (!empty($decodedOptions)) {
-                                                    foreach ($decodedOptions as $question) {
-                                                        $questionTypes[] = $question['type'];
-                                                    }
-                                                    $questionTypes = array_unique($questionTypes);
-                                                }
-                                            @endphp
-                                            <span>
-                                                Типы вопросов:
-                                                {{ !empty($questionTypes)
-                                                    ? implode(
-                                                        ', ',
-                                                        array_map(fn($type) => $typeTranslations[$type] ?? ucfirst(str_replace('_', ' ', $type)), $questionTypes),
-                                                    )
-                                                    : 'Отсутствуют' }}
-                                            </span>
-                                        </div>
-                                        <div class="card-actions">
-                                            <small>Срок проверки: до
-                                                {{ \Carbon\Carbon::parse($assignment->assignment->due_date)->format('d.m.Y') }}</small>
-                                        </div>
-                                    </div>
+
+                        <div class="flex items-center text-sm text-gray-600">
+                            <i class="fas fa-calendar-check mr-2 text-[#6E76C1]"></i>
+                            Срок: {{ \Carbon\Carbon::parse($assignment['assignment']->due_date)->format('d.m.Y') }}
+                        </div>
+
+                        <div class="flex items-center justify-between text-sm mt-2">
+                            <span class="text-gray-600">Учеников:</span>
+                            <span class="text-gray-800">{{ $submissionsCount }} из {{ $totalStudents }}</span>
+                        </div>
+
+                        <div class="mt-3">
+                            <div class="w-full h-1.5 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-1.5 bg-[#6E76C1] rounded-full"
+                                    style="width: {{ $totalStudents ? round(($submissionsCount / $totalStudents) * 100) : 0 }}%">
                                 </div>
-                            @endforeach
+                            </div>
                         </div>
 
-                        <div id="no-assignments-message" class="no-assignments-message hidden">
-                            <p>Нет заданий, соответствующих выбранным фильтрам.</p>
+                        <div class="mt-3 flex justify-between items-center">
+                            <span class="text-xs font-medium text-gray-500">Статус:</span>
+                            @if ($submissionsCount == 0)
+                                <span
+                                    class="badge status-badge status-not_submitted bg-red-500 text-white text-xs px-2 py-1 rounded">
+                                    Не выполнено
+                                </span>
+                            @elseif ($submissionsCount < $totalStudents)
+                                <span
+                                    class="badge status-badge status-submitted bg-yellow-500 text-white text-xs px-2 py-1 rounded">
+                                    Выполняется
+                                </span>
+                            @else
+                                <span
+                                    class="badge status-badge status-graded bg-green-500 text-white text-xs px-2 py-1 rounded">
+                                    Завершено
+                                </span>
+                            @endif
                         </div>
-                    @endif
+                    </div>
                 </div>
-            </div>
-        </main>
+            @endforeach
+        </div>
+
     </div>
-    <style>
-        :root {
-            --status-red: #e74c3c;
-            --status-yellow: #eb9800;
-            --status-green: #2ecc71;
-            --status-gray: #95a5a6;
-        }
-
-        .badge.status-badge {
-            display: inline-block;
-            padding: 0.3rem 0.6rem;
-            border-radius: 6px;
-            color: white;
-            font-weight: bold;
-            text-align: center;
-            font-size: 0.85rem;
-        }
-
-        .status-badge.status-not_submitted {
-            background-color: var(--status-red);
-        }
-
-        .status-badge.status-submitted {
-            background-color: var(--status-yellow);
-        }
-
-        .status-badge.status-graded {
-            background-color: var(--status-green);
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
             const cards = document.querySelectorAll(".assignment-card");
-
-            cards.forEach((card) => {
-                const toggleBtn = card.querySelector(".action-button");
-                const cardDetails = card.querySelector(".card-details");
-
-                toggleBtn.addEventListener("click", () => {
-                    const isHidden = cardDetails.classList.toggle("hidden");
-                    toggleBtn.textContent = isHidden ? "Подробнее" : "Скрыть";
-                    cardDetails.style.display = isHidden ? "none" : "block";
-                });
-            });
-
             const filterClass = document.getElementById("filter-class");
-            const filterStatus = document.getElementById("filter-status");
+            const noMessage = document.getElementById("no-assignments-message");
 
-            function filterAssignments() {
-                const classVal = filterClass.value.trim();
-                const statusVal = filterStatus.value.trim();
+            filterClass.addEventListener("input", function() {
+                const query = this.value.trim().toLowerCase();
+                let visibleCards = 0;
 
-                let hasVisibleCards = false;
-
-                cards.forEach((card) => {
-                    const cardClass = card.getAttribute("data-class") || "";
-                    const cardStatus = card.querySelector(".status-badge")?.textContent.trim() || "";
-
-                    const classMatch = !classVal || cardClass === classVal;
-                    const statusMatch = !statusVal || cardStatus === statusVal;
-
-                    if (classMatch && statusMatch) {
+                cards.forEach(card => {
+                    const cardClass = card.dataset.class.toLowerCase();
+                    if (!query || cardClass.includes(query)) {
                         card.style.display = "block";
-                        hasVisibleCards = true;
+                        visibleCards++;
                     } else {
                         card.style.display = "none";
                     }
                 });
 
-                const noAssignmentsMessage = document.querySelector(".no-assignments-message");
-                if (hasVisibleCards) {
-                    noAssignmentsMessage.classList.add("hidden");
-                } else {
-                    noAssignmentsMessage.classList.remove("hidden");
-                }
-            }
+                noMessage.classList.toggle("hidden", visibleCards > 0);
+            });
 
-            filterClass.addEventListener("change", filterAssignments);
-            filterStatus.addEventListener("change", filterAssignments);
-
-            filterAssignments();
+            document.getElementById("clear-filter").addEventListener("click", function() {
+                filterClass.value = "";
+                cards.forEach(card => card.style.display = "block");
+                noMessage.classList.add("hidden");
+            });
         });
     </script>
-</body>
-
-</html>
+@endsection

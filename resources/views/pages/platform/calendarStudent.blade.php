@@ -1,47 +1,25 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мой календарь</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <script src="{{ asset('js/script.js') }}" defer></script>
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
-</head>
-
-<body>
-    @include('layout.sidebar', ['activePage' => 'calendar'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-
-        <main>
-            <div class="main-platform">
-                <div id="calendar">
-                    <div class="filters-calendar">
-                        <select id="filter-calendar-class">
-                            <option value="">Все классы</option>
-                            @foreach ($classes as $class)
-                                <option value="{{ $class->id }}">{{ $class->name }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="calendar-header">
-                        <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
-                        <h2 id="current-month"></h2>
-                        <button id="next-month"><i class="fas fa-chevron-right"></i></button>
-                    </div>
-                    <div class="calendar-grid"></div>
-                    <div id="days-container"></div>
-                </div>
-
+@extends('pages.platform.layout', ['activePage' => 'calendar', 'title' => 'Календарь', 'quick_action' => 'null'])
+@section('content')
+    <div class="main-platform">
+        <div id="calendar">
+            <div class="filters-calendar">
+                <select id="filter-calendar-class">
+                    <option value="">Все классы</option>
+                    @foreach ($classes as $class)
+                        <option value="{{ $class->id }}">{{ $class->name }}</option>
+                    @endforeach
+                </select>
             </div>
-        </main>
-    </div>
+            <div class="calendar-header">
+                <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
+                <h2 id="current-month"></h2>
+                <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            <div class="calendar-grid"></div>
+            <div id="days-container"></div>
+        </div>
 
+    </div>
     <script>
         document.addEventListener("DOMContentLoaded", () => {
             const daysContainer = document.getElementById("days-container");
@@ -248,6 +226,4 @@
             renderCalendar(currentDate);
         });
     </script>
-</body>
-
-</html>
+@endsection

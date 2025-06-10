@@ -13,14 +13,12 @@ return new class extends Migration
     {
         Schema::create('assignments', function (Blueprint $table) {
             $table->id();
-            $table->string('title');  // Название задания
-            $table->text('description');  // Описание задания
-            $table->date('due_date');  // Дата сдачи задания
-            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');  // Внешний ключ на учителя
-            $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');  // Внешний ключ на класс
-            $table->enum('type', ['file_upload', 'multiple_choice', 'single_choice', 'text']);  // Тип задания
-            $table->json('options')->nullable();  // Дополнительные опции (для выбора вариантов ответа и других настроек)
-            $table->enum('status', ['pending', 'active', 'completed'])->default('pending'); // Добавляем статус
+            $table->string('title');
+            $table->text('description')->nullable();
+            $table->dateTime('due_date');
+            $table->foreignId('teacher_id')->constrained('users')->onDelete('cascade');
+            $table->foreignId('class_id')->constrained('classes')->onDelete('cascade');
+            $table->json('options')->nullable();
             $table->timestamps();
         });
     }

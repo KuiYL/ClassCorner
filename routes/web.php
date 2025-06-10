@@ -55,6 +55,7 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/assignments/edit/{id}/{classId?}', [PagesController::class, 'editAssignments'])->name('assignments.edit');
     Route::put('/assignments/update/{id}/{classId?}', [AssignmentsController::class, 'update'])->name('assignments.update');
+    Route::delete('/assignment/material/{id}', [AssignmentsController::class, 'deleteMaterial']);
     Route::delete('/assignments/{id}', [AssignmentsController::class, 'destroy'])->name('assignments.destroy');
     Route::get('/assignment/{id}', [PagesController::class, 'showAssignmentPage'])->name('assignments.show');
     Route::post('/assignment/{id}/submit', [StudentAssignmentsController::class, 'submitAnswer'])->name('assignment.submit.answer');

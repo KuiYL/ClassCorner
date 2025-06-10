@@ -25,7 +25,7 @@
                 </div>
                 <div class="first">
                     <div class="head-block">
-                        <h2><span class="attention-title">Регистрация</span> для студента</h2>
+                        <h2><span class="attention-title">Регистрация</span> для ученика</h2>
                         <p>Создайте аккаунт для начала обучения и отслеживания своего прогресса</p>
                     </div>
 
@@ -100,7 +100,7 @@
                 <div class="first">
                     <div class="head-block">
                         <h2><span class="attention-title">Регистрация</span> для учителя</h2>
-                        <p>Создайте аккаунт для управления уроками и студентами</p>
+                        <p>Создайте аккаунт для управления уроками и учениками</p>
                     </div>
 
                     <form action="{{ route('register.store', $role) }}" method="POST" class="auth-form">

@@ -1,186 +1,275 @@
-<!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+@extends('pages.platform.layout', ['activePage' => 'dashboard', 'title' => 'Главная', 'quick_action' => 'null'])
+@section('content')
+    <div class="container-fluid py-6 px-md-4">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Платформа для обучающихся</title>
-    <link rel="stylesheet" href="{{ asset('css/style-platform.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css ">
-    <script src="{{ asset('js/script.js') }}" defer></script>
-    <link rel="icon" href="{{ asset('icon-logo.svg') }}" type="image/svg+xml">
-
-</head>
-
-<body>
-    @include('layout.sidebar', ['activePage' => 'dashboard'])
-
-    <div class="topbar">
-        @include('layout.topbar')
-
-        <main>
-            <div class="main-platform">
-
-                <div class="banner">
-                    <div class="greeting">
-                        <h2>Добро пожаловать, {{ $user->name }}!</h2>
-                        <p>У вас {{ $totalAssignments - $completedAssignments }} невыполненных заданий</p>
-                    </div>
-                    <div class="items">
-                        <div class="item">
-                            <p class="text">Активные классы</p>
-                            <p class="text-count">{{ $totalClasses }}</p>
-                        </div>
-                        <div class="item">
-                            <p class="text">Выполненные</p>
-                            <p class="text-count">{{ $completedAssignments }}</p>
-                        </div>
-                        <div class="item">
-                            <p class="text">Всего заданий</p>
-                            <p class="text-count">{{ $totalAssignments }}</p>
-                        </div>
-                        <div class="item">
-                            <p class="text">Осталось</p>
-                            <p class="text-count">{{ $totalAssignments - $completedAssignments }}</p>
-                        </div>
-                    </div>
+        <!-- Баннер приветствия -->
+        <div class="bg-[#6E76C1] text-white rounded-lg shadow-lg mb-8 overflow-hidden">
+            <div class="p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <h2 class="text-3xl font-bold">Добро пожаловать, {{ $user->name }}!</h2>
+                    <p class="mt-2 text-lg opacity-90">У вас {{ $totalAssignments - $completedAssignments }} невыполненных
+                        заданий</p>
                 </div>
 
-                <div class="banner-new-class">
-                    <div class="wrapper">
-                        <div>
-                            <h3>Мои классы</h3>
-                            <p>Смотрите задания и информацию по вашим классам</p>
-                        </div>
-                        <a href="{{ route('user.classes') }}">
-                            <i class="fas fa-arrow-right"></i>
-                            Перейти к списку
-                        </a>
-                    </div>
-                </div>
+                <a href="{{ route('user.assignments') }}"
+                    class="inline-flex items-center px-5 py-2 bg-white/10 hover:bg-white/20 text-white font-medium rounded-md transition duration-200">
+                    <i class="fas fa-book-open mr-2"></i> Мои задания
+                </a>
+            </div>
+        </div>
 
-                <div class="classes">
-                    <div class="head">
-                        <h3>Мои классы</h3>
-                        <a href="{{ route('user.classes') }}">Смотреть все</a>
+        <!-- Статистика сверху -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Классы -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-[#6E76C1]">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-[#6E76C1]/10 text-[#6E76C1]">
+                        <i class="fas fa-school text-xl"></i>
                     </div>
-                    @if ($classes->isEmpty())
-                        <div class="warning-message">
-                            Вы пока не состоите ни в одном классе.
-                        </div>
-                    @else
-                        <div class="items">
-                            @foreach ($classes as $class)
-                                <div class="class-card">
-                                    <div class="class-card-info">
-                                        <div class="card"></div>
-                                    </div>
-                                    <div class="info">
-                                        <div class="info-student">
-                                            <h4>{{ $class->name }}</h4>
-                                            <span>{{ $class->students()->count() - 1 }} студентов</span>
-                                        </div>
-                                        <div class="info-teacher">
-                                            <i class="fas fa-user-tie"></i>
-                                            <span>{{ $class->teacher->name }} {{ $class->teacher->surname }}</span>
-                                        </div>
-                                        <div class="info-assigments">
-                                            <div class="assigments-text">
-                                                <i class="fas fa-tasks"></i>
-                                                <span>{{ $class->assignments->count() }} заданий</span>
-                                            </div>
-                                            <a href="{{ route('class.show', $class->id) }}"
-                                                class="text-sm text-[#6E76C1] font-medium">Открыть</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-
-                <div class="assignments">
-                    <div class="head">
-                        <h3>Задания на выполнение</h3>
-                        <a href="{{ route('user.assignments') }}">Смотреть все</a>
-                    </div>
-                    <div class="assignments-filters">
-                        <div class="filters-container">
-                            <label>Фильтр по статусу:
-                                <select id="filter-status">
-                                    <option value="">Все</option>
-                                    <option value="not_submitted">Не выполнено</option>
-                                    <option value="submitted">На проверке</option>
-                                    <option value="graded">Выполнено</option>
-                                </select>
-                            </label>
-
-                            <label>Фильтр по классу:
-                                <select id="filter-class">
-                                    <option value="">Все</option>
-                                    @foreach ($classes as $class)
-                                        <option value="{{ $class->name }}">{{ $class->name }}</option>
-                                    @endforeach
-                                </select>
-                            </label>
-                        </div>
-                    </div>
-                    <div class="assignments-scrollable">
-                        @if (empty($assignments))
-                            <div id="no-assignments-message" class="no-assignments-message" style="display: none;">
-                                Нет заданий на выполнение.
-                            </div>
-                        @else
-                            @foreach ($assignments as $item)
-                                @php
-                                    $status = $item['submission']?->status ?? 'not_submitted';
-                                    $statusLabels = [
-                                        'not_submitted' => 'Не выполнено',
-                                        'submitted' => 'На проверке',
-                                        'graded' => 'Выполнено',
-                                    ];
-                                @endphp
-                                <div id="no-assignments-message" class="no-assignments-message" style="display: none;">
-                                    Нет заданий, соответствующих выбранным фильтрам.
-                                </div>
-                                <div class="assignment-card status-{{ $status }}">
-                                    <div class="assignment-header">
-                                        <h4>{{ $item['assignment']->title }}</h4>
-                                        <div class="assignment-meta">
-                                            <p><strong>Класс:</strong> <span
-                                                    class="assignment-class">{{ $item['class']->name }}</span></p>
-                                            <p><strong>Дедлайн:</strong>
-                                                @php
-                                                    $deadline = \Carbon\Carbon::parse($item['assignment']->due_date);
-                                                @endphp
-                                                {{ $deadline->format('d.m.Y') }}
-                                            </p>
-                                        </div>
-                                        <div class="assignment-status">
-                                            {{ $statusLabels[$status] }}
-                                        </div>
-                                    </div>
-
-                                    @if ($status !== 'submitted')
-                                        @if ($status === 'graded' && !is_null($item['submission']->grade))
-                                            <a href="{{ route('assignment.result', ['id' => $item['submission']->id]) }}"
-                                                class="action-button" style="display: flex; gap: 5px;">
-                                                <i class="fas fa-eye"></i> Результаты
-                                            </a>
-                                        @else
-                                            <a href="{{ route('assignments.show', $item['assignment']->id) }}"
-                                                class="action-button" style="display: flex; gap: 5px;">
-                                                <i class="fas fa-folder-open"></i> Перейти
-                                            </a>
-                                        @endif
-                                    @endif
-                                </div>
-                            @endforeach
-                        @endif
+                    <div class="ml-4">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Классов</p>
+                        <h3 class="text-xl font-bold text-gray-800">{{ $totalClasses }}</h3>
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- Выполненные задания -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-green-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                        <i class="fas fa-check-circle text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Выполнено</p>
+                        <h3 class="text-xl font-bold text-gray-800">{{ $completedAssignments }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Всего заданий -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-blue-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                        <i class="fas fa-tasks text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Всего заданий</p>
+                        <h3 class="text-xl font-bold text-gray-800">{{ $totalAssignments }}</h3>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Осталось -->
+            <div class="bg-white p-4 rounded-lg shadow-sm border-l-4 border-red-500">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-red-100 text-red-600">
+                        <i class="fas fa-hourglass-half text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-xs text-gray-500 uppercase font-semibold">Осталось</p>
+                        <h3 class="text-xl font-bold text-gray-800">{{ $totalAssignments - $completedAssignments }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Мои классы -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900 pl-4 relative">
+                    <span class="absolute left-0 top-0 h-full w-1 bg-[#6E76C1]"></span>
+                    Мои классы
+                </h3>
+                <a href="{{ route('user.classes') }}" class="text-sm text-[#6E76C1] hover:text-[#616EBD] font-medium">
+                    Смотреть все <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            @if ($classes->isEmpty())
+                <div class="text-center py-10 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                    <i class="fas fa-school text-gray-300 text-4xl mb-4"></i>
+                    <h4 class="text-lg font-semibold text-gray-600">Вы не состоите ни в одном классе</h4>
+                    <p class="text-gray-500 mt-1">Подключитесь к классу, чтобы начать выполнять задания</p>
+                </div>
+            @else
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    @foreach ($classes as $class)
+                        <div
+                            class="bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-[#6E76C1] transition-all duration-300 hover:shadow-md">
+                            <!-- Заголовок класса -->
+                            <div class="p-4 bg-gradient-to-r from-[#6E76C1] to-[#9CA4F2] flex justify-between items-start">
+                                <h4 class="font-bold text-lg text-white truncate">{{ $class->name }}</h4>
+                            </div>
+
+                            <!-- Информация о классе -->
+                            <div class="p-4 pt-3 pb-3 space-y-2">
+                                <div class="flex items-center justify-between text-sm text-gray-600">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fas fa-user-tie mr-2 text-[#6E76C1]"></i>{{ $class->teacher->name }}
+                                    </div>
+                                    <div class="flex items-center gap-1">
+                                        <i
+                                            class="fas fa-users mr-2 text-[#6E76C1]"></i>{{ $class->students()->count() - 1 }}
+                                        Учеников
+                                    </div>
+                                </div>
+
+                                <div class="flex items-center justify-between text-sm text-gray-600">
+                                    <div class="flex items-center gap-1">
+                                        <i class="fas fa-tasks mr-2 text-[#6E76C1]"></i>{{ $class->assignments->count() }}
+                                        заданий
+                                    </div>
+                                    <a href="{{ route('class.show', $class->id) }}"
+                                        class="text-[#6E76C1] hover:text-[#616EBD] font-medium">
+                                        Открыть <i class="fas fa-arrow-right ml-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+        </div>
+
+        <!-- Мои задания -->
+        <div class="mb-8">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-gray-900 pl-4 relative">
+                    <span class="absolute left-0 top-0 h-full w-1 bg-[#6E76C1]"></span>
+                    Задания на выполнение
+                </h3>
+                <a href="{{ route('user.assignments') }}" class="text-sm text-[#6E76C1] hover:text-[#616EBD] font-medium">
+                    Смотреть все <i class="fas fa-arrow-right ml-1"></i>
+                </a>
+            </div>
+
+            <!-- Фильтры -->
+            <div class="bg-white rounded-lg shadow-sm p-4 mb-6 border border-gray-200">
+                <div class="filters-container flex flex-wrap gap-4">
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Фильтр по статусу:</span>
+                        <select id="filter-status"
+                            class="form-select w-auto px-3 py-2 mt-1 border border-gray-300 rounded-md focus:ring-[#6E76C1] focus:border-transparent">
+                            <option value="">Все</option>
+                            <option value="not_submitted">Не выполнено</option>
+                            <option value="submitted">На проверке</option>
+                            <option value="graded">Выполнено</option>
+                        </select>
+                    </label>
+
+                    <label class="block">
+                        <span class="text-sm font-medium text-gray-700">Фильтр по классу:</span>
+                        <select id="filter-class"
+                            class="form-select w-auto px-3 py-2 mt-1 border border-gray-300 rounded-md focus:ring-[#6E76C1] focus:border-transparent">
+                            <option value="">Все</option>
+                            @foreach ($classes as $class)
+                                <option value="{{ $class->name }}">{{ $class->name }}</option>
+                            @endforeach
+                        </select>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Список заданий -->
+            <div id="assignments-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                @forelse ($assignments as $item)
+                    @php
+                        $assignment = $item['assignment'];
+                        $status = $item['submission']?->status ?? 'not_submitted';
+                        $badgeClass = match ($status) {
+                            'not_submitted' => 'bg-red-50 text-red-600',
+                            'submitted' => 'bg-yellow-50 text-yellow-600',
+                            'graded' => 'bg-green-50 text-green-600',
+                            default => 'bg-gray-100 text-gray-700',
+                        };
+                        $deadline = \Carbon\Carbon::parse($assignment->due_date);
+                        $description = $assignment->description ?: 'Нет описания';
+
+                        // Пример: прогресс и количество (если есть)
+                        $completed = $item['completed'] ?? 0;
+                        $totalStudents = $item['totalStudents'] ?? 0;
+                        $progress = $totalStudents ? round(($completed / $totalStudents) * 100) : 0;
+                    @endphp
+
+                    <div class="card h-full shadow-sm hover:shadow-md transition-shadow duration-200 border border-gray-200 rounded-lg overflow-hidden bg-white"
+                        data-id="{{ $assignment->id }}">
+
+                        <div class="p-4">
+                            <div class="flex justify-between items-start">
+                                <h4 class="font-bold text-gray-900 flex items-center group truncate">
+                                    <i
+                                        class="fas fa-book-open mr-2 text-[#6E76C1] group-hover:scale-110 transition-transform duration-200"></i>
+                                    {{ $assignment->title }}
+                                </h4>
+                                <span class="inline-block px-2 py-1 text-xs font-medium rounded-full {{ $badgeClass }}">
+                                    @if ($status === 'not_submitted')
+                                        Не выполнено
+                                    @elseif ($status === 'submitted')
+                                        На проверке
+                                    @else
+                                        Выполнено
+                                    @endif
+                                </span>
+                            </div>
+
+                            <p class="text-sm text-gray-600 mt-2 truncate">{{ $description }}</p>
+
+                            <div class="mt-4 text-sm text-gray-500 space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <i class="fas fa-calendar-check text-[#6E76C1]"></i>
+                                    <strong class="text-gray-700">Дедлайн:</strong>
+                                    <span>{{ $deadline->format('d.m.Y') }} в {{ $deadline->format('H:i') }}</span>
+                                </div>
+
+                                @if ($totalStudents > 0)
+                                    <div class="flex items-center gap-2">
+                                        <i class="fas fa-tasks text-[#6E76C1]"></i>
+                                        <strong class="text-gray-700">Выполнили:</strong>
+                                        <div class="w-full ml-2">
+                                            <div class="progress h-2 bg-gray-200 rounded overflow-hidden">
+                                                <div class="progress-bar bg-[#6E76C1]" role="progressbar"
+                                                    style="width: {{ $progress }}%"
+                                                    aria-valuenow="{{ $progress }}" aria-valuemin="0"
+                                                    aria-valuemax="100"></div>
+                                            </div>
+                                            <small class="text-gray-500">{{ $completed }} из {{ $totalStudents }}
+                                                выполнили</small>
+                                        </div>
+                                    </div>
+                                @endif
+                            </div>
+
+                            <div class="mt-4 pt-4 border-t border-gray-200 flex justify-end gap-2">
+                                @if ($status === 'not_submitted')
+                                    <a href="{{ route('assignments.show', $assignment->id) }}"
+                                        class="btn outline-none text-red-600 border-red-600 hover:bg-red-600 hover:text-gray-100 rounded-md px-3 py-1 inline-flex items-center">
+                                        <i class="fas fa-arrow-right mr-1"></i> Перейти
+                                    </a>
+                                @elseif ($status === 'submitted')
+                                    <span
+                                        class="inline-flex items-center text-sm text-yellow-600 cursor-default px-3 py-1 rounded-md border border-yellow-600 bg-yellow-50">
+                                        На проверке <i class="fas fa-clock ml-1"></i>
+                                    </span>
+                                @else
+                                    <a href="{{ route('assignment.result', ['id' => $item['submission']->id]) }}"
+                                        class="btn outline-none text-green-600 border-green-600 hover:bg-green-600 hover:text-gray-100 rounded-md px-3 py-1 inline-flex items-center">
+                                        <i class="fas fa-eye mr-1"></i> Результаты
+                                    </a>
+                                @endif
+
+                            </div>
+                        </div>
+                    </div>
+                @empty
+                    <div
+                        class="col-span-full text-center py-10 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                        <i class="fas fa-folder-open text-gray-300 text-4xl mb-2"></i>
+                        <p class="text-gray-500">Нет заданий на выполнение.</p>
+                    </div>
+                @endforelse
+            </div>
+
+        </div>
     </div>
 
     <script>
@@ -188,45 +277,42 @@
             const cards = document.querySelectorAll(".assignment-card");
             const filterStatus = document.getElementById("filter-status");
             const filterClass = document.getElementById("filter-class");
-
             const noAssignmentsMessage = document.getElementById("no-assignments-message");
 
-            function filterAssignments() {
-                const selectedStatus = filterStatus.value.trim().toLowerCase();
+            function applyFilters() {
+                const selectedStatus = filterStatus.value.trim();
                 const selectedClass = filterClass.value.trim();
 
-                let hasVisibleCards = false;
+                let visibleCount = 0;
 
                 cards.forEach(card => {
-                    const cardStatus = card.classList[1]?.split('-')[1] || '';
-                    const cardClass = card.querySelector('.assignment-class')?.textContent.trim() || '';
+                    const cardStatus = card.classList[0]?.split('-')[1] || '';
+                    const cardClassName = card.querySelector('.assignment-class')?.textContent.trim() || '';
 
-                    const statusMatch = !selectedStatus || cardStatus === selectedStatus;
-                    const classMatch = !selectedClass || cardClass === selectedClass;
+                    const matchesStatus = !selectedStatus || cardStatus === selectedStatus;
+                    const matchesClass = !selectedClass || cardClassName === selectedClass;
 
-                    if (statusMatch && classMatch) {
-                        card.style.display = "flex";
-                        hasVisibleCards = true;
+                    if (matchesStatus && matchesClass) {
+                        card.style.display = "block";
+                        visibleCount++;
                     } else {
                         card.style.display = "none";
                     }
                 });
 
                 // Показываем/скрываем сообщение
-                if (hasVisibleCards) {
-                    noAssignmentsMessage.style.display = "none";
-                } else {
+                if (visibleCount === 0) {
                     noAssignmentsMessage.style.display = "block";
+                } else {
+                    noAssignmentsMessage.style.display = "none";
                 }
             }
 
-            filterStatus.addEventListener("change", filterAssignments);
-            filterClass.addEventListener("change", filterAssignments);
+            filterStatus.addEventListener("change", applyFilters);
+            filterClass.addEventListener("change", applyFilters);
 
-            filterAssignments(); // Запуск фильтрации при загрузке страницы
+            // Инициализация при загрузке
+            window.addEventListener("load", applyFilters);
         });
     </script>
-
-</body>
-
-</html>
+@endsection
