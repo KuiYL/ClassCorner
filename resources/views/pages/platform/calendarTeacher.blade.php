@@ -1,238 +1,201 @@
 @extends('pages.platform.layout', ['activePage' => 'calendar', 'title' => 'Календарь', 'quick_action' => 'assignments.create'])
 @section('content')
-    <div class="main-platform">
+    <div class="container-fluid py-6 px-md-4">
+        <div class="bg-white rounded-lg shadow-md border-l-4 border-[#6E76C1] mb-6 overflow-hidden">
+            <div class="p-6 flex justify-between items-center bg-[#EEF2FF]">
+                <div>
+                    <h3 class="text-xl font-semibold text-[#555EB1]"> <i class="fas fa-calendar-alt mr-3"></i>Календарь
+                        заданий</h3>
+                    <p class="mt-2 text-sm text-[#6E76C1] font-medium">
+                        Просмотр дедлайнов заданий по дням
+                    </p>
+                </div>
+            </div>
+        </div>
 
-        <div id="calendar">
-            <div class="filters-calendar">
-                <select id="filter-calendar-class">
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+            <div class="lg:col-span-1 bg-white rounded-lg shadow-sm p-4 border border-gray-200 sticky top-6 h-fit">
+                <label for="filter-calendar-class" class="block text-sm font-medium text-gray-700 mb-2">Фильтр по
+                    классу</label>
+                <select id="filter-calendar-class"
+                    class="form-select w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
                     <option value="">Все классы</option>
                     @foreach ($classes as $class)
                         <option value="{{ $class->id }}">{{ $class->name }}</option>
                     @endforeach
                 </select>
             </div>
-            <div class="calendar-header">
-                <button id="prev-month"><i class="fas fa-chevron-left"></i></button>
-                <h2 id="current-month"></h2>
-                <button id="next-month"><i class="fas fa-chevron-right"></i></button>
+
+            <div class="lg:col-span-3 bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <div class="flex justify-between items-center mb-6">
+                    <button id="prev-month"
+                        class="btn btn-outline-secondary hover:bg-[#6E76C1]/10 hover:text-[#6E76C1] rounded-md">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <h3 id="current-month" class="text-xl font-semibold text-gray-800"></h3>
+                    <button id="next-month"
+                        class="btn btn-outline-secondary hover:bg-[#6E76C1]/10 hover:text-[#6E76C1] rounded-md">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+
+                <div class="grid grid-cols-7 gap-1 mb-2 text-center text-xs font-medium text-gray-500">
+                    <div>Пн</div>
+                    <div>Вт</div>
+                    <div>Ср</div>
+                    <div>Чт</div>
+                    <div>Пт</div>
+                    <div>Сб</div>
+                    <div>Вс</div>
+                </div>
+
+                <div id="calendar-days" class="grid grid-cols-7 gap-1 mb-6 text-center text-sm calendar-day-container">
+                </div>
+
+                <div id="day-events" class="space-y-3">
+                </div>
             </div>
-            <div class="calendar-grid"></div>
-            <div id="days-container"></div>
         </div>
     </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", () => {
-            const daysContainer = document.getElementById("days-container");
-            const currentMonthElement = document.getElementById("current-month");
-            const prevMonthButton = document.getElementById("prev-month");
-            const nextMonthButton = document.getElementById("next-month");
 
-            const assignments = @json($assignments);
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const calendarEvents = @json($assignmentData);
+            const currentMonthEl = document.getElementById("current-month");
+            const prevMonthBtn = document.getElementById("prev-month");
+            const nextMonthBtn = document.getElementById("next-month");
+            const filterClass = document.getElementById("filter-calendar-class");
+            const calendarDaysContainer = document.getElementById("calendar-days");
+            const dayEventsContainer = document.getElementById("day-events");
 
             let currentDate = new Date();
+            let filteredAssignments = [...calendarEvents];
 
-            const dayNames = ["Пн", "Вт", "Ср", "Чт", "Пт", "Сб", "Вс"];
-            const calendarGrid = document.querySelector(".calendar-grid");
-            dayNames.forEach(day => {
-                const div = document.createElement("div");
-                div.className = "day-name";
-                div.textContent = day;
-                calendarGrid.appendChild(div);
-            });
+            function getAssignmentsByDate(date) {
+                return filteredAssignments.filter(ass => {
+                    const assDate = new Date(ass.due_date);
+                    return assDate.toDateString() === date.toDateString();
+                });
+            }
 
-            function renderCalendar(date) {
-                daysContainer.innerHTML = "";
-                const year = date.getFullYear();
-                const month = date.getMonth();
-                const firstDayOfMonth = new Date(year, month, 1);
-                const lastDayOfMonth = new Date(year, month + 1, 0);
-                const startDayIndex = (firstDayOfMonth.getDay() + 6) % 7;
-                const totalDays = lastDayOfMonth.getDate();
-                const monthNames = [
-                    "Январь", "Февраль", "Март", "Апрель",
-                    "Май", "Июнь", "Июль", "Август",
-                    "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"
-                ];
-                currentMonthElement.textContent = `${monthNames[month]} ${year}`;
+            function renderCalendar() {
+                const year = currentDate.getFullYear();
+                const month = currentDate.getMonth();
 
-                for (let i = 0; i < startDayIndex; i++) {
-                    daysContainer.appendChild(document.createElement("div"));
+                currentMonthEl.textContent = `${['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь',
+                    'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month]} ${year}`;
+
+                const firstDay = new Date(year, month, 1).getDay() || 7;
+                const lastDay = new Date(year, month + 1, 0).getDate();
+                const days = [];
+
+                for (let i = 1; i < firstDay; i++) {
+                    days.push('<div class="opacity-0">.</div>');
                 }
 
-                const today = new Date();
-                const currentYear = today.getFullYear();
-                const currentMonthNum = today.getMonth();
-                const currentDay = today.getDate();
+                for (let day = 1; day <= lastDay; day++) {
+                    const date = new Date(year, month, day);
+                    const assignments = getAssignmentsByDate(date);
 
-                const selectedClassId = document.getElementById("filter-calendar-class").value;
+                    const hasEvents = assignments.length > 0;
 
-                for (let day = 1; day <= totalDays; day++) {
                     const dayDiv = document.createElement("div");
-                    dayDiv.className = "day";
-                    dayDiv.textContent = day;
-
-                    const isPastDay = (
-                        year < currentYear ||
-                        (year === currentYear && month < currentMonthNum) ||
-                        (year === currentYear && month === currentMonthNum && day < currentDay)
-                    );
-
-                    if (isPastDay) {
-                        dayDiv.classList.add("past-day");
-                        dayDiv.style.opacity = "0.6";
-                        dayDiv.style.cursor = "not-allowed";
-                    } else {
-                        dayDiv.addEventListener("click", () => openDayActions(dayDiv, dateKey));
-                    }
-
-                    if (
-                        year === today.getFullYear() &&
-                        month === today.getMonth() &&
-                        day === today.getDate()
-                    ) {
-                        dayDiv.classList.add("today");
-                    }
-
-                    const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-
-                    if (assignments[dateKey]) {
-                        let filteredAssignments = assignments[dateKey];
-                        if (selectedClassId) {
-                            filteredAssignments = assignments[dateKey].filter(a => a.class_id.toString() ===
-                                selectedClassId);
-                        }
-
-                        if (filteredAssignments.length > 0) {
-                            dayDiv.classList.add("has-assignments");
-                            dayDiv.dataset.assignments = JSON.stringify(filteredAssignments);
-                        } else {
-                            dayDiv.classList.remove("has-assignments");
-                            delete dayDiv.dataset.assignments;
-                        }
-                    }
-
-                    daysContainer.appendChild(dayDiv);
+                    dayDiv.className = `
+                    p-2 rounded-lg text-center cursor-pointer transition-all duration-300 ease-in-out
+                    ${hasEvents ? 'bg-[#6E76C1]/10 hover:bg-[#6E76C1]/20' : 'bg-gray-100 hover:bg-gray-200'}
+                `;
+                    dayDiv.dataset.date = date.toISOString().split("T")[0];
+                    dayDiv.innerHTML = `
+                    <div class="font-medium">${day}</div>
+                    <div class="text-xs mt-1">
+                        ${hasEvents ? `<span class="inline-block w-2 h-2 bg-[#6E76C1] rounded-full"></span>` : ''}
+                    </div>
+                `;
+                    dayDiv.addEventListener("click", () => showEventsForDate(date));
+                    calendarDaysContainer.appendChild(dayDiv);
                 }
             }
 
-            function openDayActions(dayElement, dateKey) {
-                const existing = document.querySelector('.day-actions');
-                if (existing) existing.remove();
+            function showEventsForDate(date) {
+                const selectedDate = new Date(date);
+                const assignmentsForDay = filteredAssignments.filter(ass => {
+                    const dueDate = new Date(ass.due_date);
+                    return dueDate.getDate() === selectedDate.getDate() &&
+                        dueDate.getMonth() === selectedDate.getMonth() &&
+                        dueDate.getFullYear() === selectedDate.getFullYear();
+                });
 
-                const actions = document.createElement("div");
-                actions.className = "day-actions";
+                dayEventsContainer.innerHTML = "";
 
-                const rect = dayElement.getBoundingClientRect();
-                actions.style.position = "absolute";
-                actions.style.top = `${rect.bottom + window.scrollY}px`;
-                actions.style.left = `${rect.left + window.scrollX}px`;
-
-                const dayAssignments = JSON.parse(dayElement.dataset.assignments || "[]");
-
-                const addBtn = document.createElement("button");
-                addBtn.textContent = "Добавить задание";
-                addBtn.className = "add-btn";
-                addBtn.onclick = () => {
-                    const currentUrl = encodeURIComponent(window.location.href);
-                    window.location.href = `/assignments/create?date=${dateKey}&return_url=${currentUrl}`;
-                };
-
-                actions.appendChild(addBtn);
-
-                if (dayAssignments.length > 0) {
-                    const viewBtn = document.createElement("button");
-                    viewBtn.textContent = "Посмотреть задания";
-                    viewBtn.className = "view-btn";
-                    viewBtn.onclick = () => showAssignments(dayAssignments);
-                    actions.appendChild(viewBtn);
+                if (assignmentsForDay.length === 0) {
+                    dayEventsContainer.innerHTML = `
+                        <div class="text-center py-6 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
+                            <i class="fas fa-calendar-check text-gray-300 text-3xl mb-2"></i>
+                            <p class="text-gray-500">Нет заданий на этот день</p>
+                        </div>`;
+                    return;
                 }
 
-                document.body.appendChild(actions);
+                assignmentsForDay.forEach(ass => {
+                    const event = document.createElement("div");
+                    event.className =
+                        "p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 cursor-pointer transition";
+                    event.innerHTML = `
+                        <h4 class="font-semibold text-[#6E76C1]">${ass.title}</h4>
+                        <p class="text-sm text-gray-600 mt-1 line-clamp-1">${ass.description || '<i class="fas fa-info-circle text-gray-400 mr-1"></i> Нет описания'}</p>
+                        <p class="text-xs text-gray-500 mt-2">{{ __('Класс') }}: ${ass.class_name}</p>
+                        <p class="text-xs text-gray-500 mt-1">{{ __('Дата сдачи') }}: ${new Date(ass.due_date).toLocaleString()}</p>
+                    `;
+                    event.addEventListener("click", () => {
+                        window.location.href = "{{ route('assignments.show', '') }}" + "/" +
+                            ass.id + "?return_url=" + encodeURIComponent(window.location
+                                .href);
+                    });
 
-                document.addEventListener("click", function onClickOutside(e) {
-                    if (!actions.contains(e.target) && !dayElement.contains(e.target)) {
-                        actions.remove();
-                        document.removeEventListener("click", onClickOutside);
-                    }
+                    dayEventsContainer.appendChild(event);
                 });
             }
 
-            function showAssignments(assigs) {
-                const modal = document.createElement("div");
-                modal.className = "modal-сalendar";
+            function showModal(assignment) {
+                modal.classList.remove("hidden");
+                modalTitle.textContent = assignment.title;
 
-                const modalContent = document.createElement("div");
-                modalContent.className = "modal-сalendar-content";
+                const dueDate = new Date(assignment.due_date).toLocaleString();
+                const description = assignment.description || 'Нет описания';
 
-                const closeButton = document.createElement("span");
-                closeButton.className = "close-button";
-                closeButton.textContent = "×";
-                closeButton.onclick = () => modal.remove();
-                modalContent.appendChild(closeButton);
-
-                const title = document.createElement("h3");
-                title.textContent = `Задания (${assigs.length})`;
-                title.style.marginBottom = "15px";
-                title.style.fontSize = "1.2rem";
-                title.style.color = "#333";
-                modalContent.appendChild(title);
-
-                assigs.forEach(assignment => {
-                    const item = document.createElement("div");
-                    item.className = "assignment-item";
-
-                    const link = document.createElement("a");
-                    link.href = `/assignment/${assignment.id}`;
-                    link.textContent = assignment.title;
-                    link.style.display = "block";
-                    link.style.fontWeight = "600";
-                    link.style.marginBottom = "5px";
-                    link.style.textDecoration = "none";
-                    link.style.color = "#333";
-
-                    const classLink = document.createElement("a");
-                    classLink.href = `/class/${assignment.class_id}`;
-                    classLink.textContent =
-                        `Класс: ${assignment.class_name || 'ID ' + assignment.class_id}`;
-                    classLink.style.fontSize = "0.9rem";
-                    classLink.style.color = "#6e76c1";
-                    classLink.style.textDecoration = "none";
-
-                    const dueDate = document.createElement("span");
-                    dueDate.textContent = `Дедлайн: ${assignment.due_date}`;
-                    dueDate.style.display = "block";
-                    dueDate.style.fontSize = "0.85rem";
-                    dueDate.style.color = "#777";
-                    dueDate.style.marginTop = "4px";
-
-                    item.appendChild(link);
-                    item.appendChild(classLink);
-                    item.appendChild(dueDate);
-                    modalContent.appendChild(item);
-                });
-
-                modal.appendChild(modalContent);
-                document.body.appendChild(modal);
+                modalContent.innerHTML = `
+                    <p class="text-sm text-gray-600">{{ __('Описание') }}: ${description}</p>
+                    <p class="text-sm text-gray-600 mt-2">{{ __('Класс') }}: ${assignment.class_name}</p>
+                    <p class="text-sm text-gray-600 mt-2">{{ __('Дата сдачи') }}: ${dueDate}</p>
+                `;
             }
 
-            document.querySelectorAll('#filter-calendar-class').forEach(input => {
-                input.addEventListener("change", () => {
-                    currentDate = new Date();
-                    renderCalendar(currentDate);
-                });
-            });
-
-            prevMonthButton.addEventListener("click", () => {
+            prevMonthBtn.addEventListener("click", () => {
                 currentDate.setMonth(currentDate.getMonth() - 1);
-                renderCalendar(currentDate);
+                clearCalendar();
+                renderCalendar();
             });
 
-            nextMonthButton.addEventListener("click", () => {
+            nextMonthBtn.addEventListener("click", () => {
                 currentDate.setMonth(currentDate.getMonth() + 1);
-                renderCalendar(currentDate);
+                clearCalendar();
+                renderCalendar();
             });
 
-            renderCalendar(currentDate);
+            filterClass.addEventListener("change", () => {
+                const selectedClassId = filterClass.value;
+                filteredAssignments = selectedClassId ?
+                    calendarEvents.filter(ass => ass.class_id == selectedClassId) : [...calendarEvents];
+                clearCalendar();
+                renderCalendar();
+            });
+
+            function clearCalendar() {
+                calendarDaysContainer.innerHTML = "";
+            }
+
+            renderCalendar();
         });
     </script>
 @endsection

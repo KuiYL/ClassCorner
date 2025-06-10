@@ -39,7 +39,7 @@
                         </div>
                         <div class="bg-white p-4 rounded shadow-sm">
                             <div class="text-2xl font-bold text-[#6E76C1]">{{ $stats['total_students'] }}</div>
-                            <div class="text-sm text-gray-600">Всего студентов</div>
+                            <div class="text-sm text-gray-600">Всего Учеников</div>
                         </div>
                     </div>
                 </div>
@@ -104,13 +104,13 @@
                                 <div class="bg-purple-50 border-l-4 border-purple-400 text-purple-800 p-3 rounded-md">
                                     <strong class="text-sm uppercase tracking-wide text-purple-600">Тип:</strong>
                                     <span class="ml-2">Текстовый ответ</span>
-                                    <p class="mt-2 text-sm italic">Студент должен ввести свой текст.</p>
+                                    <p class="mt-2 text-sm italic">Ученик должен ввести свой текст.</p>
                                 </div>
                             @elseif ($field['type'] === 'file_upload')
                                 <div class="bg-indigo-50 border-l-4 border-indigo-400 text-indigo-800 p-3 rounded-md">
                                     <strong class="text-sm uppercase tracking-wide text-indigo-600">Тип:</strong>
                                     <span class="ml-2">Загрузка файла</span>
-                                    <p class="mt-2 text-sm italic">Студент должен загрузить файл.</p>
+                                    <p class="mt-2 text-sm italic">Ученик должен загрузить файл.</p>
                                 </div>
                             @elseif (in_array($field['type'], ['multiple_choice', 'single_choice']))
                                 <ul class="space-y-2 mt-2">

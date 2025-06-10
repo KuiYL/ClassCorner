@@ -175,7 +175,7 @@
         @if ($studentProgress->isNotEmpty())
             <div class="card shadow-sm mt-6">
                 <div class="card-header bg-white border-b border-gray-200 py-3 px-4 flex justify-between flex-wrap gap-3">
-                    <h3 class="text-lg font-semibold text-gray-800">Студенты</h3>
+                    <h3 class="text-lg font-semibold text-gray-800">Ученики</h3>
                     <button type="button"
                         class="btn btn-outline-secondary text-[#6E76C1] border-[#6E76C1] hover:bg-[#6E76C1]"
                         data-bs-toggle="modal" data-bs-target="#inviteStudentModal">
@@ -223,7 +223,7 @@
         @else
             <div class="text-center py-6 bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
                 <i class="fas fa-user-graduate text-gray-400 text-4xl mb-2"></i>
-                <p class="text-gray-500 italic">Нет студентов в этом классе.</p>
+                <p class="text-gray-500 italic">Нет Учеников в этом классе.</p>
             </div>
         @endif
 
@@ -283,7 +283,7 @@
 
                 if (filtered.length === 0) {
                     const li = document.createElement("li");
-                    li.textContent = "Студенты не найдены";
+                    li.textContent = "Ученики не найдены";
                     li.style.color = "#888";
                     li.style.textAlign = "center";
                     li.className = "list-group-item list-group-item-action text-center";

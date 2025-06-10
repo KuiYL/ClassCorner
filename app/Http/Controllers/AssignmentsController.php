@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\AssignmentMaterial;
 use App\Models\Assignments;
+use App\Models\ClassUser;
+use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
@@ -87,6 +90,18 @@ class AssignmentsController extends Controller
                         'file_path' => $filePath,
                     ]);
                 }
+            }
+
+            $classUsers = ClassUser::with('user')
+                ->where('class_id', $request->input('class_id'))
+                ->get();
+            foreach ($classUsers as $student) {
+                $this->createNotification(
+                    $student->id,
+                    'Новое задание',
+                    'Задание "' . $assignment->title . '" добавлено.',
+                    'assignment_created'
+                );
             }
 
             $returnUrl = $request->input('return_url', route('user.assignments'));
@@ -194,7 +209,9 @@ class AssignmentsController extends Controller
         $assignment = Assignments::findOrFail($id);
         $assignment->delete();
 
-        return redirect()->back()->with('success', 'Задание успешно удалено.');
+        $returnUrl = request('return_url') ?: url()->previous();
+
+        return redirect()->to($returnUrl)->with('success', 'Задание успешно удалено.');
     }
 
     public function deleteMaterial($id)
@@ -204,5 +221,15 @@ class AssignmentsController extends Controller
         $material->delete();
 
         return redirect()->back()->with('success', 'Материал успешно удалено.');
+    }
+
+    public function createNotification($userId, $title, $message, $type = 'general')
+    {
+        Notification::create([
+            'user_id' => $userId,
+            'title' => $title,
+            'message' => $message,
+            'type' => $type,
+        ]);
     }
 }

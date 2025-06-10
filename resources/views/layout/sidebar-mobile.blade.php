@@ -2,7 +2,9 @@
         <ul class="list-none mb-4 space-y-1 px-2">
             <li>
                 <a href="{{ route('user.dashboard') }}"
-                    class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'dashboard' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
+                    class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200
+                    hover:bg-gray-100 hover:text-gray-900
+                    {{ $activePage === 'dashboard' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
 
                     @if ($activePage === 'dashboard')
                         <span class="absolute left-0 top-0 bottom-0 w-1 bg-[#6E76C1] rounded-r-md"></span>
@@ -50,16 +52,18 @@
 
                     </a>
                 </li>
-                <li>
-                    <a href="{{ route('user.statistics') }}"
-                        class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'statistics' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
-                        @if ($activePage === 'statistics')
-                            <span class="absolute left-0 top-0 bottom-0 w-1 bg-[#6E76C1] rounded-r-md"></span>
-                        @endif
-                        <i class="fas fa-chart-pie text-xl"></i>
-                        <span class="text-lg font-medium">Статистика</span>
-                    </a>
-                </li>
+                @if ($user->role !== 'student')
+                    <li>
+                        <a href="{{ route('user.statistics') }}"
+                            class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'statistics' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
+                            @if ($activePage === 'statistics')
+                                <span class="absolute left-0 top-0 bottom-0 w-1 bg-[#6E76C1] rounded-r-md"></span>
+                            @endif
+                            <i class="fas fa-chart-pie text-xl"></i>
+                            <span class="text-lg font-medium">Статистика</span>
+                        </a>
+                    </li>
+                @endif
             @else
                 <li>
                     <a href="{{ route('admin.users') }}"

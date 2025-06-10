@@ -28,12 +28,12 @@
                 <h2>Информация</h2>
                 <ul class="profile-details-list">
                     <li><strong>Имя и фамилия:</strong> {{ $user->name }} {{ $user->surname }}</li>
-                    <li><strong>Email:</strong> {{ $user->email }}</li>
+                    <li><strong>Электронная почта:</strong> {{ $user->email }}</li>
                     @php
                         $roles = [
                             'admin' => 'Администратор',
                             'teacher' => 'Преподаватель',
-                            'student' => 'Студент',
+                            'student' => 'Ученик',
                         ];
                     @endphp
 
@@ -48,7 +48,7 @@
                 <h2>Действия</h2>
                 <div class="actions-buttons">
                     <button class="btn btn-primary" onclick="showForm('changePasswordForm')">
-                        <i class="fas fa-key"></i> Сменить пароль
+                        <i class="fas fa-key"></i> Изменить пароль
                     </button>
                     <button class="btn delete-btn delete-button" type="button" data-id="{{ $user->id }}"
                         data-name="{{ $user->name }}" data-type="user">

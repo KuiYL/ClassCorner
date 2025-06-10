@@ -251,7 +251,7 @@ class PagesController extends Controller
                     ['path' => route('user.classes')]
                 );
 
-                return view('pages.platform.classesStudent', compact('user', 'paginatedItems', 'invitations'));
+                return view('pages.platform.classesStudent', compact('user', 'paginatedItems', 'invitations', 'classes'));
 
             default:
                 abort(403, 'Нет доступа');
@@ -261,13 +261,24 @@ class PagesController extends Controller
     public function showAssignmentsPage()
     {
         $user = $this->getAuthenticatedUser();
+        $perPage = 6;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
         switch ($user->role) {
             case 'teacher':
                 $classes = $this->getUserClasses($user);
-                $assignments = Assignments::where('teacher_id', $user->id)->get();
+                $allAssignments = Assignments::where('teacher_id', $user->id)->get();
 
-                return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'assignments'));
+                $paginatedItems = new LengthAwarePaginator(
+                    $allAssignments->forPage($currentPage, $perPage),
+                    $allAssignments->count(),
+                    $perPage,
+                    $currentPage,
+                    ['path' => route('user.assignments')]
+                );
+
+                return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'paginatedItems'));
+
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':
@@ -309,25 +320,20 @@ class PagesController extends Controller
             case 'teacher':
                 $classes = $this->getUserClasses($user);
 
-                $assignments = Assignments::where('teacher_id', $user->id)
-                    ->with('class')
-                    ->orderBy('due_date')
-                    ->get()
-                    ->groupBy('due_date')
-                    ->map(function ($group) {
-                        return $group->map(function ($item) {
-                            return [
-                                'id' => $item->id,
-                                'title' => $item->title,
-                                'description' => $item->description,
-                                'due_date' => $item->due_date,
-                                'class_id' => $item->class_id,
-                                'class_name' => optional($item->class)->name,
-                            ];
-                        });
-                    });
+                $assignments = Assignments::where('teacher_id', $user->id)->with('class')->get();
 
-                return view('pages.platform.calendarTeacher', compact('user', 'classes', 'assignments'));
+                $assignmentData = $assignments->map(function ($assignment) {
+                    return [
+                        'id' => $assignment->id,
+                        'title' => $assignment->title,
+                        'description' => $assignment->description,
+                        'due_date' => $assignment->due_date,
+                        'class_id' => $assignment->class->id ?? null,
+                        'class_name' => $assignment->class->name ?? 'Без класса'
+                    ];
+                })->toArray();
+
+                return view('pages.platform.calendarTeacher', compact('user', 'classes', 'assignmentData'));
 
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
@@ -388,7 +394,36 @@ class PagesController extends Controller
                 $classes = $this->getUserClasses($user);
                 $assignments = Assignments::where('teacher_id', $user->id)->get();
 
-                return view('pages.platform.statisticsTeacher', compact('user', 'classes', 'assignments'));
+                $assignmentsByMonth = $assignments
+                    ->groupBy(function ($item) {
+                        return \Carbon\Carbon::parse($item->due_date)->format('m');
+                    })
+                    ->map(fn($group) => $group->count());
+
+                $studentCounts = [];
+                foreach ($classes as $class) {
+                    $studentCounts[$class->name] = $class->students()
+                        ->where('role', 'student')
+                        ->count();
+                }
+                $totalStudents = $this->getTeacherStudentsCount($user);
+                $assignmentTypes = $assignments->flatMap(fn($a) => json_decode($a->options, true))
+                    ->pluck('type')->filter()->countBy();
+
+                $totalStudents = array_sum($studentCounts);
+
+                $newAssignmentsCount = $assignments->where('created_at', '>=', now()->subDays(7))->count();
+
+                return view('pages.platform.statisticsTeacher', compact(
+                    'user',
+                    'classes',
+                    'assignments',
+                    'assignmentsByMonth',
+                    'studentCounts',
+                    'assignmentTypes',
+                    'totalStudents',
+                    'newAssignmentsCount'
+                ));
             case 'admin':
                 return view('pages.platform.dashboardAdmin', compact('user'));
             case 'student':

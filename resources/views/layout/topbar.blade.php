@@ -25,7 +25,7 @@
                 @php $unreadCount = auth()->user()->notifications->where('read', false)->count(); @endphp
                 @if ($unreadCount > 0)
                     <span
-                        class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-indigo-500 text-white fs-6"
+                        class="position-absolute top-0 start-0 translate-middle badge rounded-pill bg-[#6E76C1] text-white fs-6"
                         style="font-size: 0.6rem; padding: 0.35rem 0.4rem;">
                         {{ $unreadCount }}
                     </span>
@@ -119,7 +119,7 @@
             <div class="d-none d-md-block text-end me-3">
                 <p class="mb-0 fw-bold">{{ $user->name }} {{ $user->surname }}</p>
                 @php
-                    $roles = ['admin' => 'Администратор', 'teacher' => 'Преподаватель', 'student' => 'Студент'];
+                    $roles = ['admin' => 'Администратор', 'teacher' => 'Преподаватель', 'student' => 'Ученик'];
                 @endphp
                 <small class="text-base">{{ $roles[$user->role] ?? 'Неизвестная роль' }}</small>
             </div>

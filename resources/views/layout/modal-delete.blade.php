@@ -22,6 +22,7 @@
                     class="btn btn-secondary px-4 py-2 rounded-md bg-gray-300 hover:bg-gray-400 text-gray-800 transition duration-200">
                     <i class="fas fa-times mr-1"></i> Отмена
                 </button>
+                <input type="hidden" name="return_url" value="{{ url()->current() }}">
                 <button type="submit"
                     class="btn btn-danger px-4 py-2 rounded-md bg-red-600 hover:bg-red-700 text-white transition duration-200">
                     <i class="fas fa-trash mr-1"></i> Удалить

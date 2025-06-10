@@ -6,7 +6,7 @@
                 <div>
                     <h3 class="text-xl font-semibold text-[#555EB1]">Создать новый класс</h3>
                     <p class="mt-2 text-sm text-[#6E76C1] font-medium">
-                        Добавьте студентов, материалы и задания
+                        Добавьте Учеников, материалы и задания
                     </p>
                 </div>
 
@@ -54,7 +54,7 @@
                         <div class="class-card bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-[#6E76C1] transition-all duration-300 hover:shadow-md"
                             data-name="{{ $class->name }}" data-teacher="{{ $class->teacher->id ?? 'none' }}">
 
-                            <div class="p-4 bg-[#6E76C1] flex justify-between items-start relative">
+                            <div class="p-4 bg-gradient-to-r from-[#6E76C1] to-[#9CA4F2] flex justify-between items-start relative">
                                 <h4 class="font-bold text-lg text-white flex items-center gap-2 truncate">
                                     <i class="fas fa-school text-white/80"></i>
                                     <span class="truncate">{{ $class->name }}</span>

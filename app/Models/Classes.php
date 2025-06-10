@@ -23,9 +23,8 @@ class Classes extends Model
             ->withTimestamps();
     }
 
-public function assignments()
-{
-    return $this->hasMany(Assignments::class, 'class_id', 'id');
-}
-
+    public function assignments()
+    {
+        return $this->hasMany(Assignments::class, 'class_id', 'id');
+    }
 }
