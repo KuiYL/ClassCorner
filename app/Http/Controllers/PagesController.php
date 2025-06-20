@@ -653,22 +653,7 @@ class PagesController extends Controller
         }
     }
 
-    public function showAssignmentsToGrade()
-    {
-        $user = $this->getAuthenticatedUser();
-
-        switch ($user->role) {
-            case 'teacher':
-                $classes = $this->getUserClasses($user);
-                $assignmentsToGrade = $this->getUserAssignmentsToGrade($user);
-
-                return view('pages.assignments.assignmensToGrade', compact('user', 'classes', 'assignmentsToGrade'));
-            case 'admin':
-                return view('pages.platform.dashboardAdmin', compact('user'));
-            default:
-                abort(403, 'Нет доступа');
-        }
-    }
+ 
 
     public function gradeForm($id)
     {
