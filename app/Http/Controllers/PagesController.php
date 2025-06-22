@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 
 class PagesController extends Controller
@@ -207,19 +208,35 @@ class PagesController extends Controller
 
         switch ($user->role) {
             case 'teacher':
+                $perPage = 6;
+                $filter = request('filter', '');
                 $classes = $this->getUserClasses($user);
-                $classes = $user->classes;
+                $filterClasses = $classes;
+                if ($filter !== '') {
+                    $filterClasses = $classes->filter(function ($class) use ($filter) {
+                        return mb_stripos($class->name, $filter) !== false;
+                    })->values();
+                }
+
                 $perPage = 6;
                 $currentPage = LengthAwarePaginator::resolveCurrentPage();
+
+                $total = $filterClasses->count();
+
+                $itemsForCurrentPage = $filterClasses->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
                 $paginatedItems = new LengthAwarePaginator(
-                    Collection::make($classes)->forPage($currentPage, $perPage),
-                    count($classes),
+                    $itemsForCurrentPage,
+                    $total,
                     $perPage,
                     $currentPage,
-                    ['path' => route('user.classes')]
+                    [
+                        'path' => route('user.classes'),
+                        'query' => ['filter' => $filter],
+                    ]
                 );
 
-                return view('pages.platform.classesTeacher', compact('user', 'paginatedItems', 'classes'));
+                return view('pages.platform.classesTeacher', compact('user', 'paginatedItems', 'filter', 'classes'));
 
             case 'admin':
                 $classes = Classes::all();
@@ -385,52 +402,68 @@ class PagesController extends Controller
         }
     }
 
-    public function showStatisticsPage()
+    public function showStatisticsPage(Request $request)
     {
         $user = $this->getAuthenticatedUser();
 
-        switch ($user->role) {
-            case 'teacher':
-                $classes = $this->getUserClasses($user);
-                $assignments = Assignments::where('teacher_id', $user->id)->get();
-
-                $assignmentsByMonth = $assignments
-                    ->groupBy(function ($item) {
-                        return \Carbon\Carbon::parse($item->due_date)->format('m');
-                    })
-                    ->map(fn($group) => $group->count());
-
-                $studentCounts = [];
-                foreach ($classes as $class) {
-                    $studentCounts[$class->name] = $class->students()
-                        ->where('role', 'student')
-                        ->count();
-                }
-                $totalStudents = $this->getTeacherStudentsCount($user);
-                $assignmentTypes = $assignments->flatMap(fn($a) => json_decode($a->options, true))
-                    ->pluck('type')->filter()->countBy();
-
-                $totalStudents = array_sum($studentCounts);
-
-                $newAssignmentsCount = $assignments->where('created_at', '>=', now()->subDays(7))->count();
-
-                return view('pages.platform.statisticsTeacher', compact(
-                    'user',
-                    'classes',
-                    'assignments',
-                    'assignmentsByMonth',
-                    'studentCounts',
-                    'assignmentTypes',
-                    'totalStudents',
-                    'newAssignmentsCount'
-                ));
-            case 'admin':
-                return view('pages.platform.dashboardAdmin', compact('user'));
-            case 'student':
-                return view('pages.platform.dashboardUser', compact('user'));
-            default:
-                abort(403, 'Нет доступа');
+        if ($user->role !== 'teacher') {
+            abort(403, 'Нет доступа');
         }
+
+        $classes = $this->getUserClasses($user);
+        $assignments = Assignments::where('teacher_id', $user->id)->get();
+
+        $assignmentsByMonth = $assignments->groupBy(fn($item) => \Carbon\Carbon::parse($item->due_date)->format('m'))
+            ->map(fn($group) => $group->count())
+            ->toArray();
+
+        $studentCounts = $classes->mapWithKeys(fn($class) => [
+            $class->name => $class->students()->where('role', 'student')->count()
+        ])->toArray();
+
+        $assignmentTypes = $assignments->flatMap(fn($a) => json_decode($a->options, true))
+            ->pluck('type')
+            ->filter()
+            ->countBy()
+            ->toArray();
+
+        $totalStudents = array_sum($studentCounts);
+        $newAssignmentsCount = $assignments->where('created_at', '>=', now()->subDays(7))->count();
+
+        $selectedClassId = $request->query('class_id', $classes->first()?->id);
+
+        $studentRatings = [];
+        if ($selectedClassId) {
+            $class = $classes->firstWhere('id', $selectedClassId);
+
+            if ($class) {
+                $students = $class->students()->where('role', 'student')->get();
+
+                $studentRatings = $students->mapWithKeys(function ($student) use ($selectedClassId) {
+                    $assignmentIds = Assignments::where('class_id', $selectedClassId)->pluck('id');
+
+                    $avgGrade = $student->studentAssignments()
+                        ->whereIn('assignment_id', $assignmentIds)
+                        ->whereNotNull('grade')
+                        ->avg('grade');
+
+                    return [$student->name . ' ' . $student->surname => round($avgGrade ?? 0, 2)];
+                })->sortDesc()->toArray();
+            }
+        }
+
+        return view('pages.platform.statisticsTeacher', compact(
+            'user',
+            'classes',
+            'assignments',
+            'assignmentsByMonth',
+            'studentCounts',
+            'assignmentTypes',
+            'totalStudents',
+            'newAssignmentsCount',
+            'studentRatings',
+            'selectedClassId'
+        ));
     }
 
     public function showProfilePage()
@@ -564,7 +597,7 @@ class PagesController extends Controller
 
                 $grades = $completedSubmissions->pluck('grade')->filter(fn($g) => !is_null($g));
                 $averageGrade = $grades->isNotEmpty()
-                    ? round($grades->avg())
+                    ? $grades->avg()
                     : null;
 
                 return [
@@ -653,14 +686,28 @@ class PagesController extends Controller
         }
     }
 
- 
+    public function showAssignmentsToGrade()
+    {
+        $user = $this->getAuthenticatedUser();
+
+        switch ($user->role) {
+            case 'teacher':
+                $classes = $this->getUserClasses($user);
+                $assignmentsToGrade = $this->getUserAssignmentsToGrade($user);
+
+                return view('pages.assignments.assignmensToGrade', compact('user', 'classes', 'assignmentsToGrade'));
+            case 'admin':
+                return view('pages.platform.dashboardAdmin', compact('user'));
+            default:
+                abort(403, 'Нет доступа');
+        }
+    }
 
     public function gradeForm($id)
     {
         $user = $this->getAuthenticatedUser();
         $role = $user->role;
         $classes = $this->getUserClasses($user);
-
         if ($role === 'teacher') {
             $assignment = Assignments::with('class')->findOrFail($id);
             $studentAssignment = StudentAssignments::where('assignment_id', $id)
@@ -674,46 +721,53 @@ class PagesController extends Controller
             $totalPossible = 0;
             $detailedStats = [];
 
-            foreach ($answers as $index => $answer) {
-                if (in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
-                    $field = $assignmentFields[$index] ?? null;
+            foreach ($assignmentFields as $index => $field) {
+                $questionTitle = $field['name'] ?? 'Вопрос ' . ($index + 1);
+                $questionType = $field['type'] ?? 'unknown';
 
-                    if ($field && isset($field['options']) && is_array($field['options'])) {
-                        $correctOptions = array_filter($field['options'], fn($opt) => $opt['isCorrect'] ?? false);
-                        $correctCountInField = count($correctOptions);
-
-                        $selectedCorrect = array_intersect_key(
-                            array_flip($answer['selected_options']),
-                            $correctOptions
-                        );
-                        $studentCorrectInField = count($selectedCorrect);
-
-                        $detailedStats[] = [
-                            'question' => $field['name'],
-                            'type' => $answer['type'],
-                            'correct_needed' => $correctCountInField,
-                            'correct_given' => $studentCorrectInField,
-                            'percent' => $correctCountInField > 0 ? round(($studentCorrectInField / $correctCountInField) * 100) : 100,
-                        ];
-
-                        $totalCorrect += $studentCorrectInField;
-                        $totalPossible += $correctCountInField;
-                    }
+                if (in_array($questionType, ['file_upload', 'text'])) {
+                    $detailedStats[] = [
+                        'question' => $questionTitle,
+                        'type' => $questionType,
+                        'correct_needed' => 0,
+                        'correct_given' => 0,
+                        'percent' => 'N/A',
+                    ];
+                    continue;
                 }
+
+                $correctOptions = array_filter($field['options'] ?? [], fn($opt) => $opt['isCorrect'] ?? false);
+                $correctCountInField = count($correctOptions);
+
+                $studentAnswer = $answers[$index] ?? [];
+                $selectedOptions = $studentAnswer['selected_options'] ?? [];
+                $selectedCorrect = array_intersect_key(
+                    array_flip($selectedOptions),
+                    $correctOptions
+                );
+                $studentCorrectInField = count($selectedCorrect);
+
+                $detailedStats[] = [
+                    'question' => $questionTitle,
+                    'type' => $questionType,
+                    'correct_needed' => $correctCountInField,
+                    'correct_given' => $studentCorrectInField,
+                    'percent' => $correctCountInField > 0 ? round(($studentCorrectInField / $correctCountInField) * 100) : 100,
+                ];
+
+                $totalCorrect += $studentCorrectInField;
+                $totalPossible += $correctCountInField;
             }
 
             $percentCorrect = $totalPossible > 0 ? round(($totalCorrect / $totalPossible) * 100) : 100;
-            $autoGrade = $percentCorrect;
 
-            if ($percentCorrect >= 90) {
-                $autoFeedback = "Отличная работа! Все вопросы выполнены на высоком уровне.";
-            } elseif ($percentCorrect >= 70) {
-                $autoFeedback = "Хорошо выполнено. Есть небольшие ошибки.";
-            } elseif ($percentCorrect >= 50) {
-                $autoFeedback = "Работа выполнена удовлетворительно. Рекомендуется повторить материал.";
-            } else {
-                $autoFeedback = "Много ошибок. Рекомендую пересмотреть тему и попробовать снова.";
-            }
+            $autoGrade = $percentCorrect;
+            $autoFeedback = match (true) {
+                $percentCorrect >= 90 => "Отличная работа! Все вопросы выполнены на высоком уровне.",
+                $percentCorrect >= 70 => "Хорошо выполнено. Есть небольшие ошибки.",
+                $percentCorrect >= 50 => "Работа выполнена удовлетворительно. Рекомендуется повторить материал.",
+                default => "Много ошибок. Рекомендую пересмотреть тему и попробовать снова.",
+            };
 
             return view('pages.assignments.gradeForm', compact(
                 'user',
@@ -721,15 +775,15 @@ class PagesController extends Controller
                 'assignmentFields',
                 'studentAssignment',
                 'answers',
-                'classes',
                 'percentCorrect',
                 'autoGrade',
                 'autoFeedback',
-                'detailedStats'
+                'detailedStats',
+                'classes'
             ));
         }
 
-        return redirect()->back();
+        return redirect()->route('assignment.result');
     }
 
     public function showAssignmentResult($id)
@@ -747,39 +801,80 @@ class PagesController extends Controller
         $questions = json_decode($studentAssignment->assignment->options, true) ?? [];
 
         $results = [];
+        $detailedStats = [];
+
+        $totalCorrect = 0;
+        $totalPossible = 0;
 
         foreach ($questions as $index => $question) {
             $answer = $answers[$index] ?? null;
 
-            $isCorrect = false;
+            $questionTitle = $question['name'] ?? 'Вопрос ' . ($index + 1);
+            $questionType = $question['type'] ?? 'unknown';
 
-            if ($answer && in_array($answer['type'], ['single_choice', 'multiple_choice'])) {
+            $isCorrect = false;
+            if ($answer && in_array($questionType, ['single_choice', 'multiple_choice'])) {
                 $selected = $answer['selected_options'] ?? [];
                 $correctIndices = array_keys(array_filter($question['options'] ?? [], fn($opt) => $opt['isCorrect'] ?? false));
 
-                $isCorrect = count(array_intersect($selected, $correctIndices)) === count($correctIndices) &&
-                    count($selected) === count($correctIndices);
+                $isCorrect = count(array_intersect($selected, $correctIndices)) === count($correctIndices)
+                    && count($selected) === count($correctIndices);
             }
 
             $results[] = [
-                'question_text' => $question['name'] ?? 'Без текста',
-                'type' => $question['type'] ?? 'text',
+                'question_text' => $questionTitle,
+                'type' => $questionType,
                 'options' => $question['options'] ?? [],
                 'student_answer' => $answer,
                 'isCorrect' => $isCorrect,
             ];
+
+            if (in_array($questionType, ['file_upload', 'text'])) {
+                $detailedStats[] = [
+                    'question' => $questionTitle,
+                    'type' => $questionType,
+                    'correct_needed' => 0,
+                    'correct_given' => 0,
+                    'percent' => 'N/A',
+                ];
+                continue;
+            }
+
+            $correctOptions = array_filter($question['options'] ?? [], fn($opt) => $opt['isCorrect'] ?? false);
+            $correctCountInField = count($correctOptions);
+
+            $selectedOptions = $answer['selected_options'] ?? [];
+            $selectedCorrect = array_intersect_key(
+                array_flip($selectedOptions),
+                $correctOptions
+            );
+            $studentCorrectInField = count($selectedCorrect);
+
+            $percent = $correctCountInField > 0
+                ? round(($studentCorrectInField / $correctCountInField) * 100)
+                : 100;
+
+            $detailedStats[] = [
+                'question' => $questionTitle,
+                'type' => $questionType,
+                'correct_needed' => $correctCountInField,
+                'correct_given' => $studentCorrectInField,
+                'percent' => $percent,
+            ];
+
+            $totalCorrect += $studentCorrectInField;
+            $totalPossible += $correctCountInField;
         }
 
-        $percentCorrect = !empty($results)
-            ? round(collect($results)->where('isCorrect', true)->count() / count($results) * 100)
-            : 100;
+        $percentCorrect = $totalPossible > 0 ? round(($totalCorrect / $totalPossible) * 100) : 100;
 
         return view('pages.assignments.showAssignmentResult', compact(
             'studentAssignment',
             'results',
             'percentCorrect',
             'classes',
-            'user'
+            'user',
+            'detailedStats'
         ));
     }
 

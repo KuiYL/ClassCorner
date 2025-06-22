@@ -1,18 +1,20 @@
 @extends('pages.platform.layout', ['activePage' => 'statistics', 'title' => 'Статистика', 'quick_action' => 'null'])
+
 @section('content')
     <div class="container-fluid py-6 px-md-4">
-
-        <!-- Баннер -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 class="text-2xl font-bold text-gray-900 flex items-center">
-                <i class="fas fa-chart-bar mr-3 text-[#6E76C1]"></i> Ваша статистика
-            </h2>
-            <p class="mt-1 text-sm text-gray-500">Посмотрите данные по классам, заданиям и учениками</p>
+        <div class="bg-white rounded-lg shadow-md border-l-4 border-[#6E76C1] mb-6 overflow-hidden">
+            <div class="p-6 flex justify-between items-center bg-[#EEF2FF]">
+                <div>
+                    <h3 class="text-xl font-semibold text-[#555EB1]"> <i class="fas fa-chart-bar mr-3 text-[#6E76C1]"></i>Ваша
+                        статистика</h3>
+                    <p class="mt-2 text-sm text-[#6E76C1] font-medium">
+                        Посмотрите данные по классам, заданиям и ученикам
+                    </p>
+                </div>
+            </div>
         </div>
 
-        <!-- Статистика сверху -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <!-- Активные классы -->
             <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-[#6E76C1]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-[#6E76C1]/10 text-[#6E76C1]">
@@ -20,12 +22,11 @@
                     </div>
                     <div class="ml-4">
                         <p class="text-xs text-gray-500 uppercase font-semibold">Классов</p>
-                        <h3 class="text-xl font-bold text-gray-800">{{ $classes->count() }}</h3>
+                        <h3 class="text-xl font-bold text-gray-800">{{ count($classes) }}</h3>
                     </div>
                 </div>
             </div>
 
-            <!-- Обучающихся -->
             <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-[#6E76C1]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-[#6E76C1]/10 text-[#6E76C1]">
@@ -38,7 +39,6 @@
                 </div>
             </div>
 
-            <!-- Всего заданий -->
             <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-[#6E76C1]">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-[#6E76C1]/10 text-[#6E76C1]">
@@ -51,7 +51,6 @@
                 </div>
             </div>
 
-            <!-- Новых заданий -->
             <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-500">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-red-100 text-red-600">
@@ -65,253 +64,315 @@
             </div>
         </div>
 
-        <!-- Фильтр по классу -->
-        <div class="mb-8 bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-            <label for="class-select" class="block text-sm font-medium text-gray-700 mb-2">Выберите класс:</label>
-            <select id="class-select"
-                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-[#6E76C1] focus:border-transparent transition duration-200">
-                <option value="">Все классы</option>
-                @foreach ($classes as $class)
-                    <option value="{{ $class->id }}">{{ $class->name }}</option>
-                @endforeach
-            </select>
+        <div class="mb-10 flex items-center space-x-4">
+            <form method="GET" action="{{ route('user.statistics') }}">
+                <label for="classSelect" class="font-semibold text-gray-700 text-lg whitespace-nowrap">Выберите
+                    класс:</label>
+                <select name="class_id" id="classSelect" onchange="this.form.submit()"
+                    class="border border-gray-300 rounded-md px-4 py-2 focus:outline-none focus:ring-2 focus:ring-[#6E76C1]">
+                    @foreach ($classes as $class)
+                        <option value="{{ $class->id }}" @if ($class->id == $selectedClassId) selected @endif>
+                            {{ $class->name }}
+                        </option>
+                    @endforeach
+                </select>
+            </form>
         </div>
 
-        <!-- Графики -->
-        <div class="charts-container grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <!-- Задания по месяцам -->
-            <div class="chart-item bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h4 class="font-semibold text-gray-800 mb-4">Задания по месяцам</h4>
-                <canvas id="lineChart"></canvas>
+        <section class="bg-white rounded-lg shadow-md p-6 mb-12 border border-gray-200 max-w-4xl mx-auto">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6 border-b border-gray-300 pb-2">Рейтинг учеников в классе
+            </h3>
+            @if (count($studentRatings) > 0)
+                <table class="w-full text-left border-collapse table-auto">
+                    <thead>
+                        <tr class="bg-[#6E76C1]/10 text-[#6E76C1] uppercase text-sm font-semibold">
+                            <th class="py-3 px-5 rounded-tl-lg">Ученик</th>
+                            <th class="py-3 px-5 rounded-tr-lg">Средний балл</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($studentRatings as $studentName => $avgGrade)
+                            <tr class="border-b border-gray-200 hover:bg-[#6E76C1]/10 transition-colors">
+                                <td class="py-3 px-5 font-medium text-gray-800">{{ $studentName }}</td>
+                                <td class="py-3 px-5 font-semibold text-gray-900">{{ $avgGrade }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            @else
+                <p class="text-gray-500 text-center py-10">Нет данных по выбранному классу.</p>
+            @endif
+        </section>
+
+        <section class="grid grid-cols-1 lg:grid-cols-2 gap-10 max-w-7xl mx-auto">
+            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex flex-col">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6">Задания по месяцам</h3>
+                <div class="flex-grow">
+                    <canvas id="lineChart" class="w-full" style="min-height: 320px;"></canvas>
+                </div>
             </div>
 
-            <!-- Ученики по классам -->
-            <div class="chart-item bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h4 class="font-semibold text-gray-800 mb-4">Ученики по классам</h4>
-                <canvas id="barChart"></canvas>
+            <div class="bg-white rounded-lg shadow-md p-6 border border-gray-200 flex flex-col">
+                <h3 class="text-xl font-semibold text-gray-900 mb-6">Ученики по классам</h3>
+                <div class="flex-grow">
+                    <canvas id="barChart" class="w-full" style="min-height: 320px;"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section
+            class="bg-white rounded-lg shadow-md p-6 border border-gray-200 max-w-4xl mx-auto mt-12 flex flex-col lg:flex-row items-center lg:items-start gap-8">
+            <div class="flex-grow" style="min-width: 280px; min-height: 280px;">
+                <canvas id="pieChart" width="280" height="280"
+                    style="display: block; width: 280px; height: 280px;"></canvas>
             </div>
 
-            <!-- Типы заданий -->
-            <div class="chart-item bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <h4 class="font-semibold text-gray-800 mb-4">Типы заданий</h4>
-                <canvas id="pieChart"></canvas>
+            <div class="w-full lg:w-48">
+                <h3 class="text-xl font-semibold text-gray-900 mb-4 text-center lg:text-left">Типы заданий</h3>
+                <ul id="pieLegend" class="space-y-4">
+                </ul>
             </div>
-        </div>
+        </section>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            // --- Получаем данные из Blade ---
-            const originalStudentCounts = @json($studentCounts); // {"Математика": 12, "Физика": 15}
-            const originalAssignmentsByMonth = @json($assignmentsByMonth); // {"01": 5, "02": 8}
-            const originalAssignmentTypes = @json($assignmentTypes); // {"text": 5, "multiple_choice": 10}
+            const studentCounts = @json($studentCounts);
+            const assignmentsByMonth = @json($assignmentsByMonth);
+            const assignmentTypes = @json($assignmentTypes);
+            const months = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек'];
 
-            // --- Список месяцев для линейного графика ---
-            const monthLabels = ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя',
-                'Дек'
-            ];
+            const typeTranslations = {
+                'file_upload': 'Загрузка файла',
+                'multiple_choice': 'Множественный выбор',
+                'single_choice': 'Один выбор',
+                'text': 'Текстовый ответ'
+            };
 
-            // --- Инициализация графиков ---
-            let barChart, lineChart, pieChart;
+            const translatedAssignmentTypes = Object.fromEntries(
+                Object.entries(assignmentTypes).map(([key, value]) => [typeTranslations[key] || key, value])
+            );
 
-            // --- Линейный график: задания по месяцам ---
-            lineChart = new Chart(document.getElementById('lineChart').getContext('2d'), {
+            const colors = ['#6E76C1', '#8B9AC0', '#A8B2D1', '#C0C6E0'];
+
+            const commonOptions = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeOutQuart'
+                },
+                plugins: {
+                    legend: {
+                        display: false,
+                    },
+                    tooltip: {
+                        enabled: true,
+                        backgroundColor: 'rgba(0,0,0,0.7)',
+                        titleFont: {
+                            size: 16,
+                            weight: '700'
+                        },
+                        bodyFont: {
+                            size: 14
+                        },
+                        padding: 10,
+                        cornerRadius: 4,
+                        displayColors: false,
+                    }
+                },
+                scales: {},
+            };
+
+            new Chart(document.getElementById('lineChart'), {
                 type: 'line',
                 data: {
-                    labels: monthLabels,
+                    labels: months,
                     datasets: [{
                         label: 'Задания',
-                        data: monthLabels.map(m => originalAssignmentsByMonth[m] || 0),
+                        data: months.map((_, i) => assignmentsByMonth[String(i + 1).padStart(2,
+                            '0')] || 0),
                         borderColor: '#6E76C1',
-                        backgroundColor: '#6E76C1/20',
+                        backgroundColor: 'rgba(110, 118, 193, 0.3)',
                         fill: true,
-                        tension: 0.4,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#6E76C1'
+                        tension: 0.3,
+                        pointRadius: 5,
+                        pointHoverRadius: 7,
+                        pointHoverBackgroundColor: '#4F51C0',
+                        borderWidth: 3,
+                        hoverBorderWidth: 4
                     }]
                 },
                 options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: context => `${context.parsed.y} заданий`
-                            }
-                        }
-                    },
+                    ...commonOptions,
                     scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Месяцы',
+                                font: {
+                                    size: 16,
+                                    weight: '600'
+                                },
+                                color: '#374151'
+                            },
+                            ticks: {
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
+                        },
                         y: {
+                            title: {
+                                display: true,
+                                text: 'Количество заданий',
+                                font: {
+                                    size: 16,
+                                    weight: '600'
+                                },
+                                color: '#374151'
+                            },
                             beginAtZero: true,
                             ticks: {
                                 stepSize: 1,
-                                callback: value => value + ' шт.'
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: '#E5E7EB'
                             }
                         }
                     }
                 }
             });
 
-            // --- Гистограмма: Ученики по классам ---
-            barChart = new Chart(document.getElementById('barChart').getContext('2d'), {
+            new Chart(document.getElementById('barChart'), {
                 type: 'bar',
                 data: {
-                    labels: Object.keys(originalStudentCounts),
+                    labels: Object.keys(studentCounts),
                     datasets: [{
-                        label: 'Учеников',
-                        data: Object.values(originalStudentCounts),
-                        backgroundColor: '#6E76C1'
+                        label: 'Ученики',
+                        data: Object.values(studentCounts),
+                        backgroundColor: '#6E76C1',
+                        hoverBackgroundColor: '#4F51C0',
+                        borderRadius: 6,
+                        borderSkipped: false
                     }]
                 },
                 options: {
-                    responsive: true,
-                    plugins: {
-                        legend: {
-                            display: false
+                    ...commonOptions,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Классы',
+                                font: {
+                                    size: 16,
+                                    weight: '600'
+                                },
+                                color: '#374151'
+                            },
+                            ticks: {
+                                maxRotation: 45,
+                                minRotation: 45,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                display: false
+                            }
                         },
-                        tooltip: {
-                            callbacks: {
-                                label: context => context.parsed.y + ' обучающихся'
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Количество учеников',
+                                font: {
+                                    size: 16,
+                                    weight: '600'
+                                },
+                                color: '#374151'
+                            },
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 1,
+                                font: {
+                                    size: 12
+                                }
+                            },
+                            grid: {
+                                color: '#E5E7EB'
                             }
                         }
                     },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                stepSize: 1
-                            }
-                        }
+                    hover: {
+                        animationDuration: 300
                     }
                 }
             });
 
-            // --- Круговая диаграмма: типы заданий ---
-            pieChart = new Chart(document.getElementById('pieChart').getContext('2d'), {
+            const pieCtx = document.getElementById('pieChart').getContext('2d');
+
+            const pieChart = new Chart(pieCtx, {
                 type: 'doughnut',
                 data: {
-                    labels: Object.keys(originalAssignmentTypes).map(type => {
-                        return type === 'single_choice' ? 'Один выбор' :
-                            type === 'multiple_choice' ? 'Множественный выбор' :
-                            type === 'file_upload' ? 'Загрузка файла' : 'Текстовый ответ';
-                    }),
+                    labels: Object.keys(translatedAssignmentTypes),
                     datasets: [{
-                        data: Object.values(originalAssignmentTypes),
-                        backgroundColor: ['#6E76C1', '#8B9AC0', '#A8B2D1', '#C5CAE9']
+                        data: Object.values(translatedAssignmentTypes),
+                        backgroundColor: colors,
+                        hoverOffset: 30,
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
                     }]
                 },
                 options: {
-                    responsive: true,
+                    ...commonOptions,
+                    cutout: '70%',
                     plugins: {
-                        legend: {
-                            position: 'right'
-                        },
-                        tooltip: {
-                            callbacks: {
-                                label: context => context.label + ': ' + context.parsed + ' заданий'
-                            }
-                        }
+                        ...commonOptions.plugins,
                     }
                 }
             });
 
-            // --- Фильтрация по классу (через JS) ---
-            const classSelect = document.getElementById("class-select");
+            const legendContainer = document.getElementById('pieLegend');
+            const labels = pieChart.data.labels;
+            const data = pieChart.data.datasets[0].data;
 
-            classSelect?.addEventListener("change", function() {
-                const selectedClass = this.value;
+            labels.forEach((label, i) => {
+                const li = document.createElement('li');
+                li.className = "flex items-center cursor-pointer select-none";
 
-                if (!selectedClass) {
-                    // Сброс фильтра
-                    lineChart.data.datasets[0].data = monthLabels.map(m => originalAssignmentsByMonth[m] ||
-                        0);
-                    barChart.data.labels = Object.keys(originalStudentCounts);
-                    barChart.data.datasets[0].data = Object.values(originalStudentCounts);
-                    pieChart.data.labels = Object.keys(originalAssignmentTypes).map(type =>
-                        type === 'single_choice' ? 'Один выбор' :
-                        type === 'multiple_choice' ? 'Множественный выбор' :
-                        type === 'file_upload' ? 'Загрузка файла' : 'Текстовый ответ'
-                    );
-                    pieChart.data.datasets[0].data = Object.values(originalAssignmentTypes);
+                const box = document.createElement('span');
+                box.className = "w-5 h-5 rounded-full mr-3";
+                box.style.backgroundColor = colors[i];
+                box.style.flexShrink = '0';
 
-                    lineChart.update();
-                    barChart.update();
+                const text = document.createElement('span');
+                text.textContent = `${label} (${data[i]})`;
+                text.className = "text-gray-700 font-semibold";
+
+                li.appendChild(box);
+                li.appendChild(text);
+
+                li.addEventListener('click', () => {
+                    const meta = pieChart.getDatasetMeta(0);
+                    const currHidden = meta.data[i].hidden;
+                    meta.data[i].hidden = !currHidden;
                     pieChart.update();
 
-                    return;
-                }
-
-                // Фильтр только по выбранному классу
-                const filteredClasses = @json($classes->keyBy('id')->toArray());
-                const selectedClassData = filteredClasses[selectedClass];
-
-                if (!selectedClassData) return;
-
-                // Подсчёт заданий по месяцам для одного класса
-                const assignmentsByMonthForClass = {};
-                const allAssignments = @json($assignments->groupBy(fn($a) => \Carbon\Carbon::parse($a->due_date)->format('m')));
-
-                if (allAssignments[selectedClass]) {
-                    selectedClassData.assignments.forEach(ass => {
-                        const month = \Carbon\ Carbon::parse(ass.due_date).format('m');
-                        assignmentsByMonthForClass[month] = (assignmentsByMonthForClass[month] ||
-                            0) + 1;
-                    });
-                }
-
-                // Подсчёт Учеников в классе
-                const studentCountForClass = selectedClassData.students.length - 1; // минус учитель
-
-                // Подсчёт типов заданий для класса
-                const assignmentTypesForClass = {};
-                selectedClassData.assignments.forEach(ass => {
-                    const options = JSON.parse(ass.options);
-                    options.forEach(opt => {
-                        const type = opt.type;
-                        assignmentTypesForClass[type] = (assignmentTypesForClass[type] ||
-                            0) + 1;
-                    });
+                    if (meta.data[i].hidden) {
+                        li.classList.add('opacity-50');
+                    } else {
+                        li.classList.remove('opacity-50');
+                    }
                 });
 
-                // --- Обновляем графики ---
-                lineChart.data.labels = monthLabels;
-                lineChart.data.datasets[0].data = monthLabels.map(m => assignmentsByMonthForClass[m] || 0);
-                lineChart.update();
-
-                barChart.data.labels = [selectedClassData.name];
-                barChart.data.datasets[0].data = [studentCountForClass];
-                barChart.update();
-
-                pieChart.data.labels = Object.keys(assignmentTypesForClass).map(type =>
-                    type === 'single_choice' ? 'Один выбор' :
-                    type === 'multiple_choice' ? 'Множественный выбор' :
-                    type === 'file_upload' ? 'Загрузка файла' : 'Текстовый ответ'
-                );
-                pieChart.data.datasets[0].data = Object.values(assignmentTypesForClass);
-                pieChart.update();
-            });
-
-            // --- Сброс фильтров ---
-            document.getElementById("clear-filter")?.addEventListener("click", function() {
-                classSelect.value = "";
-                lineChart.data.labels = monthLabels;
-                lineChart.data.datasets[0].data = monthLabels.map(m => originalAssignmentsByMonth[m] || 0);
-                lineChart.update();
-
-                barChart.data.labels = Object.keys(originalStudentCounts);
-                barChart.data.datasets[0].data = Object.values(originalStudentCounts);
-                barChart.update();
-
-                pieChart.data.labels = Object.keys(originalAssignmentTypes).map(type =>
-                    type === 'single_choice' ? 'Один выбор' :
-                    type === 'multiple_choice' ? 'Множественный выбор' :
-                    type === 'file_upload' ? 'Загрузка файла' : 'Текстовый ответ'
-                );
-                pieChart.data.datasets[0].data = Object.values(originalAssignmentTypes);
-                pieChart.update();
+                legendContainer.appendChild(li);
             });
         });
     </script>

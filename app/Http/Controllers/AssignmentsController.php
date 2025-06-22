@@ -92,17 +92,6 @@ class AssignmentsController extends Controller
                 }
             }
 
-            $classUsers = ClassUser::with('user')
-                ->where('class_id', $request->input('class_id'))
-                ->get();
-            foreach ($classUsers as $student) {
-                $this->createNotification(
-                    $student->id,
-                    'Новое задание',
-                    'Задание "' . $assignment->title . '" добавлено.',
-                    'assignment_created'
-                );
-            }
 
             $returnUrl = $request->input('return_url', route('user.assignments'));
             return redirect($returnUrl)->with('success', 'Задание успешно создано!');

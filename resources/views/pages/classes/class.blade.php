@@ -65,7 +65,7 @@
                         @php
                             $completed = $assignment
                                 ->studentAssignments()
-                                ->whereIn('status', ['submitted', 'graded'])
+                                ->whereIn('status', ['graded'])
                                 ->count();
                             $totalStudents = $assignment->students->count();
                             $progress = $totalStudents > 0 ? round(($completed / $totalStudents) * 100) : 0;
@@ -172,7 +172,15 @@
         </div>
 
 
-        @if ($studentProgress->isNotEmpty())
+        @php
+            $studentCount = collect($studentProgress)
+                ->filter(function ($sp) {
+                    return $sp['student']->role === 'student';
+                })
+                ->count();
+        @endphp
+
+        @if ($studentCount > 0)
             <div class="card shadow-sm mt-6">
                 <div class="card-header bg-white border-b border-gray-200 py-3 px-4 flex justify-between flex-wrap gap-3">
                     <h3 class="text-lg font-semibold text-gray-800">Ученики</h3>
@@ -196,8 +204,20 @@
                             @foreach ($studentProgress as $sp)
                                 @if ($sp['student']->role == 'student')
                                     <tr class="hover:bg-gray-50 transition-colors duration-150">
-                                        <td class="py-3 px-4 font-medium">
-                                            {{ $sp['student']->name }} {{ $sp['student']->surname }}
+                                        <td class="py-3 px-4 font-medium flex items-center justify-between">
+                                            <span>{{ $sp['student']->name }} {{ $sp['student']->surname }}</span>
+
+                                            <form method="POST" action=""
+                                                onsubmit="return confirm('Вы уверены, что хотите удалить ученика {{ $sp['student']->name }} из класса?');"
+                                                class="inline-block ml-4">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit"
+                                                    class="text-red-600 hover:text-red-800 focus:outline-none"
+                                                    title="Удалить ученика">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
                                         </td>
                                         <td class="py-3 px-4">
                                             {{ $sp['completed'] }} из {{ $sp['total'] }}
@@ -217,13 +237,15 @@
                                 @endif
                             @endforeach
                         </tbody>
+
                     </table>
                 </div>
             </div>
         @else
-            <div class="text-center py-6 bg-white rounded-lg shadow-sm border border-gray-200 mt-6">
+            <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg mt-6">
                 <i class="fas fa-user-graduate text-gray-400 text-4xl mb-2"></i>
-                <p class="text-gray-500 italic">Нет Учеников в этом классе.</p>
+                <h4 class="text-lg font-semibold text-gray-600">Нет учеников в этом классе.</h4>
+                <p class="text-gray-500 mt-1">Нажмите "Пригласить ученика", чтобы добавить</p>
             </div>
         @endif
 

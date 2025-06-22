@@ -739,3 +739,13 @@ main.profile-container {
     border: 2px solid #4CAF50;
     border-radius: 8px;
 }
+
+
+#lineChart,
+#barChart,
+#pieChart {
+    height: 300px !important;
+    max-width: 100%;
+    display: block;
+    margin: 0 auto;
+}

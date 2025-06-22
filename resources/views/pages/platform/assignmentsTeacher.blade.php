@@ -4,9 +4,9 @@
         <div class="bg-white rounded-lg shadow-md border-l-4 border-[#6E76C1] mb-6 overflow-hidden">
             <div class="p-6 flex justify-between items-center bg-[#EEF2FF]">
                 <div>
-                    <h3 class="text-xl font-semibold text-[#555EB1]">Задания на проверку</h3>
+                    <h3 class="text-xl font-semibold text-[#555EB1]">Задания для проверки и проверенные</h3>
                     <p class="mt-2 text-sm text-[#6E76C1] font-medium">
-                        Проверьте ответы Учеников и выставите оценки
+                        Проверьте ответы учеников и выставите оценки
                     </p>
                 </div>
 
@@ -19,7 +19,7 @@
 
         <div class="flex justify-between items-center mb-6">
             <h3 class="text-xl font-bold text-gray-800">Мои задания</h3>
-            <a href="{{ route('assignments.to.grade') }}"
+            <a href="{{ route('assignments.create') }}"
                 class="inline-flex items-center px-4 py-2 bg-[#6E76C1] hover:bg-[#616EBD] text-white font-medium rounded-md transition duration-200">
                 <i class="fas fa-tasks mr-2"></i> Новое задание
             </a>

@@ -20,6 +20,11 @@ class AvatarController extends Controller
         $request->validate([
             'avatar' => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
             'default_avatar' => 'nullable|string',
+        ], [
+            'avatar.file' => 'Аватар должен быть файлом.',
+            'avatar.mimes' => 'Аватар должен быть в формате jpg, png или jpeg.',
+            'avatar.max' => 'Размер аватара не должен превышать 2 МБ.',
+            'default_avatar.string' => 'Аватар по умолчанию должен быть строкой.',
         ]);
 
         $user = User::findOrFail($userId);
@@ -49,6 +54,11 @@ class AvatarController extends Controller
         $request->validate([
             'avatar' => 'nullable|file|mimes:jpg,png,jpeg|max:2048',
             'default_avatar' => 'nullable|string',
+        ], [
+            'avatar.file' => 'Аватар должен быть файлом.',
+            'avatar.mimes' => 'Аватар должен быть в формате jpg, png или jpeg.',
+            'avatar.max' => 'Размер аватара не должен превышать 2 МБ.',
+            'default_avatar.string' => 'Аватар по умолчанию должен быть строкой.',
         ]);
 
         if ($request->hasFile('avatar')) {

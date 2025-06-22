@@ -28,5 +28,5 @@
             <span class="error-message">{{ $message }}</span>
         @enderror
     </div>
-    <button type="submit" class="action-button">Сохранить</button>
+    <button type="submit" class="action-button w-full max-w-full">Сохранить</button>
 </form>

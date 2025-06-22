@@ -125,7 +125,7 @@ class StudentAssignmentsController extends Controller
                 'status' => 'graded',
             ]);
 
-            return redirect()->back()->with('success', 'Результаты успешно отправлены!');
+            return redirect()->route('assignments.to.grade')->with('success', 'Результаты успешно отправлены!');
         } catch (ValidationException $e) {
             return back()->withErrors($e->errors())->withInput();
         } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {

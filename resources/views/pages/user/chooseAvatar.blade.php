@@ -26,6 +26,9 @@
                         </div>
                     </div>
                     <input type="hidden" name="default_avatar" id="selected-avatar" value="">
+                    @error('avatar')
+                        <span class="error-message">{{ $message }}</span>
+                    @enderror
                     <div class="buttons">
                         <a href="{{ route('user.profile') }}">
                             <div class="button-next">
