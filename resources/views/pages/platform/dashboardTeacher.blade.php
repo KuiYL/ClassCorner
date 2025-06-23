@@ -1,7 +1,6 @@
 @extends('pages.platform.layout', ['activePage' => 'dashboard', 'title' => 'Главная', 'quick_action' => 'classes.create'])
 @section('content')
     <div class="container-fluid py-6 px-md-4">
-
         <div class="bg-[#6E76C1] text-white rounded-lg shadow-lg mb-8 overflow-hidden">
             <div class="p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
@@ -53,7 +52,6 @@
                 </div>
             </div>
 
-            <!-- Новые задания -->
             <div class="bg-white p-6 rounded-lg shadow-sm border-l-4 border-red-400">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-red-100 text-red-600">
@@ -87,16 +85,14 @@
             @else
                 <div id="classes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                     @foreach ($classes->take(6) as $class)
-                        <div class="class-card bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-[#6E76C1] transition-all duration-300 hover:shadow-md"
-                            data-name="{{ $class->name }}" data-teacher="{{ $class->teacher->id ?? 'none' }}">
-
+                        <div
+                            class="class-card bg-white rounded-lg shadow-sm overflow-hidden border-l-4 border-[#6E76C1] transition-all duration-300 hover:shadow-md">
                             <div
                                 class="p-4 bg-gradient-to-r from-[#6E76C1] to-[#9CA4F2] flex justify-between items-start relative">
                                 <h4 class="font-bold text-lg text-white flex items-center gap-2 truncate">
                                     <i class="fas fa-school text-white/80"></i>
                                     <span class="truncate">{{ $class->name }}</span>
                                 </h4>
-
                                 <div class="relative group">
                                     <i
                                         class="fas fa-cog text-white cursor-pointer group-hover:text-[#6E76C1] transition-colors"></i>
@@ -257,5 +253,27 @@
             document.getElementById('filter-title').value = '';
             filterByTitle();
         }
+
+        document.addEventListener("DOMContentLoaded", function() {
+            document.querySelectorAll(".class-card .fa-cog").forEach(cogIcon => {
+                cogIcon.addEventListener("click", function(event) {
+                    event.stopPropagation();
+                    const menu = this.nextElementSibling;
+                    const isMenuVisible = menu.classList.contains("show");
+                    document.querySelectorAll(".class-card .menu").forEach(menu => {
+                        menu.classList.remove("show");
+                    });
+                    if (!isMenuVisible) {
+                        menu.classList.add("show");
+                    }
+                });
+            });
+
+            document.addEventListener("click", function() {
+                document.querySelectorAll(".class-card .menu").forEach(menu => {
+                    menu.classList.remove("show");
+                });
+            });
+        });
     </script>
 @endsection

@@ -68,10 +68,23 @@
             <p class="text-gray-500 italic">Нет заданий, соответствующих фильтрам</p>
         </div>
 
+        @php
+            use Carbon\Carbon;
+            $now = Carbon::now();
+        @endphp
+
         <div id="assignments-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach ($assignments as $item)
                 @php
+                    $dueDate = Carbon::parse($item['assignment']->due_date);
                     $status = $item['submission']->status ?? 'not_submitted';
+                @endphp
+
+                @if ($dueDate->lt($now))
+                    @continue
+                @endif
+
+                @php
                     $statusLabels = [
                         'not_submitted' => 'Не выполнено',
                         'submitted' => 'На проверке',
@@ -83,13 +96,15 @@
                         'submitted' => 'text-yellow-500 bg-yellow-100 border-yellow-600',
                         'graded' => 'text-green-500 bg-green-100 border-green-500',
                     ];
+                    $statusStyle = $statusStyles[$status] ?? 'text-gray-500 bg-gray-100 border-gray-500';
+
                     $typeTranslations = [
                         'file_upload' => 'Загрузка файла',
                         'multiple_choice' => 'Множественный выбор',
                         'single_choice' => 'Один выбор',
                         'text' => 'Текстовый ответ',
                     ];
-                    $statusStyle = $statusStyles[$status] ?? 'text-gray-500 bg-gray-100 border-gray-500';
+
                     $decodedOptions = json_decode($item['assignment']->options, true);
                     $questionTypes = !empty($decodedOptions)
                         ? array_unique(
@@ -99,42 +114,99 @@
                 @endphp
 
                 <div class="assignment-card bg-white rounded-lg shadow-sm border-l-4 {{ $statusStyle }} overflow-hidden">
-                    <!-- Заголовок и статус -->
-                    <div class="p-4 bg-white border-b border-gray-200">
-                        <h4 class="font-semibold text-gray-900 truncate">{{ $item['assignment']->title }}</h4>
-                        <span class="inline-block mt-2 px-2 py-1 text-sm font-medium rounded {{ $statusStyle }}">
-                            {{ $statusLabels[$status] ?? 'Неизвестный статус' }}
-                        </span>
+                    <div class="p-4 bg-white border-b border-gray-200 flex justify-between items-start">
+                        <div>
+                            <h4 class="font-semibold text-gray-900 truncate">{{ $item['assignment']->title }}</h4>
+                            <span class="inline-block mt-2 px-2 py-1 text-sm font-medium rounded {{ $statusStyle }}">
+                                {{ $statusLabels[$status] ?? 'Неизвестный статус' }}
+                            </span>
+                        </div>
                     </div>
 
-                    <!-- Основная информация -->
                     <div class="p-4 text-sm text-gray-600">
-                        <p class="text-xs text-gray-500">Дедлайн: {{ $item['assignment']->due_date }}</p>
+                        <p class="text-xs text-gray-500">Дедлайн: {{ $dueDate->format('d.m.Y H:i') }}</p>
                         <p class="mt-1">Класс: <span class="font-medium">{{ $item['class']->name }}</span></p>
                         <p class="mt-1">Тип: <span class="font-medium">{{ implode(', ', $questionTypes) }}</span></p>
                         <p class="mt-2 text-gray-700 line-clamp-2">{{ $item['assignment']->description }}</p>
                     </div>
 
-                    <!-- Действия -->
                     <div class="p-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
-                        <a href="{{ route('assignments.show', $item['assignment']->id) }}"
-                            class="inline-flex items-center gap-2 text-sm px-4 py-1.5 text-[#6E76C1] border border-[#6E76C1] rounded-md hover:bg-[#6E76C1] hover:text-white transition duration-200">
-                            <i class="fas fa-eye text-sm"></i> Перейти
-                        </a>
+                        @if ($status === 'not_submitted')
+                            <a href="{{ route('assignments.show', $item['assignment']->id) }}"
+                                class="btn outline-none text-red-600 border-red-600 hover:bg-red-600 hover:text-gray-100 rounded-md px-3 py-1 inline-flex items-center">
+                                <i class="fas fa-arrow-right mr-1"></i> Перейти
+                            </a>
+                        @elseif ($status === 'submitted')
+                            <span
+                                class="inline-flex items-center text-sm text-yellow-600 cursor-default px-3 py-1 rounded-md border border-yellow-600 bg-yellow-50">
+                                На проверке <i class="fas fa-clock ml-1"></i>
+                            </span>
+                        @else
+                            <a href="{{ route('assignment.result', ['id' => $item['submission']->id]) }}"
+                                class="btn outline-none text-green-600 border-green-600 hover:bg-green-600 hover:text-gray-100 rounded-md px-3 py-1 inline-flex items-center">
+                                <i class="fas fa-eye mr-1"></i> Результаты
+                            </a>
+                        @endif
                     </div>
                 </div>
             @endforeach
         </div>
 
+
+        @if ($assignments->isEmpty())
+            <div class="text-center py-8 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                <i class="fas fa-book-open text-gray-300 text-4xl mb-2"></i>
+                <p class="text-gray-500">У вас пока нет заданий</p>
+            </div>
+        @endif
     </div>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const statusFilter = document.getElementById('filter-status');
+            const classFilter = document.getElementById('filter-class');
+            const typeFilter = document.getElementById('filter-type');
             const clearFilterBtn = document.getElementById('clear-filter');
+            const assignmentsGrid = document.getElementById('assignments-grid');
+            const noResults = document.getElementById('no-results');
+
+            const assignmentCards = Array.from(assignmentsGrid.getElementsByClassName('assignment-card'));
+
+            function filterAssignments() {
+                const selectedStatus = statusFilter.value;
+                const selectedClass = classFilter.value;
+                const selectedType = typeFilter.value;
+
+                let hasVisibleCards = false;
+
+                assignmentCards.forEach(card => {
+                    const cardStatus = card.querySelector('span').innerText.trim();
+                    const cardClass = card.querySelector('p:nth-of-type(2) span').innerText.trim();
+                    const cardType = card.querySelector('p:nth-of-type(3) span').innerText.trim();
+
+                    const statusMatch = !selectedStatus || cardStatus === selectedStatus;
+                    const classMatch = !selectedClass || cardClass === selectedClass;
+                    const typeMatch = !selectedType || cardType.includes(selectedType);
+
+                    if (statusMatch && classMatch && typeMatch) {
+                        card.style.display = 'block';
+                        hasVisibleCards = true;
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+
+                noResults.classList.toggle('hidden', hasVisibleCards);
+            }
+
+            [statusFilter, classFilter, typeFilter].forEach(filter =>
+                filter.addEventListener('change', filterAssignments)
+            );
+
             clearFilterBtn.addEventListener('click', function() {
-                document.getElementById('filter-status').value = '';
-                document.getElementById('filter-class').value = '';
-                document.getElementById('filter-type').value = '';
-                // Optionally trigger filtering logic here
+                statusFilter.value = '';
+                classFilter.value = '';
+                typeFilter.value = '';
+                filterAssignments();
             });
         });
     </script>

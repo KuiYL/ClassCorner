@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Assignments;
+use App\Models\Notification;
 use App\Models\StudentAssignments;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -19,12 +20,12 @@ class StudentAssignmentsController extends Controller
             $answers = $request->input('answers', []);
 
             if (empty($answers)) {
-                return back()->withErrors(['answers' => 'Необходимо заполнить хотя бы одно поле.']);
+                return back()->withErrors(['answers' => 'Необходимо заполнить хотя бы одно поле.'])->withInput();
             }
 
             $fields = json_decode($assignment->options, true);
             if (count($answers) !== count($fields)) {
-                return back()->withErrors(['answers' => 'Количество ответов должно соответствовать количеству вопросов.']);
+                return back()->withErrors(['answers' => 'Количество ответов должно соответствовать количеству вопросов.'])->withInput();
             }
 
             $preparedAnswers = [];
@@ -33,13 +34,13 @@ class StudentAssignmentsController extends Controller
                 $field = $fields[$index] ?? null;
 
                 if (!$field) {
-                    return back()->withErrors(["answers.{$index}" => 'Неверный индекс ответа.']);
+                    return back()->withErrors(["answers.{$index}" => 'Неверный индекс ответа.'])->withInput();
                 }
 
                 switch ($field['type']) {
                     case 'text':
                         if (empty(trim($answer['value'] ?? ''))) {
-                            return back()->withErrors(["answers.{$index}" => "Поле \"{$field['name']}\" не может быть пустым."]);
+                            return back()->withErrors(["answers.{$index}" => "Поле \"{$field['name']}\" не может быть пустым."])->withInput();
                         }
                         $preparedAnswers[] = [
                             'type' => 'text',
@@ -49,7 +50,7 @@ class StudentAssignmentsController extends Controller
 
                     case 'file_upload':
                         if (!$request->hasFile("answers.$index.file")) {
-                            return back()->withErrors(["answers.{$index}" => "Файл обязателен для поля \"{$field['name']}\""]);
+                            return back()->withErrors(["answers.{$index}" => "Файл обязателен для поля \"{$field['name']}\""])->withInput();
                         }
                         $file = $request->file("answers.$index.file");
                         $path = $file->store("assignments/{$assignment->id}", 'public');
@@ -64,7 +65,7 @@ class StudentAssignmentsController extends Controller
                     case 'multiple_choice':
                         $selectedOptions = $answer['options'] ?? [];
                         if (empty($selectedOptions)) {
-                            return back()->withErrors(["answers.{$index}" => "Выберите хотя бы один вариант для \"{$field['name']}\""]);
+                            return back()->withErrors(["answers.{$index}" => "Выберите хотя бы один вариант для \"{$field['name']}\""])->withInput();
                         }
                         $preparedAnswers[] = [
                             'type' => $field['type'],
@@ -73,7 +74,7 @@ class StudentAssignmentsController extends Controller
                         break;
 
                     default:
-                        return back()->withErrors(["answers.{$index}" => "Некорректный тип поля \"{$field['name']}\""]);
+                        return back()->withErrors(["answers.{$index}" => "Некорректный тип поля \"{$field['name']}\""])->withInput();
                 }
             }
 
@@ -88,11 +89,22 @@ class StudentAssignmentsController extends Controller
                 ]
             );
 
+            $teacher = $assignment->teacher;
+            if ($teacher) {
+                Notification::create([
+                    'user_id' => $teacher->id,
+                    'title' => 'Задание отправлено на проверку',
+                    'message' => "Студент {$user->name} отправил задание \"{$assignment->title}\" на проверку.",
+                    'type' => 'assignment_submitted',
+                ]);
+            }
+
             return redirect()->route('class.show', $assignment->class_id)->with('success', 'Ответ успешно отправлен!');
         } catch (\Exception $e) {
-            return back()->with('error', $e->getMessage());
+            return back()->with('error', $e->getMessage())->withInput();
         }
     }
+
 
     public function submitGrading(Request $request, $id)
     {
@@ -123,6 +135,14 @@ class StudentAssignmentsController extends Controller
                 'grade' => $validated['grade'],
                 'feedback' => $validated['feedback'] ?? '',
                 'status' => 'graded',
+            ]);
+
+            $student = $studentAssignment->user;
+            Notification::create([
+                'user_id' => $student->id,
+                'title' => 'Задание проверено',
+                'message' => "Ваше задание \"{$studentAssignment->assignment->title}\" проверено. Вы получили {$validated['grade']} баллов.",
+                'type' => 'assignment_graded',
             ]);
 
             return redirect()->route('assignments.to.grade')->with('success', 'Результаты успешно отправлены!');

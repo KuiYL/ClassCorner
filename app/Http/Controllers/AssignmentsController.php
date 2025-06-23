@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\AssignmentMaterial;
 use App\Models\Assignments;
-use App\Models\ClassUser;
 use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -92,6 +91,11 @@ class AssignmentsController extends Controller
                 }
             }
 
+            $users = User::whereHas('classes', function ($query) use ($validated) {
+                $query->where('class_id', $validated['class_id']);
+            })->get();
+
+            $this->createNotification($users, 'Новое задание', "Добавлено новое задание: {$assignment->title}", 'assignment_created');
 
             $returnUrl = $request->input('return_url', route('user.assignments'));
             return redirect($returnUrl)->with('success', 'Задание успешно создано!');
@@ -184,6 +188,14 @@ class AssignmentsController extends Controller
                     ]);
                 }
             }
+
+            $users = User::whereHas('classes', function ($query) use ($validated) {
+                $query->where('class_id', $validated['class_id']);
+            })->get();
+
+            $this->createNotification($users, 'Изменение задания', "Задание '{$assignment->title}' было обновлено.", 'general');
+
+
             $returnUrl = $request->input('return_url', route('user.assignments'));
             return redirect($returnUrl)->with('success', 'Задание успешно обновлено!');
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -196,10 +208,15 @@ class AssignmentsController extends Controller
     public function destroy($id)
     {
         $assignment = Assignments::findOrFail($id);
+        $title = $assignment->title;
         $assignment->delete();
 
         $returnUrl = request('return_url') ?: url()->previous();
+        $users = User::whereHas('classes', function ($query) use ($assignment) {
+            $query->where('class_id', $assignment->class_id);
+        })->get();
 
+        $this->createNotification($users, 'Удаление задания', "Задание '{$title}' было удалено.", 'general');
         return redirect()->to($returnUrl)->with('success', 'Задание успешно удалено.');
     }
 
@@ -212,13 +229,15 @@ class AssignmentsController extends Controller
         return redirect()->back()->with('success', 'Материал успешно удалено.');
     }
 
-    public function createNotification($userId, $title, $message, $type = 'general')
+    protected function createNotification($users, $title, $message, $type)
     {
-        Notification::create([
-            'user_id' => $userId,
-            'title' => $title,
-            'message' => $message,
-            'type' => $type,
-        ]);
+        foreach ($users as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'title' => $title,
+                'message' => $message,
+                'type' => $type,
+            ]);
+        }
     }
 }

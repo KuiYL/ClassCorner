@@ -96,7 +96,13 @@
 
                     <div class="p-4 pt-3 pb-3 space-y-2 text-sm text-gray-600">
                         <p class="text-xs text-gray-500">Дедлайн:
-                            {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y в H:i') }}</p>
+                            {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y в H:i') }}
+                            @if (\Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($assignment->due_date)))
+                                <span class="ml-2 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded-full">
+                                    Срок сдачи истёк
+                                </span>
+                            @endif
+                        </p>
 
                         <p data-role="class"><i
                                 class="fas fa-chalkboard-teacher mr-1"></i>{{ $assignment->class->name ?? 'Без класса' }}

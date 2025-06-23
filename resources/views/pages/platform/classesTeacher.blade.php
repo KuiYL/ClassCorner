@@ -192,6 +192,7 @@
                     form.submit();
                 }, 300);
             });
+
         });
     </script>
 @endsection

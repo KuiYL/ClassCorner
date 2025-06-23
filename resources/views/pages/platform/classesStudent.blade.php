@@ -153,60 +153,98 @@
             @endif
         </div>
 
-        <div id="invitations-modal" class="modal-invite hidden">
-            <div class="modal-invite-content bg-white rounded-lg shadow-lg p-6">
-                <span class="close-btn text-gray-400 cursor-pointer" id="close-invitations-modal">&times;</span>
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Входящие приглашения</h3>
+        <div id="invitations-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="flex justify-between items-center border-b pb-3 mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Входящие приглашения</h3>
+                    <button type="button" id="close-invitations-modal"
+                        class="text-gray-500 hover:text-gray-700 text-xl font-semibold">&times;</button>
+                </div>
 
-                @if ($invitations->isEmpty())
-                    <p class="text-gray-500">У вас нет активных приглашений.</p>
-                @else
-                    <ul id="invitations-list" class="divide-y divide-gray-200">
-                        @foreach ($invitations as $invitation)
-                            <li class="py-4">
-                                <strong class="block text-gray-800">{{ $invitation->class->name }}</strong>
-                                <small class="block text-gray-600">Преподаватель:
-                                    {{ optional($invitation->class->teacher)->name }}</small>
+                <div class="modal-body px-6 py-4 bg-gray-50 rounded-b-lg">
+                    @if ($invitations->isEmpty())
+                        <p class="text-gray-500 text-center italic py-8">У вас нет активных приглашений.</p>
+                    @else
+                        <ul id="invitations-list" class="divide-y divide-gray-300 max-h-96 overflow-y-auto">
+                            @foreach ($invitations as $invitation)
+                                <li class="py-3 px-4">
+                                    <div class="min-w-0 flex-grow">
+                                        <h3
+                                            class="text-lg font-semibold text-gray-900 cursor-default transition-colors truncate flex items-center gap-2">
+                                            <i class="fas fa-school text-gray-600"></i>
+                                            {{ $invitation->class->name }}
+                                        </h3>
+                                        <p class="text-sm text-gray-600 mt-1 truncate flex items-center gap-2">
+                                            <i class="fas fa-chalkboard-teacher text-gray-500"></i>
+                                            Преподаватель: <span
+                                                class="font-medium">{{ optional($invitation->class->teacher)->name . ' ' . optional($invitation->class->teacher)->surname ?? 'Не указан' }}</span>
+                                        </p>
+                                    </div>
 
-                                <div class="mt-2 flex gap-2">
-                                    <form action="{{ route('invitations.accept', $invitation->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit"
-                                            class="btn primary bg-green-500 text-white px-4 py-2 rounded-md">Принять</button>
-                                    </form>
+                                    <div class="flex gap-4 justify-center md:justify-start mt-3 md:mt-0 flex-shrink-0">
+                                        <form action="{{ route('invitations.accept', $invitation->id) }}" method="POST"
+                                            class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                class="bg-green-600 hover:bg-green-700 focus:ring-green-300 focus:outline-none focus:ring-2 focus:ring-offset-1
+            text-white px-3 py-1.5 rounded-md font-semibold transition whitespace-nowrap text-sm">
+                                                Принять
+                                            </button>
+                                        </form>
 
-                                    <form action="{{ route('invitations.decline', $invitation->id) }}" method="POST">
-                                        @csrf
-                                        <button type="submit"
-                                            class="btn secondary bg-red-500 text-white px-4 py-2 rounded-md">Отклонить</button>
-                                    </form>
-                                </div>
-                            </li>
-                        @endforeach
-                    </ul>
-                @endif
+                                        <form action="{{ route('invitations.decline', $invitation->id) }}" method="POST"
+                                            class="inline">
+                                            @csrf
+                                            <button type="submit"
+                                                class="bg-red-600 hover:bg-red-700 focus:ring-red-300 focus:outline-none focus:ring-2 focus:ring-offset-1
+            text-white px-3 py-1.5 rounded-md font-semibold transition whitespace-nowrap text-sm">
+                                                Отклонить
+                                            </button>
+                                        </form>
+                                    </div>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @endif
+                </div>
+
                 <button id="close-invitations-bottom"
-                    class="btn secondary bg-gray-200 px-4 py-2 rounded-md mt-4">Закрыть</button>
+                    class="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded-md mt-4 w-full">
+                    Закрыть
+                </button>
             </div>
         </div>
+
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function() {
-            const modal = document.getElementById('invitations-modal');
-            const openBtn = document.getElementById('open-invitations-modal');
-            const closeBtns = document.querySelectorAll('#close-invitations-modal, #close-invitations-bottom');
+            const modal = document.getElementById("invitations-modal");
+            const openBtn = document.getElementById("open-invitations-modal");
+            const closeBtns = document.querySelectorAll("#close-invitations-modal, #close-invitations-bottom");
 
-            openBtn.addEventListener('click', () => {
-                modal.classList.remove('hidden');
+            openBtn.addEventListener("click", () => {
+                modal.classList.add("open");
+                modal.classList.remove("hidden");
             });
 
-            closeBtns.forEach(btn => {
-                btn.addEventListener('click', () => {
-                    modal.classList.add('hidden');
+            closeBtns.forEach((btn) => {
+                btn.addEventListener("click", () => {
+                    modal.classList.remove("open");
+                    setTimeout(() => {
+                        modal.classList.add("hidden");
+                    }, 300);
                 });
             });
 
+            modal.addEventListener("click", (e) => {
+                if (e.target === modal) {
+                    modal.classList.remove("open");
+                    setTimeout(() => {
+                        modal.classList.add("hidden");
+                    }, 300);
+                }
+            });
             const filterName = document.getElementById("filter-name");
 
             if (filterName) {

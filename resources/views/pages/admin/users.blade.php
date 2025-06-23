@@ -29,7 +29,8 @@
                                 <td class="px-6 py-4 text-[#4A4F8C]" data-label="Классы">
                                     {{ optional($user->classes)->count() }}</td>
                                 <td class="px-6 py-4" data-label="Действия">
-                                    <button onclick="openModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}')"
+                                    <button
+                                        onclick="openModal({{ $user->id }}, '{{ $user->name }}', '{{ $user->email }}', '{{ $user->role }}')"
                                         class="inline-block mr-3 text-sm bg-[#6E76C1] hover:bg-[#5a639e] text-white font-semibold py-1.5 px-4 rounded-lg transition-colors duration-200">
                                         Изменить
                                     </button>
@@ -39,7 +40,7 @@
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit"
-                                             class="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-4 rounded-lg transition-colors duration-200">
+                                            class="text-sm bg-red-600 hover:bg-red-700 text-white font-semibold py-1.5 px-4 rounded-lg transition-colors duration-200">
                                             Удалить
                                         </button>
                                     </form>
@@ -56,18 +57,19 @@
         </div>
     </div>
 
-    <!-- Modal -->
     <div id="editModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
         <div class="bg-white rounded-lg shadow-lg p-6 w-full max-w-lg">
             <h3 class="text-lg font-semibold text-[#6E76C1]" id="modalTitle">Редактировать пользователя</h3>
             <form id="editForm">
                 <div class="my-4">
                     <label for="userName" class="block text-gray-600 font-medium">Имя</label>
-                    <input type="text" id="userName" class="w-full border rounded-lg p-2 mt-1" placeholder="Введите имя">
+                    <input type="text" id="userName" class="w-full border rounded-lg p-2 mt-1"
+                        placeholder="Введите имя">
                 </div>
                 <div class="my-4">
                     <label for="userEmail" class="block text-gray-600 font-medium">Email</label>
-                    <input type="email" id="userEmail" class="w-full border rounded-lg p-2 mt-1" placeholder="Введите email">
+                    <input type="email" id="userEmail" class="w-full border rounded-lg p-2 mt-1"
+                        placeholder="Введите email">
                 </div>
                 <div class="my-4">
                     <label for="userRole" class="block text-gray-600 font-medium">Роль</label>
@@ -82,8 +84,7 @@
                         class="px-4 py-2 bg-gray-300 hover:bg-gray-400 rounded-lg text-gray-700 mr-2">
                         Отмена
                     </button>
-                    <button type="submit"
-                        class="px-4 py-2 bg-[#6E76C1] hover:bg-[#5a639e] text-white rounded-lg">
+                    <button type="submit" class="px-4 py-2 bg-[#6E76C1] hover:bg-[#5a639e] text-white rounded-lg">
                         Сохранить
                     </button>
                 </div>

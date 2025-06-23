@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Invitation;
+use App\Models\Notification;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Session;
 
 class UserController extends Controller
 {
@@ -16,13 +15,23 @@ class UserController extends Controller
     {
         $validated = $request->validate([
             'name' => [
-                'required','string','max:255','regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
             ],
             'surname' => [
-                'required','string','max:255','regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
+                'required',
+                'string',
+                'max:255',
+                'regex:/^[А-Яа-яЁёA-Za-z\s\-]+$/u',
             ],
             'email' => 'required|string|email|max:255|unique:users',
-            'password' => ['required','string','min:8','confirmed',
+            'password' => [
+                'required',
+                'string',
+                'min:8',
+                'confirmed',
                 'regex:/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[\W_]).{8,}$/',
             ],
         ], [
@@ -112,6 +121,13 @@ class UserController extends Controller
             'password' => Hash::make($request->input('password')),
         ]);
 
+        Notification::create([
+            'user_id' => $user->id,
+            'title' => 'Пароль обновлён',
+            'message' => 'Ваш пароль был успешно изменён.',
+            'type' => 'general',
+        ]);
+
         return redirect()->route('user.profile')
             ->with('success', 'Пароль изменён.');
     }
@@ -140,6 +156,12 @@ class UserController extends Controller
             'email' => $request->input('email'),
         ]);
 
+        Notification::create([
+            'user_id' => $user->id,
+            'title' => 'Информация обновлена',
+            'message' => 'Ваши данные профиля были успешно обновлены.',
+            'type' => 'general',
+        ]);
         return redirect()->route('user.profile')
             ->with('success', 'Информация обновлена.');
     }
@@ -185,6 +207,16 @@ class UserController extends Controller
             'status' => 'pending',
         ]);
 
+        $invitee = User::where('email', $request->email)->first();
+        if ($invitee) {
+            $this->createNotification(
+                [$invitee],
+                'Приглашение в класс',
+                'Вы получили приглашение присоединиться к классу.',
+                'class_invitation'
+            );
+        }
+
         return back()->with('success', 'Приглашение успешно отправлено!');
     }
 
@@ -196,6 +228,17 @@ class UserController extends Controller
         $class = $invitation->class;
         $user = User::where('email', $invitation->invitee_email)->first();
         $class->students()->attach($user->id, ['status' => 'approved']);
+
+        $inviter = $invitation->inviter;
+        if ($inviter) {
+            $this->createNotification(
+                [$inviter],
+                'Приглашение принято',
+                "{$user->name} {$user->surname} принял(а) ваше приглашение в класс {$class->name}.",
+                'class_joined'
+            );
+        }
+
         return back()->with('success', 'Приглашение принято!');
     }
 
@@ -203,6 +246,29 @@ class UserController extends Controller
     {
         $invitation = Invitation::findOrFail($invitationId);
         $invitation->update(['status' => 'declined']);
+
+        $inviter = $invitation->inviter;
+        if ($inviter) {
+            $this->createNotification(
+                [$inviter],
+                'Приглашение отклонено',
+                "{$invitation->invitee_email} отклонил(а) ваше приглашение в класс.",
+                'class_invitation'
+            );
+        }
+
         return back()->with('error', 'Приглашение отклонено!');
+    }
+
+    protected function createNotification($users, $title, $message, $type)
+    {
+        foreach ($users as $user) {
+            Notification::create([
+                'user_id' => $user->id,
+                'title' => $title,
+                'message' => $message,
+                'type' => $type,
+            ]);
+        }
     }
 }

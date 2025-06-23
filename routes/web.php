@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssignmentsController;
 use App\Http\Controllers\AvatarController;
 use App\Http\Controllers\ClassesController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PagesController;
 use App\Http\Controllers\StudentAssignmentsController;
 use App\Http\Controllers\UserController;
@@ -72,6 +73,9 @@ Route::middleware('auth')->group(function () {
     Route::post('/classes/{class}/invite', [UserController::class, 'invite'])->name('classes.invite');
     Route::post('/invitations/{invitation}/accept', [UserController::class, 'accept'])->name('invitations.accept');
     Route::post('/invitations/{invitation}/decline', [UserController::class, 'decline'])->name('invitations.decline');
+
+    Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
+    Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
 });
 
 Route::middleware(['auth'])->group(function () {

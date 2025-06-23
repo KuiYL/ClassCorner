@@ -39,7 +39,7 @@
                         </div>
                         <div class="bg-white p-4 rounded shadow-sm">
                             <div class="text-2xl font-bold text-[#6E76C1]">{{ $stats['total_students'] }}</div>
-                            <div class="text-sm text-gray-600">Всего Учеников</div>
+                            <div class="text-sm text-gray-600">Всего учеников</div>
                         </div>
                     </div>
                 </div>
@@ -60,17 +60,31 @@
                 @endif
             </div>
 
+            @php
+                $dueDate = \Carbon\Carbon::parse($assignment->due_date);
+                $now = \Carbon\Carbon::now();
+                $isOverdue = $now->gt($dueDate);
+            @endphp
+
             <div class="flex items-center gap-2 text-sm text-gray-600">
                 <i class="fas fa-calendar-check text-[#6E76C1]"></i>
                 <span class="font-medium">Срок выполнения:</span>
                 <strong class="ml-1">
-                    {{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y') }}
+                    {{ $dueDate->format('d.m.Y') }}
                 </strong>
                 &nbsp;в&nbsp;
                 <strong>
-                    {{ \Carbon\Carbon::parse($assignment->due_date)->format('H:i') }}
+                    {{ $dueDate->format('H:i') }}
                 </strong>
+
+                @if ($isOverdue)
+                    <span class="ml-3 px-2 py-1 text-xs font-semibold rounded-full bg-red-600 text-white select-none"
+                        title="Срок сдачи задания прошёл">
+                        Срок сдачи истёк
+                    </span>
+                @endif
             </div>
+
 
             @if ($assignment->materials->isNotEmpty())
                 <div class="mt-6">

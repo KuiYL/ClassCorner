@@ -12,8 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
 
 class PagesController extends Controller
 {
@@ -358,45 +356,38 @@ class PagesController extends Controller
             case 'student':
                 $classes = $this->getUserClasses($user);
 
-                $assignments = [];
+                $assignments = Assignments::whereIn('class_id', $classes->pluck('id'))
+                    ->with('class')
+                    ->get();
 
-                foreach ($classes as $class) {
-                    $classAssignments = $class->assignments;
+                $assignmentData = $assignments->map(function ($assignment) use ($user) {
+                    $submission = StudentAssignments::where('assignment_id', $assignment->id)
+                        ->where('user_id', $user->id)
+                        ->first();
 
-                    foreach ($classAssignments as $assignment) {
-                        $submission = StudentAssignments::where('assignment_id', $assignment->id)
-                            ->where('user_id', $user->id)
-                            ->first();
-
-                        $assignments[] = [
-                            'id' => $assignment->id,
-                            'title' => $assignment->title,
-                            'description' => $assignment->description,
-                            'due_date' => $assignment->due_date,
-                            'class_name' => optional($assignment->class)->name,
-                            'class_id' => optional($assignment->class)->id,
-                            'status' => $submission ? $submission->status : 'not_submitted',
-                            'completed' => in_array($submission?->status, ['submitted', 'graded']),
-                        ];
+                    $status = 'not_submitted';
+                    $submission_id = null;
+                    if ($submission) {
+                        $status = $submission->status;
+                        $submission_id = $submission->id;
                     }
-                }
 
-                $groupedAssignments = collect($assignments)->groupBy('due_date')->map(function ($group) {
-                    return $group->map(function ($item) {
-                        return [
-                            'id' => $item['id'],
-                            'title' => $item['title'],
-                            'description' => $item['description'],
-                            'due_date' => $item['due_date'],
-                            'class_name' => $item['class_name'],
-                            'class_id' => $item['class_id'],
-                            'status' => $item['status'],
-                            'completed' => $item['completed'],
-                        ];
-                    });
-                });
+                    return [
+                        'id' => $assignment->id,
+                        'title' => $assignment->title,
+                        'description' => $assignment->description,
+                        'due_date' => $assignment->due_date,
+                        'class_id' => $assignment->class->id ?? null,
+                        'class_name' => $assignment->class->name ?? 'Без класса',
+                        'status' => $status,
+                        'submission_id' => $submission_id,
+                        'url_show' => route('assignments.show', $assignment->id),
+                        'url_result' => $submission_id ? route('assignment.result', ['id' => $submission_id]) : null,
+                    ];
+                })->toArray();
 
-                return view('pages.platform.calendarStudent', compact('user', 'classes', 'groupedAssignments'));
+                return view('pages.platform.calendarStudent', compact('user', 'classes', 'assignmentData'));
+
             default:
                 abort(403, 'Нет доступа');
         }
@@ -630,22 +621,20 @@ class PagesController extends Controller
                 'studentProgress'
             ));
         } else {
-            $assignments = [];
             $classes = $this->getUserClasses($user);
-
-            foreach ($class->assignments as $assignment) {
+            $assignments = $class->assignments->map(function ($assignment) use ($user) {
                 $submission = StudentAssignments::where('user_id', $user->id)
                     ->where('assignment_id', $assignment->id)
                     ->first();
-
-                $assignments[] = [
+                $averageGrade = $submission?->grade ?? null;
+                return [
                     'assignment' => $assignment,
                     'submission' => $submission,
+                    'average_grade' => $averageGrade,
                 ];
-            }
+            })->toArray();
 
             $completedAssignments = count(array_filter($assignments, fn($a) => in_array($a['submission']?->status, ['submitted', 'graded'])));
-
             return view('pages.classes.classStudent', compact('class', 'assignments', 'completedAssignments', 'classes', 'user'));
         }
     }

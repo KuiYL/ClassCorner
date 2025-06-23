@@ -317,4 +317,31 @@
             </aside>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const gradeInput = document.getElementById('final-grade');
+            const feedbackTextarea = document.getElementById('feedback');
+
+            if (gradeInput && feedbackTextarea) {
+                gradeInput.addEventListener('input', function() {
+                    const grade = parseInt(gradeInput.value, 10);
+                    let feedback = '';
+
+                    if (grade >= 90) {
+                        feedback = "Отличная работа! Все вопросы выполнены на высоком уровне.";
+                    } else if (grade >= 70) {
+                        feedback = "Хорошо выполнено. Есть небольшие ошибки.";
+                    } else if (grade >= 50) {
+                        feedback = "Работа выполнена удовлетворительно. Рекомендуется повторить материал.";
+                    } else if (!isNaN(grade)) {
+                        feedback = "Много ошибок. Рекомендую пересмотреть тему и попробовать снова.";
+                    }
+
+                    feedbackTextarea.value = feedback;
+                });
+            }
+        });
+    </script>
+
 @endsection

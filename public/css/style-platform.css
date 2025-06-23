@@ -749,3 +749,40 @@ main.profile-container {
     display: block;
     margin: 0 auto;
 }
+
+.modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1031;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: rgba(0, 0, 0, 0.5);
+    transition: all 0.3s ease;
+}
+
+.modal-content {
+    width: 100%;
+    max-width: 500px;
+    padding: 20px;
+    background: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transform: scale(0.95);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modal.open .modal-content {
+    transform: scale(1);
+    opacity: 1;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal.open {
+    display: flex;
+    pointer-events: auto;
+}

@@ -99,6 +99,12 @@
                                         <strong class="text-gray-700">Срок:</strong>
                                         <span>{{ \Carbon\Carbon::parse($assignment->due_date)->format('d.m.Y') }} в
                                             {{ \Carbon\Carbon::parse($assignment->due_date)->format('H:i') }}</span>
+                                        @if (\Carbon\Carbon::now()->gt(\Carbon\Carbon::parse($assignment->due_date)))
+                                            <span
+                                                class="ml-2 px-2 py-1 text-xs font-medium text-white bg-red-600 rounded-full">
+                                                Срок сдачи истёк
+                                            </span>
+                                        @endif
                                     </div>
 
                                     <div class="flex items-center gap-2">
@@ -179,17 +185,15 @@
                 })
                 ->count();
         @endphp
-
-        @if ($studentCount > 0)
-            <div class="card shadow-sm mt-6">
-                <div class="card-header bg-white border-b border-gray-200 py-3 px-4 flex justify-between flex-wrap gap-3">
-                    <h3 class="text-lg font-semibold text-gray-800">Ученики</h3>
-                    <button type="button"
-                        class="btn btn-outline-secondary text-[#6E76C1] border-[#6E76C1] hover:bg-[#6E76C1]"
-                        data-bs-toggle="modal" data-bs-target="#inviteStudentModal">
-                        <i class="fas fa-user-plus mr-2"></i> Пригласить ученика
-                    </button>
-                </div>
+        <div class="card shadow-sm mt-6">
+            <div class="card-header bg-white border-b border-gray-200 py-3 px-4 flex justify-between flex-wrap gap-3">
+                <h3 class="text-lg font-semibold text-gray-800">Ученики</h3>
+                <button type="button" class="btn btn-outline-secondary text-[#6E76C1] border-[#6E76C1] hover:bg-[#6E76C1]"
+                    data-bs-toggle="modal" data-bs-target="#inviteStudentModal">
+                    <i class="fas fa-user-plus mr-2"></i> Пригласить ученика
+                </button>
+            </div>
+            @if ($studentCount > 0)
                 <div class="card-body p-0 overflow-x-auto">
                     <table class="table table-hover align-middle mb-0">
                         <thead class="bg-gray-50">
@@ -220,7 +224,7 @@
                                             </form>
                                         </td>
                                         <td class="py-3 px-4">
-                                            {{ $sp['completed'] }} из {{ $sp['total'] }}
+                                            {{ $sp['completed'] ?? 0 }} из {{ $sp['total'] ?? 0 }}
                                         </td>
                                         <td class="py-3 px-4">
                                             {{ $sp['average_grade'] ?? '-' }}
@@ -240,13 +244,13 @@
 
                     </table>
                 </div>
-            </div>
-        @else
-            <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg mt-6">
-                <i class="fas fa-user-graduate text-gray-400 text-4xl mb-2"></i>
-                <h4 class="text-lg font-semibold text-gray-600">Нет учеников в этом классе.</h4>
-                <p class="text-gray-500 mt-1">Нажмите "Пригласить ученика", чтобы добавить</p>
-            </div>
+        </div>
+    @else
+        <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg mt-6">
+            <i class="fas fa-user-graduate text-gray-400 text-4xl mb-2"></i>
+            <h4 class="text-lg font-semibold text-gray-600">Нет учеников в этом классе.</h4>
+            <p class="text-gray-500 mt-1">Нажмите "Пригласить ученика", чтобы добавить</p>
+        </div>
         @endif
 
         <div class="modal fade" id="inviteStudentModal" tabindex="-1" aria-labelledby="inviteStudentModalLabel"
@@ -266,7 +270,8 @@
                             <div class="mb-3">
                                 <label for="search-student" class="form-label">Введите имя или email</label>
                                 <input type="text" id="search-student" class="form-control" placeholder="Поиск...">
-                                <ul id="search-results" class="list-group mt-2 hidden">
+                                <ul id="search-results"
+                                    class="list-group mt-2 hidden max-h-36 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg absolute w-full z-50">
                                 </ul>
                             </div>
                             <input type="hidden" id="invite-student-email" name="email">
@@ -288,11 +293,12 @@
             const emailInput = document.getElementById("invite-student-email");
 
             const availableStudents = @json($availableStudents);
-
+            console.log(availableStudents);
             if (!searchInput || !resultsList || !emailInput) return;
 
             searchInput.addEventListener("input", function() {
                 const query = this.value.trim().toLowerCase();
+                console.log("Поиск:", query);
                 resultsList.innerHTML = "";
                 resultsList.classList.add("hidden");
 
@@ -303,6 +309,7 @@
                     student.email.toLowerCase().includes(query)
                 );
 
+
                 if (filtered.length === 0) {
                     const li = document.createElement("li");
                     li.textContent = "Ученики не найдены";
@@ -312,6 +319,7 @@
                     resultsList.appendChild(li);
                 } else {
                     filtered.forEach(student => {
+                        console.log("Добавляю ученика:", student.name);
                         const li = document.createElement("li");
                         li.textContent = `${student.name} (${student.email})`;
                         li.setAttribute("data-email", student.email);
@@ -331,6 +339,7 @@
 
                 resultsList.classList.remove("hidden");
             });
+
 
             document.addEventListener("click", function(e) {
                 if (!resultsList.contains(e.target) && e.target !== searchInput) {

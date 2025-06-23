@@ -33,15 +33,20 @@
             </button>
 
             <div id="notificationDropdown"
-                class="position-absolute end-0 mt-1 bg-white border rounded shadow-sm hidden z-20 overflow-hidden"
+                class="position-absolute end-0 mt-1 bg-white border rounded shadow-sm hidden z-20"
                 style="width: 340px; max-height: 360px; overflow-y: auto; border-color: #E5E7EB;">
 
                 <div class="p-3 border-bottom" style="background-color: #F9FAFB;">
                     <h6 class="mb-0 font-semibold text-gray-800">Уведомления</h6>
                 </div>
 
-                <ul class="list-group list-group-flush">
-                    @forelse (auth()->user()->notifications as $notif)
+                <ul class="list-group list-group-flush" style="max-height: 300px; overflow-y: auto;">
+                    @php
+                        \Carbon\Carbon::setLocale('ru');
+                        $notifications = auth()->user()->notifications->sortByDesc('created_at');
+                    @endphp
+
+                    @forelse ($notifications as $notif)
                         <li class="list-group-item py-3 px-3 hover:bg-gray-50 transition-colors duration-200">
                             <a href="{{ $notif->data['url'] ?? '#' }}" class="d-block text-decoration-none">
                                 <div class="flex items-start gap-3">
@@ -49,38 +54,36 @@
                                         <div class="flex items-start gap-3 mt-2 text-xs text-gray-400">
                                             @switch($notif->type)
                                                 @case('assignment_submitted')
-                                                    <i class="fas fa-file-upload text-blue-500"></i>
+                                                    <i class="fas fa-file-upload fa-lg text-blue-500"></i>
                                                 @break
 
                                                 @case('assignment_graded')
-                                                    <i class="fas fa-star-half-alt text-yellow-500"></i>
+                                                    <i class="fas fa-star-half-alt fa-lg text-yellow-500"></i>
                                                 @break
 
                                                 @case('class_joined')
-                                                    <i class="fas fa-user-plus text-green-500"></i>
+                                                    <i class="fas fa-user-plus fa-lg text-green-500"></i>
                                                 @break
 
                                                 @case('class_invitation')
-                                                    <i class="fas fa-envelope text-indigo-500"></i>
+                                                    <i class="fas fa-envelope fa-lg text-indigo-500"></i>
                                                 @break
 
                                                 @case('assignment_created')
-                                                    <i class="fas fa-chalkboard-teacher text-purple-500"></i>
+                                                    <i class="fas fa-chalkboard-teacher fa-lg text-purple-500"></i>
                                                 @break
 
                                                 @case('assignment_reminder')
-                                                    <i class="fas fa-clock text-red-500"></i>
+                                                    <i class="fas fa-clock fa-lg text-red-500"></i>
                                                 @break
 
                                                 @case('feedback_received')
-                                                    <i class="fas fa-comment-dots text-teal-500"></i>
+                                                    <i class="fas fa-comment-dots fa-lg text-teal-500"></i>
                                                 @break
 
                                                 @default
-                                                    <i class="fas fa-bell text-gray-500"></i>
+                                                    <i class="fas fa-bell fa-lg text-gray-500"></i>
                                             @endswitch
-
-                                            <span>{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
                                         </div>
                                     </div>
 
@@ -89,13 +92,40 @@
                                         <small class="text-gray-600">{{ $notif->message }}</small>
 
                                         <div class="mt-2 flex justify-between items-center text-xs text-gray-400">
-                                            <span>{{ \Carbon\Carbon::parse($notif->created_at)->diffForHumans() }}</span>
-                                            @unless ($notif->read)
-                                                <span class="inline-flex items-center gap-1 text-indigo-600">
-                                                    <span class="w-2 h-2 rounded-full bg-indigo-500"></span> Новое
-                                                </span>
-                                            @endunless
+                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
+
+                                            <div class="flex gap-2 flex-nowrap"
+                                                style="min-width: 120px; justify-content: flex-end;">
+
+                                                @if (!$notif->read)
+                                                    <form method="POST"
+                                                        action="{{ route('notifications.read', $notif->id) }}"
+                                                        style="flex-shrink: 0;">
+                                                        @csrf
+                                                        <button type="submit" class="btn btn-sm btn-outline-success"
+                                                            style="padding: 0.25rem 0.5rem; font-size: 0.75rem; white-space: nowrap;"
+                                                            title="Отметить как прочитанное">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                @endif
+
+                                                <form method="POST"
+                                                    action="{{ route('notifications.delete', $notif->id) }}"
+                                                    style="flex-shrink: 0;">
+                                                    @csrf
+                                                    @method('DELETE')
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
+                                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem; white-space: nowrap;"
+                                                        onclick="return confirm('Удалить уведомление?')"
+                                                        title="Удалить уведомление">
+                                                        <i class="fas fa-trash-alt"></i>
+                                                    </button>
+                                                </form>
+
+                                            </div>
                                         </div>
+
                                     </div>
                                 </div>
                             </a>
@@ -110,6 +140,7 @@
 
                 </div>
             </div>
+
 
             <a href="{{ route('user.profile') }}" class="settings text-muted hover:text-indigo-600 transition-colors"
                 title="Настройки профиля">
