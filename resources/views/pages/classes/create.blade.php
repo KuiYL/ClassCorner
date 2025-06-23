@@ -43,16 +43,30 @@
 
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Преподаватель</label>
-                    <div class="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
-                        <div class="flex items-center gap-2">
-                            <i class="fas fa-user-circle text-[#6E76C1]"></i>
-                            <span>{{ auth()->user()->name }} {{ auth()->user()->surname }}</span>
+
+                    @if (auth()->user()->role === 'admin')
+                        <select name="teacher_id"
+                            class="block w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                            <option value="">Выберите преподавателя</option>
+                            @foreach ($teachers as $teacher)
+                                <option value="{{ $teacher->id }}">{{ $teacher->name }} {{ $teacher->surname }}</option>
+                            @endforeach
+                        </select>
+                        @error('teacher_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    @else
+                        <div class="px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg text-gray-800">
+                            <div class="flex items-center gap-2">
+                                <i class="fas fa-user-circle text-[#6E76C1]"></i>
+                                <span>{{ auth()->user()->name }} {{ auth()->user()->surname }}</span>
+                            </div>
                         </div>
-                    </div>
-                    <input type="hidden" name="teacher_id" value="{{ auth()->user()->id }}">
-                    @error('teacher_id')
-                        <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
-                    @enderror
+                        <input type="hidden" name="teacher_id" value="{{ auth()->user()->id }}">
+                        @error('teacher_id')
+                            <span class="text-red-500 text-xs mt-1">{{ $message }}</span>
+                        @enderror
+                    @endif
                 </div>
 
                 <input type="hidden" name="return_url" value="{{ request('return_url', route('user.classes')) }}">
@@ -67,7 +81,7 @@
         </div>
 
         <div class="text-center text-sm text-gray-500 mt-4">
-            После создания вы сможете добавлять Учеников и задания
+            После создания вы сможете добавлять учеников и задания
         </div>
     </div>
 @endsection

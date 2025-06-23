@@ -65,8 +65,9 @@
                                         class="absolute right-0 top-full mt-2 w-36 bg-white shadow-md rounded-md z-10 menu border border-gray-200">
                                         <button type="button"
                                             class="w-full text-left px-4 py-2 text-red-600 hover:bg-gray-100 text-sm flex items-center delete-button"
-                                            data-id="{{ $class->id }}" data-name="{{ $class->name }}" data-type="class">
-                                            <i class="fas fa-trash mr-2 text-red-600"></i> Выйти из класса
+                                            data-id="{{ $class->id }}" data-name="{{ $class->name }}"
+                                            data-type="exitStudent">
+                                            <i class="fas fa-door-open mr-2 text-red-600"></i></i> Выйти
                                         </button>
                                     </div>
                                 </div>

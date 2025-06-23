@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Classes;
 use App\Models\Invitation;
 use App\Models\Notification;
 use App\Models\User;
@@ -260,6 +261,69 @@ class UserController extends Controller
         return back()->with('error', 'Приглашение отклонено!');
     }
 
+    public function updateUser(Request $request, $id)
+    {
+        $admin = auth()->user();
+
+        if ($admin->role !== 'admin') {
+            abort(403, 'Доступ запрещён');
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => "required|email|max:255|unique:users,email,{$id}",
+            'role' => 'required|in:admin,teacher,student',
+        ]);
+
+        $user = User::findOrFail($id);
+
+        $user->name = $validated['name'];
+        $user->email = $validated['email'];
+        $user->role = $validated['role'];
+        $user->save();
+
+        return redirect()->back()->with('success', 'Данные пользователя успешно обновлены.');
+    }
+
+    public function removeStudentFromClass($classId, $studentId)
+    {
+        $user = auth()->user();
+
+        if (!in_array($user->role, ['admin', 'teacher'])) {
+            abort(403, 'Доступ запрещён');
+        }
+
+        if ($user->role === 'teacher') {
+            $class = $user->classes()->findOrFail($classId);
+        } else {
+            $class = Classes::findOrFail($classId);
+        }
+
+        $student = $class->students()->where('user_id', $studentId)->first();
+
+        if (!$student) {
+            return redirect()->back()->with('error', 'Ученик не найден в этом классе');
+        }
+
+        $class->students()->detach($studentId);
+
+        return redirect()->back()->with('success', 'Ученик успешно удалён из класса');
+    }
+
+    public function leaveClass($classId)
+    {
+        $user = auth()->user();
+
+        if ($user->role !== 'student') {
+            abort(403, 'Доступ запрещён');
+        }
+
+        $class = $user->classes()->findOrFail($classId);
+
+        $user->classes()->detach($classId);
+
+        return redirect()->back()->with('success', 'Вы успешно вышли из класса');
+    }
     protected function createNotification($users, $title, $message, $type)
     {
         foreach ($users as $user) {

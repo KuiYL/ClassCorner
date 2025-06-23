@@ -269,7 +269,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!modal || !modalTitle || !modalText || !deleteForm) return;
 
-    function openModal(itemId, itemName, itemType) {
+    function openModal(itemId, itemName, itemType, relatedId = null) {
         let entityType = "";
         switch (itemType) {
             case "class":
@@ -284,9 +284,21 @@ document.addEventListener('DOMContentLoaded', () => {
                 entityType = "пользователь";
                 deleteForm.action = `/users/${itemId}`;
                 break;
+            case "student":
+                entityType = "ученик";
+                deleteForm.action = `/admin/classes/${relatedId}/students/${itemId}/remove`;
+                break;
+            case "exitStudent":
+                entityType = "класс";
+                deleteForm.action = `/classes/${itemId}/leave`;
+                break;
             case "assignmentMaterial":
                 entityType = "материал";
                 deleteForm.action = `/assignment/material/${itemId}`;
+                break;
+            case "notif":
+                entityType = "уведомление";
+                deleteForm.action = `/notifications/${itemId}`;
                 break;
             default:
                 console.error("Неизвестный тип:", itemType);
@@ -316,7 +328,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const itemId = btn.dataset.id;
             const itemName = btn.dataset.name;
             const itemType = btn.dataset.type;
-            openModal(itemId, itemName, itemType);
+            const relatedId = btn.dataset.relatedId || null;
+            openModal(itemId, itemName, itemType, relatedId);
         }
     });
 

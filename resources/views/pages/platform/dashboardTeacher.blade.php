@@ -5,7 +5,9 @@
             <div class="p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                 <div>
                     <h2 class="text-3xl font-bold">Добро пожаловать, {{ $user->name }} {{ $user->surname }}!</h2>
-                    <p class="mt-2 text-lg opacity-90">У вас {{ $newAssignmentsCount }} новых заданий на проверку</p>
+                    @if ($user->role === 'teacher')
+                        <p class="mt-2 text-lg opacity-90">У вас {{ $newAssignmentsCount }} новых заданий на проверку</p>
+                    @endif
                 </div>
 
                 <a href="{{ route('classes.create', ['return_url' => url()->current()]) }}"
@@ -154,78 +156,80 @@
 
         </div>
 
-        <div class="mb-8 w-full">
-            <div
-                class="flex justify-between items-center mb-6 bg-gradient-to-r from-[#6E76C1] to-[#9CA4F2] text-white py-4 px-6 rounded-lg shadow-md">
-                <h3 class="text-xl font-bold">Задания на проверку</h3>
-            </div>
-            <div class="mb-6 flex flex-wrap gap-4 sm:gap-6">
-                <div class="flex-1 min-w-[200px]">
-                    <label for="filter-title" class="block text-sm font-medium text-gray-700 mb-1">Фильтр по
-                        названию</label>
-                    <input type="text" id="filter-title" placeholder="Например: Задание 1"
-                        class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200"
-                        oninput="filterByTitle()">
+        @if ($user->role === 'teacher')
+            <div class="mb-8 w-full">
+                <div
+                    class="flex justify-between items-center mb-6 bg-gradient-to-r from-[#6E76C1] to-[#9CA4F2] text-white py-4 px-6 rounded-lg shadow-md">
+                    <h3 class="text-xl font-bold">Задания на проверку</h3>
+                </div>
+                <div class="mb-6 flex flex-wrap gap-4 sm:gap-6">
+                    <div class="flex-1 min-w-[200px]">
+                        <label for="filter-title" class="block text-sm font-medium text-gray-700 mb-1">Фильтр по
+                            названию</label>
+                        <input type="text" id="filter-title" placeholder="Например: Задание 1"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg outline-none focus:ring-2 focus:ring-[#6E76C1] focus:border-transparent transition duration-200"
+                            oninput="filterByTitle()">
+                    </div>
+
+                    <div class="self-end">
+                        <button id="clear-filter" type="button"
+                            class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition duration-200"
+                            onclick="clearFilter()">
+                            Сбросить
+                        </button>
+                    </div>
                 </div>
 
-                <div class="self-end">
-                    <button id="clear-filter" type="button"
-                        class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 rounded-md transition duration-200"
-                        onclick="clearFilter()">
-                        Сбросить
-                    </button>
-                </div>
-            </div>
+                <div id="assignments-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative">
+                    @forelse ($assignmentsToGrade->filter(fn($assignment) => $assignment->status === 'submitted') as $assignment)
+                        <div class="assignment-card w-[380px] bg-white rounded-lg shadow-md border-l-4 border-yellow-500 border-gray-200 p-6 flex flex-col justify-between hover:shadow-lg relative transition"
+                            data-title="{{ strtolower($assignment->assignment->title) }}">
+                            <span
+                                class="absolute top-6 right-6 px-6 py-1 inline-block mt-2 px-2 py-1 text-xs font-medium rounded text-yellow-600 bg-yellow-100 border-yellow-600}}">
+                                {{ $assignment->status === 'submitted' ? 'На проверке' : 'Проверено' }}
+                            </span>
 
-            <div id="assignments-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 relative">
-                @forelse ($assignmentsToGrade->filter(fn($assignment) => $assignment->status === 'submitted') as $assignment)
-                    <div class="assignment-card w-[380px] bg-white rounded-lg shadow-md border-l-4 border-yellow-500 border-gray-200 p-6 flex flex-col justify-between hover:shadow-lg relative transition"
-                        data-title="{{ strtolower($assignment->assignment->title) }}">
-                        <span
-                            class="absolute top-6 right-6 px-6 py-1 inline-block mt-2 px-2 py-1 text-xs font-medium rounded text-yellow-600 bg-yellow-100 border-yellow-600}}">
-                            {{ $assignment->status === 'submitted' ? 'На проверке' : 'Проверено' }}
-                        </span>
-
-                        <div>
-                            <h5 class="font-semibold text-gray-900 mb-2">
-                                {{ Str::limit($assignment->assignment->title, 40) }}</h5>
-                            <p class="text-sm text-gray-500 flex items-center mb-1">
-                                <i class="fas fa-chalkboard-teacher text-[#6E76C1] mr-2"></i>
-                                Класс: {{ optional($assignment->assignment->class)->name ?? 'Не указан' }}
-                            </p>
-                            <p class="text-sm text-gray-500 flex items-center">
-                                <i class="fas fa-user-graduate text-[#6E76C1] mr-2"></i>
-                                Ученик:
-                                {{ $assignment->user?->name . ' ' . $assignment->user?->surname ?: 'Имя не найдено' }}
-                            </p>
-                        </div>
-
-                        <div class="mt-4 py-2 border-t border-gray-100 flex justify-between items-center">
-                            <div class="flex items-center text-sm text-gray-500">
-                                <i class="fas fa-calendar-alt mr-1"></i>
-                                Создан: {{ \Carbon\Carbon::parse($assignment->created_at)->format('d.m.Y') }}
+                            <div>
+                                <h5 class="font-semibold text-gray-900 mb-2">
+                                    {{ Str::limit($assignment->assignment->title, 40) }}</h5>
+                                <p class="text-sm text-gray-500 flex items-center mb-1">
+                                    <i class="fas fa-chalkboard-teacher text-[#6E76C1] mr-2"></i>
+                                    Класс: {{ optional($assignment->assignment->class)->name ?? 'Не указан' }}
+                                </p>
+                                <p class="text-sm text-gray-500 flex items-center">
+                                    <i class="fas fa-user-graduate text-[#6E76C1] mr-2"></i>
+                                    Ученик:
+                                    {{ $assignment->user?->name . ' ' . $assignment->user?->surname ?: 'Имя не найдено' }}
+                                </p>
                             </div>
 
-                            <a href="{{ route('assignment.grade.form', $assignment->assignment->id) }}"
-                                class="inline-flex items-center ml-2 px-3 py-1 text-xs bg-[#6E76C1] text-white font-medium rounded-md hover:bg-[#6E76C1]/80 transition duration-200">
-                                Проверить <i class="fas fa-arrow-right ml-1"></i>
-                            </a>
+                            <div class="mt-4 py-2 border-t border-gray-100 flex justify-between items-center">
+                                <div class="flex items-center text-sm text-gray-500">
+                                    <i class="fas fa-calendar-alt mr-1"></i>
+                                    Создан: {{ \Carbon\Carbon::parse($assignment->created_at)->format('d.m.Y') }}
+                                </div>
+
+                                <a href="{{ route('assignment.grade.form', $assignment->assignment->id) }}"
+                                    class="inline-flex items-center ml-2 px-3 py-1 text-xs bg-[#6E76C1] text-white font-medium rounded-md hover:bg-[#6E76C1]/80 transition duration-200">
+                                    Проверить <i class="fas fa-arrow-right ml-1"></i>
+                                </a>
+                            </div>
                         </div>
-                    </div>
-                    <div id="no-results"
-                        class="hidden col-span-full text-center py-6 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
-                        <i class="fas fa-search text-gray-400 text-4xl mb-2"></i>
-                        <p class="text-gray-500">Нет заданий, соответствующих вашему запросу.</p>
-                    </div>
-                @empty
-                    <div
-                        class="col-span-full text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
-                        <i class="fas fa-inbox text-gray-300 text-4xl mb-4"></i>
-                        <p class="text-gray-500">Нет заданий на проверку</p>
-                    </div>
-                @endforelse
+                        <div id="no-results"
+                            class="hidden col-span-full text-center py-6 bg-white rounded-lg shadow-sm border border-dashed border-gray-300">
+                            <i class="fas fa-search text-gray-400 text-4xl mb-2"></i>
+                            <p class="text-gray-500">Нет заданий, соответствующих вашему запросу.</p>
+                        </div>
+                    @empty
+                        <div
+                            class="col-span-full text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
+                            <i class="fas fa-inbox text-gray-300 text-4xl mb-4"></i>
+                            <p class="text-gray-500">Нет заданий на проверку</p>
+                        </div>
+                    @endforelse
+                </div>
             </div>
-        </div>
+        @endif
     </div>
 
     <script>

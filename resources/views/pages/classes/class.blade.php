@@ -210,18 +210,12 @@
                                     <tr class="hover:bg-gray-50 transition-colors duration-150">
                                         <td class="py-3 px-4 font-medium flex items-center justify-between">
                                             <span>{{ $sp['student']->name }} {{ $sp['student']->surname }}</span>
-
-                                            <form method="POST" action=""
-                                                onsubmit="return confirm('Вы уверены, что хотите удалить ученика {{ $sp['student']->name }} из класса?');"
-                                                class="inline-block ml-4">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit"
-                                                    class="text-red-600 hover:text-red-800 focus:outline-none"
-                                                    title="Удалить ученика">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </form>
+                                            <button
+                                                class="delete-button btn btn-sm btn-outline-danger text-red-600 hover:text-red-800 hover:bg-red-100 rounded-md px-3 py-1"
+                                                data-id="{{ $sp['student']->id }}" data-name="{{ $sp['student']->name }}"
+                                                data-type="student" data-related-id="{{ $class->id }}">
+                                                <i class="fas fa-trash mr-1"></i>
+                                            </button>
                                         </td>
                                         <td class="py-3 px-4">
                                             {{ $sp['completed'] ?? 0 }} из {{ $sp['total'] ?? 0 }}
@@ -244,139 +238,139 @@
 
                     </table>
                 </div>
-        </div>
-    @else
-        <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg mt-6">
-            <i class="fas fa-user-graduate text-gray-400 text-4xl mb-2"></i>
-            <h4 class="text-lg font-semibold text-gray-600">Нет учеников в этом классе.</h4>
-            <p class="text-gray-500 mt-1">Нажмите "Пригласить ученика", чтобы добавить</p>
-        </div>
-        @endif
+            @else
+                <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg mt-6">
+                    <i class="fas fa-user-graduate text-gray-400 text-4xl mb-2"></i>
+                    <h4 class="text-lg font-semibold text-gray-600">Нет учеников в этом классе.</h4>
+                    <p class="text-gray-500 mt-1">Нажмите "Пригласить ученика", чтобы добавить</p>
+                </div>
+            @endif
 
-        <div class="modal fade" id="inviteStudentModal" tabindex="-1" aria-labelledby="inviteStudentModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered">
-                <div class="modal-content rounded-lg shadow-lg">
-                    <div class="modal-header border-b pb-3">
-                        <h5 class="modal-title text-lg font-semibold text-gray-800" id="inviteStudentModalLabel">
-                            <i class="fas fa-user-plus mr-2 text-[#6E76C1]"></i>Пригласить ученика
-                        </h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="invite-student-form" action="{{ route('classes.invite', $class->id) }}"
-                            method="POST">
-                            @csrf
-                            <div class="mb-3">
-                                <label for="search-student" class="form-label">Введите имя или email</label>
-                                <input type="text" id="search-student" class="form-control" placeholder="Поиск...">
-                                <ul id="search-results"
-                                    class="list-group mt-2 hidden max-h-36 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg absolute w-full z-50">
-                                </ul>
-                            </div>
-                            <input type="hidden" id="invite-student-email" name="email">
-                            <div class="d-flex justify-content-end">
-                                <button type="submit" class="btn btn-primary bg-[#6E76C1] hover:bg-[#616EBD]">
-                                    Отправить приглашение
-                                </button>
-                            </div>
-                        </form>
+            <div class="modal fade" id="inviteStudentModal" tabindex="-1" aria-labelledby="inviteStudentModalLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content rounded-lg shadow-lg">
+                        <div class="modal-header border-b pb-3">
+                            <h5 class="modal-title text-lg font-semibold text-gray-800" id="inviteStudentModalLabel">
+                                <i class="fas fa-user-plus mr-2 text-[#6E76C1]"></i>Пригласить ученика
+                            </h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form id="invite-student-form" action="{{ route('classes.invite', $class->id) }}"
+                                method="POST">
+                                @csrf
+                                <div class="mb-3 relative">
+                                    <label for="search-student" class="form-label">Введите имя или email</label>
+                                    <input type="text" id="search-student" class="form-control"
+                                        placeholder="Поиск...">
+                                    <ul id="search-results"
+                                        class="list-group mt-2 hidden max-h-36 overflow-y-auto bg-white border border-gray-300 rounded shadow-lg absolute w-full z-50">
+                                    </ul>
+                                </div>
+                                <input type="hidden" id="invite-student-email" name="email">
+                                <div class="d-flex justify-content-end">
+                                    <button type="submit" class="btn btn-primary bg-[#6E76C1] hover:bg-[#616EBD]">
+                                        Отправить приглашение
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            const searchInput = document.getElementById("search-student");
-            const resultsList = document.getElementById("search-results");
-            const emailInput = document.getElementById("invite-student-email");
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                const searchInput = document.getElementById("search-student");
+                const resultsList = document.getElementById("search-results");
+                const emailInput = document.getElementById("invite-student-email");
 
-            const availableStudents = @json($availableStudents);
-            console.log(availableStudents);
-            if (!searchInput || !resultsList || !emailInput) return;
+                const availableStudents = @json($availableStudents);
+                console.log(availableStudents);
+                if (!searchInput || !resultsList || !emailInput) return;
 
-            searchInput.addEventListener("input", function() {
-                const query = this.value.trim().toLowerCase();
-                console.log("Поиск:", query);
-                resultsList.innerHTML = "";
-                resultsList.classList.add("hidden");
-
-                if (!query) return;
-
-                const filtered = availableStudents.filter(student =>
-                    student.name.toLowerCase().includes(query) ||
-                    student.email.toLowerCase().includes(query)
-                );
-
-
-                if (filtered.length === 0) {
-                    const li = document.createElement("li");
-                    li.textContent = "Ученики не найдены";
-                    li.style.color = "#888";
-                    li.style.textAlign = "center";
-                    li.className = "list-group-item list-group-item-action text-center";
-                    resultsList.appendChild(li);
-                } else {
-                    filtered.forEach(student => {
-                        console.log("Добавляю ученика:", student.name);
-                        const li = document.createElement("li");
-                        li.textContent = `${student.name} (${student.email})`;
-                        li.setAttribute("data-email", student.email);
-                        li.className =
-                            "list-group-item list-group-item-action cursor-pointer hover:bg-gray-100";
-
-                        li.addEventListener("click", () => {
-                            searchInput.value = `${student.name} (${student.email})`;
-                            emailInput.value = student.email;
-                            resultsList.innerHTML = "";
-                            resultsList.classList.add("hidden");
-                        });
-
-                        resultsList.appendChild(li);
-                    });
-                }
-
-                resultsList.classList.remove("hidden");
-            });
-
-
-            document.addEventListener("click", function(e) {
-                if (!resultsList.contains(e.target) && e.target !== searchInput) {
+                searchInput.addEventListener("input", function() {
+                    const query = this.value.trim().toLowerCase();
+                    console.log("Поиск:", query);
+                    resultsList.innerHTML = "";
                     resultsList.classList.add("hidden");
-                }
-            });
 
-            const filterType = document.getElementById("filter-type");
-            const cards = document.querySelectorAll("#assignments-grid .card");
+                    if (!query) return;
 
-            if (!filterType || !cards.length) return;
+                    const filtered = availableStudents.filter(student =>
+                        student.name.toLowerCase().includes(query) ||
+                        student.email.toLowerCase().includes(query)
+                    );
 
-            filterType.addEventListener("change", function() {
-                const selectedType = this.value.trim();
 
-                let hasVisible = false;
-
-                cards.forEach(card => {
-                    const cardTypes = card.dataset.types ? JSON.parse(card.dataset.types) : [];
-
-                    if (!selectedType || cardTypes.includes(selectedType)) {
-                        card.style.display = "block";
-                        hasVisible = true;
+                    if (filtered.length === 0) {
+                        const li = document.createElement("li");
+                        li.textContent = "Ученики не найдены";
+                        li.style.color = "#888";
+                        li.style.textAlign = "center";
+                        li.className = "list-group-item list-group-item-action text-center";
+                        resultsList.appendChild(li);
                     } else {
-                        card.style.display = "none";
+                        filtered.forEach(student => {
+                            console.log("Добавляю ученика:", student.name);
+                            const li = document.createElement("li");
+                            li.textContent = `${student.name} (${student.email})`;
+                            li.setAttribute("data-email", student.email);
+                            li.className =
+                                "list-group-item list-group-item-action cursor-pointer hover:bg-gray-100";
+
+                            li.addEventListener("click", () => {
+                                searchInput.value = `${student.name} (${student.email})`;
+                                emailInput.value = student.email;
+                                resultsList.innerHTML = "";
+                                resultsList.classList.add("hidden");
+                            });
+
+                            resultsList.appendChild(li);
+                        });
+                    }
+
+                    resultsList.classList.remove("hidden");
+                });
+
+
+                document.addEventListener("click", function(e) {
+                    if (!resultsList.contains(e.target) && e.target !== searchInput) {
+                        resultsList.classList.add("hidden");
                     }
                 });
 
-                const noResults = document.getElementById("no-results");
-                noResults.classList.toggle("hidden", hasVisible);
-            });
+                const filterType = document.getElementById("filter-type");
+                const cards = document.querySelectorAll("#assignments-grid .card");
 
-            document.getElementById("clear-filter").addEventListener("click", function() {
-                filterType.value = "";
-                cards.forEach(card => card.style.display = "block");
-                document.getElementById("no-results").classList.add("hidden");
+                if (!filterType || !cards.length) return;
+
+                filterType.addEventListener("change", function() {
+                    const selectedType = this.value.trim();
+
+                    let hasVisible = false;
+
+                    cards.forEach(card => {
+                        const cardTypes = card.dataset.types ? JSON.parse(card.dataset.types) : [];
+
+                        if (!selectedType || cardTypes.includes(selectedType)) {
+                            card.style.display = "block";
+                            hasVisible = true;
+                        } else {
+                            card.style.display = "none";
+                        }
+                    });
+
+                    const noResults = document.getElementById("no-results");
+                    noResults.classList.toggle("hidden", hasVisible);
+                });
+
+                document.getElementById("clear-filter").addEventListener("click", function() {
+                    filterType.value = "";
+                    cards.forEach(card => card.style.display = "block");
+                    document.getElementById("no-results").classList.add("hidden");
+                });
             });
-        });
-    </script>
-@endsection
+        </script>
+    @endsection

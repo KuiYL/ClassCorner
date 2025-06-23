@@ -95,6 +95,13 @@
                                     </div>
                                 </div>
 
+                                @if (auth()->user()->role === 'admin')
+                                    <div class="flex items-center gap-2 text-sm text-gray-500 mt-2">
+                                        <i class="fas fa-chalkboard-teacher text-[#6E76C1]"></i>
+                                        <span>{{ $class->teacher->name ?? 'Не указан' }}
+                                            {{ $class->teacher->surname ?? '' }}</span>
+                                    </div>
+                                @endif
                                 @if ($class->description)
                                     <p class="text-base text-gray-500 line-clamp-2 truncate mt-1">
                                         <i class="fas fa-info-circle mr-1"></i>{{ $class->description }}
@@ -104,6 +111,7 @@
                                         <i class="fas fa-info-circle mr-1"></i> Нет описания
                                     </div>
                                 @endif
+
                             </div>
 
                             <div class="px-4 py-2 bg-gray-50 border-t border-gray-100 flex justify-between items-center">

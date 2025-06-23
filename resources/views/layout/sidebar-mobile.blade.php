@@ -76,23 +76,37 @@
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.classes') }}"
+                    <a href="{{ route('user.classes') }}"
                         class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'classes' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
+
                         @if ($activePage === 'classes')
                             <span class="absolute left-0 top-0 bottom-0 w-1 bg-[#6E76C1] rounded-r-md"></span>
                         @endif
+
                         <i class="fas fa-chalkboard-teacher text-xl"></i>
                         <span class="text-lg font-medium">Классы</span>
+
                     </a>
                 </li>
                 <li>
-                    <a href="{{ route('admin.assignments') }}"
-                        class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'assignments' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
-                        @if ($activePage === 'assignments')
+                    <a href="{{ route('user.assignments') }}"
+                        class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'tasks' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
+                        @if ($activePage === 'tasks')
                             <span class="absolute left-0 top-0 bottom-0 w-1 bg-[#6E76C1] rounded-r-md"></span>
                         @endif
+
                         <i class="fas fa-tasks text-xl"></i>
                         <span class="text-lg font-medium">Задания</span>
+                    </a>
+                </li>
+                <li>
+                    <a href="{{ route('user.statistics') }}"
+                        class="sidebar-link flex items-center gap-3 px-3 py-3 rounded-lg text-[#616161] transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 {{ $activePage === 'statistics' ? 'text-[#6E76C1] relative pl-2 pointer-events-none cursor-default active' : '' }}">
+                        @if ($activePage === 'statistics')
+                            <span class="absolute left-0 top-0 bottom-0 w-1 bg-[#6E76C1] rounded-r-md"></span>
+                        @endif
+                        <i class="fas fa-chart-pie text-xl"></i>
+                        <span class="text-lg font-medium">Статистика</span>
                     </a>
                 </li>
             @endif

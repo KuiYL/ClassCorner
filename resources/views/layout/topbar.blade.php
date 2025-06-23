@@ -92,7 +92,9 @@
                                         <small class="text-gray-600">{{ $notif->message }}</small>
 
                                         <div class="mt-2 flex justify-between items-center text-xs text-gray-400">
-                                            <span>{{ $notif->created_at->diffForHumans() }}</span>
+                                            <span>
+                                                {{ $notif->created_at ? $notif->created_at->diffForHumans() : 'Дата не указана' }}
+                                            </span>
 
                                             <div class="flex gap-2 flex-nowrap"
                                                 style="min-width: 120px; justify-content: flex-end;">
@@ -110,19 +112,13 @@
                                                     </form>
                                                 @endif
 
-                                                <form method="POST"
-                                                    action="{{ route('notifications.delete', $notif->id) }}"
-                                                    style="flex-shrink: 0;">
-                                                    @csrf
-                                                    @method('DELETE')
-                                                    <button type="submit" class="btn btn-sm btn-outline-danger"
-                                                        style="padding: 0.25rem 0.5rem; font-size: 0.75rem; white-space: nowrap;"
-                                                        onclick="return confirm('Удалить уведомление?')"
-                                                        title="Удалить уведомление">
-                                                        <i class="fas fa-trash-alt"></i>
-                                                    </button>
-                                                </form>
-
+                                                <button type="button"
+                                                    class="delete-button btn btn-sm btn-outline-danger"
+                                                    style="padding: 0.25rem 0.5rem; font-size: 0.75rem; white-space: nowrap;"
+                                                    data-id="{{ $notif->id }}" data-name="уведомление"
+                                                    data-type="notif">
+                                                    <i class="fas fa-trash-alt"></i>
+                                                </button>
                                             </div>
                                         </div>
 

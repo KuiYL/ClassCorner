@@ -31,7 +31,6 @@ Route::post('/registration/{role}', [UserController::class, 'register'])->name('
 Route::get('/choose-avatar', [PagesController::class, 'showAvatarChoose'])->name('choose.avatar');
 Route::post('/choose-avatar', [AvatarController::class, 'store'])->name('choose.avatar.store');
 
-// Маршруты с защитой middleware
 Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [PagesController::class, 'showDashboradPage'])->name('user.dashboard');
     Route::get('/dashboard/classes', [PagesController::class, 'showClassesPage'])->name('user.classes');
@@ -76,11 +75,10 @@ Route::middleware('auth')->group(function () {
 
     Route::post('/notifications/{id}/read', [NotificationController::class, 'markAsRead'])->name('notifications.read');
     Route::delete('/notifications/{id}', [NotificationController::class, 'delete'])->name('notifications.delete');
-});
 
-Route::middleware(['auth'])->group(function () {
-    Route::get('/admin', [PagesController::class, 'adminHome'])->name('admin.dashboard');
     Route::get('/admin/users', [PagesController::class, 'adminUsers'])->name('admin.users');
-    Route::get('/admin/classes', [PagesController::class, 'adminClasses'])->name('admin.classes');
-    Route::get('/admin/assignments', [PagesController::class, 'adminAssignments'])->name('admin.assignments');
+    Route::post('/admin/users/{id}/update', [UserController::class, 'updateUser'])->name('admin.users.update');
+
+    Route::delete('/admin/classes/{classId}/students/{studentId}/remove', [UserController::class, 'removeStudentFromClass'])->name('classes.students.remove');
+    Route::delete('/classes/{classId}/leave', [UserController::class, 'leaveClass'])->name('classes.leave');
 });

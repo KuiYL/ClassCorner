@@ -7,7 +7,6 @@ use App\Models\Notification;
 use App\Models\StudentAssignments;
 use App\Models\User;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
 
