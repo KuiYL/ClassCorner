@@ -40,11 +40,17 @@
                 </div>
             </div>
 
-            @if ($paginatedItems->isEmpty())
+            @if ($paginatedItems->isEmpty() && empty($filter))
                 <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
                     <i class="fas fa-school text-gray-300 text-4xl mb-4"></i>
                     <h4 class="text-lg font-semibold text-gray-600">У вас пока нет классов</h4>
                     <p class="text-gray-500 mt-1">Ожидайте приглашения или создайте новый класс.</p>
+                </div>
+            @elseif ($paginatedItems->isEmpty() && !empty($filter))
+                <div class="text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg">
+                    <i class="fas fa-search text-gray-300 text-4xl mb-4"></i>
+                    <h4 class="text-lg font-semibold text-gray-600">Результаты не найдены</h4>
+                    <p class="text-gray-500 mt-1">Попробуйте изменить параметры поиска</p>
                 </div>
             @else
                 <div id="classes-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -92,8 +98,9 @@
                                 </div>
 
                                 @if ($class->description)
-                                    <p class="text-base text-gray-500 line-clamp-2 truncate mt-1">
-                                        <i class="fas fa-info-circle mr-1"></i>{{ $class->description }}
+                                    <p class="text-base text-gray-500 truncate mt-1" style="white-space: nowrap;">
+                                        <i
+                                            class="fas fa-info-circle mr-1"></i>{{ Str::limit($class->description, 100, '...') }}
                                     </p>
                                 @else
                                     <div class="flex items-center text-base text-gray-400 mt-1">

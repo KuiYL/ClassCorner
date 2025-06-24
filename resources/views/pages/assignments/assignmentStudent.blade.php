@@ -89,7 +89,7 @@
                             @csrf
                             @foreach ($assignmentFields as $index => $field)
                                 <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 shadow-sm">
-                                    <h4 class="font-medium text-gray-900 mb-3 truncate max-w-full">
+                                    <h4 class="font-medium text-gray-900 mb-3 break-words max-w-full">
                                         {{ $field['name'] ?? 'Без названия' }}
                                     </h4>
 
@@ -112,14 +112,16 @@
                                             @foreach ($field['options'] as $optionIndex => $option)
                                                 <li>
                                                     <label
-                                                        class="inline-flex items-center gap-2 p-2 rounded-md hover:bg-gray-100 group cursor-pointer">
+                                                        class="flex items-center gap-3 p-2 rounded-md hover:bg-gray-100 group cursor-pointer w-full">
                                                         <input
                                                             type="{{ $field['type'] === 'single_choice' ? 'radio' : 'checkbox' }}"
                                                             name="answers[{{ $index }}][options][]"
                                                             value="{{ $optionIndex }}"
-                                                            class="text-[#6E76C1] focus:ring-[#6E76C1]"
+                                                            class="shrink-0 w-5 h-5 mt-0.5 text-[#6E76C1] focus:ring-[#6E76C1] border-gray-300 rounded-full"
                                                             @if (is_array(old("answers.$index.options")) && in_array($optionIndex, old("answers.$index.options"))) checked @endif>
-                                                        <span class="text-gray-800 break-words whitespace-normal">
+
+                                                        <span
+                                                            class="text-gray-800 break-words whitespace-normal max-w-full">
                                                             {{ $option['value'] }}
                                                         </span>
                                                     </label>

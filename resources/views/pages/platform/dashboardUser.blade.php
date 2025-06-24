@@ -143,7 +143,7 @@
                                 </div>
 
                                 @if ($class->description)
-                                    <p class="text-base text-gray-500 line-clamp-2 truncate mt-1">
+                                    <p class="text-base text-gray-500 truncate mt-1">
                                         <i class="fas fa-info-circle mr-1"></i>{{ $class->description }}
                                     </p>
                                 @else
@@ -218,7 +218,8 @@
                                 </span>
                             </div>
 
-                            <p class="text-sm text-gray-600 mt-2 truncate">{{ $description }}</p>
+                            <p class="text-sm text-gray-600 mt-2 truncate"><i
+                                    class="fas fa-info-circle mr-1 text-gray-500"></i>{{ $description }}</p>
                             <p class="mt-1">Класс: <span class="font-medium">{{ $assignment->class->name }}</span></p>
                             <div class="mt-2 text-sm text-gray-500 space-y-2">
                                 <div class="flex items-center gap-2">

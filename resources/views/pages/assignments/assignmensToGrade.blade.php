@@ -72,23 +72,37 @@
                     data-title="{{ strtolower($assignment->assignment->title) }}" data-status="{{ $status }}"
                     data-class="{{ strtolower($assignment->assignment->class->name ?? '') }}"
                     data-assignment-class-name="{{ strtolower($assignment->assignment->class->name ?? '') }}">
-                    <div class="p-4 bg-white border-b border-gray-200">
-                        <h4 class="font-semibold text-gray-900 truncate">
-                            {{ Str::limit($assignment->assignment->title, 40) }}</h4>
-                        <span class="inline-block mt-2 px-2 py-1 text-sm font-medium rounded {{ $statusStyle }}">
-                            {{ $statusLabels[$assignment->status] ?? 'Неизвестный статус' }}
-                        </span>
-                    </div>
 
-                    <div class="p-4 text-sm text-gray-600">
-                        <p class="text-xs text-gray-500">Дедлайн:
+                    <div class="p-4 bg-white border-b border-gray-200">
+                        <div class="flex justify-between items-start">
+                            <h4 class="font-semibold text-gray-900 truncate flex items-center">
+                                <i
+                                    class="fas fa-book-open mr-2 text-[#6E76C1] group-hover:scale-110 transition-transform duration-200"></i>
+                                {{ Str::limit($assignment->assignment->title, 40) }}
+                            </h4>
+                            <span class="inline-block px-2 py-1 text-xs font-medium rounded {{ $statusStyle }}">
+                                {{ $statusLabels[$assignment->status] ?? 'Неизвестный статус' }}
+                            </span>
+                        </div>
+
+                        <p class="text-sm text-gray-500 mt-2">
+                            <i class="far fa-calendar-alt text-gray-400 mr-1"></i>
+                            Дедлайн:
                             {{ \Carbon\Carbon::parse($assignment->assignment->due_date)->format('d.m.Y в H:i') }}
                         </p>
-                        <p class="mt-1">Класс:
-                            <span
-                                class="font-medium">{{ optional($assignment->assignment->class)->name ?? 'Не указан' }}</span>
+                    </div>
+
+                    <div class="p-4 text-sm text-gray-600 space-y-2">
+                        <p>
+                            <i class="fas fa-chalkboard-teacher mr-1 text-[#6E76C1]"></i>
+                            <strong>Класс:</strong>
+                            <span class="font-medium">
+                                {{ optional($assignment->assignment->class)->name ?? 'Не указан' }}
+                            </span>
                         </p>
-                        <p class="mt-1">Ученик:
+                        <p>
+                            <i class="fas fa-user mr-1 text-[#6E76C1]"></i>
+                            <strong>Ученик:</strong>
                             <span class="font-medium">
                                 {{ $assignment->user?->name . ' ' . $assignment->user?->surname ?: 'Имя не найдено' }}
                             </span>
@@ -96,21 +110,20 @@
                     </div>
 
                     @if ($assignment->status == 'submitted')
-                        <div class="p-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                        <div class="p-3 bg-gray-40 border-t border-gray-100">
                             <a href="{{ route('assignment.grade.form', $assignment->assignment->id) }}"
-                                class="inline-flex items-center gap-2 text-sm px-4 py-1.5 text-[#6E76C1] border border-[#6E76C1] rounded-md hover:bg-[#6E76C1] hover:text-white transition duration-200">
+                                class="inline-flex items-center gap-2 text-sm px-4 py-2 w-full justify-center text-[#6E76C1] border border-[#6E76C1] rounded-md hover:bg-[#6E76C1] hover:text-white transition duration-200">
                                 <i class="fas fa-edit text-sm"></i> Проверить
                             </a>
                         </div>
                     @else
-                        <div class="p-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                        <div class="p-3 bg-gray-40 border-t border-gray-100">
                             <a href="{{ route('assignment.result', ['id' => $assignment->id]) }}"
-                                class="inline-flex items-center gap-2 text-sm px-4 py-1.5 text-[#6E76C1] border border-[#6E76C1] rounded-md hover:bg-[#6E76C1] hover:text-white transition duration-200">
-                                <i class="fas fa-edit text-sm"></i> Результаты
+                                class="inline-flex items-center gap-2 text-sm px-4 py-2 w-full justify-center text-[#6E76C1] border border-[#6E76C1] rounded-md hover:bg-[#6E76C1] hover:text-white transition duration-200">
+                                <i class="fas fa-eye text-sm"></i> Результаты
                             </a>
                         </div>
                     @endif
-
                 </div>
             @empty
                 <div class="col-span-full text-center py-10 bg-gray-50 border border-dashed border-gray-300 rounded-lg">

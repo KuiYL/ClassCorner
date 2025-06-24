@@ -143,7 +143,7 @@
                         "p-4 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 cursor-pointer transition";
                     event.innerHTML = `
                         <h4 class="font-semibold text-[#6E76C1]">${ass.title}</h4>
-                        <p class="text-sm text-gray-600 mt-1 line-clamp-1">${ass.description || '<i class="fas fa-info-circle text-gray-400 mr-1"></i> Нет описания'}</p>
+                        <p class="text-sm text-gray-600 mt-1 line-clamp-1"><i class="fas fa-info-circle text-gray-400 mr-1"></i>${ass.description || '<i class="fas fa-info-circle text-gray-400 mr-1"></i> Нет описания'}</p>
                         <p class="text-xs text-gray-500 mt-2">{{ __('Класс') }}: ${ass.class_name}</p>
                         <p class="text-xs text-gray-500 mt-1">{{ __('Дата сдачи') }}: ${new Date(ass.due_date).toLocaleString()}</p>
                     `;

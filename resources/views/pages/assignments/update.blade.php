@@ -213,13 +213,12 @@
                 const optionsContainer = fieldDiv.querySelector(".options-container");
                 const optionsList = fieldDiv.querySelector(".options-list");
 
-                // --- Событие изменения типа ---
                 fieldTypeSelect.addEventListener("change", function() {
                     const selectedType = this.value;
                     const isSingleChoice = selectedType === "single_choice";
                     const isMultipleChoice = selectedType === "multiple_choice";
 
-                    optionsList.innerHTML = ""; // Очистка старых вариантов
+                    optionsList.innerHTML = "";
 
                     if (isSingleChoice || isMultipleChoice) {
                         optionsContainer.classList.remove("hidden");
@@ -271,7 +270,6 @@
                     }
                 });
 
-                // --- Добавление нового варианта ---
                 fieldDiv.querySelector(".add-option-btn").addEventListener("click", function() {
                     const optionDiv = document.createElement("div");
                     optionDiv.className = "flex items-center gap-2";
@@ -304,7 +302,6 @@
                     fieldDiv.remove();
                 });
 
-                // --- Заполняем поля, если есть fieldData ---
                 if (fieldData) {
                     fieldDiv.querySelector(".field-name").value = fieldData.name || '';
                     fieldDiv.querySelector(".field-type").value = fieldData.type || 'text';
@@ -314,7 +311,6 @@
                 return fieldDiv;
             }
 
-            // --- 🔄 Восстановление данных ---
             const savedFieldsJson = @json(old('fields_json'));
 
             if (savedFieldsJson) {
@@ -341,13 +337,11 @@
                 });
             }
 
-            // --- ➕ Добавление новых полей ---
             addFieldBtn.addEventListener("click", function() {
                 const newField = createFieldElement(null);
                 fieldsContainer.appendChild(newField);
             });
 
-            // --- ✅ Отправка формы ---
             document.getElementById("assignment-form").addEventListener("submit", function(e) {
                 e.preventDefault();
                 let isValid = true;
@@ -391,13 +385,41 @@
                     });
                 });
 
+                const title = document.getElementById("title").value.trim();
+                const classId = document.getElementById("class_id").value;
+                const dueDate = document.getElementById("due_date").value;
+                const dueTime = document.getElementById("due_time").value;
+
+                if (!title) {
+                    showValidationError("Пожалуйста, введите название задания.");
+                    document.getElementById("title").classList.add("input-error");
+                    isValid = false;
+                }
+
+                if (!classId) {
+                    showValidationError("Пожалуйста, выберите класс.");
+                    document.getElementById("class_id").classList.add("input-error");
+                    isValid = false;
+                }
+
+                if (!dueDate) {
+                    showValidationError("Пожалуйста, укажите дату сдачи.");
+                    document.getElementById("due_date").classList.add("input-error");
+                    isValid = false;
+                }
+
+                if (!dueTime) {
+                    showValidationError("Пожалуйста, укажите время сдачи.");
+                    document.getElementById("due_time").classList.add("input-error");
+                    isValid = false;
+                }
+
                 if (!isValid) return;
 
                 document.getElementById("fields-json").value = JSON.stringify(filledFields);
                 e.target.submit();
             });
 
-            // --- 💬 Тост с ошибками ---
             function showValidationError(message) {
                 toast.textContent = message;
                 toast.classList.remove("hidden", "opacity-0");

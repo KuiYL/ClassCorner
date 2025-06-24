@@ -128,8 +128,9 @@
                                 </div>
 
                                 @if ($class->description)
-                                    <p class="text-base text-gray-500 line-clamp-2 truncate mt-1">
-                                        <i class="fas fa-info-circle mr-1"></i>{{ $class->description }}
+                                    <p class="text-base text-gray-500 truncate mt-1" style="white-space: nowrap;">
+                                        <i
+                                            class="fas fa-info-circle mr-1"></i>{{ Str::limit($class->description, 50, '...') }}
                                     </p>
                                 @else
                                     <div class="flex items-center text-base text-gray-400 mt-1">

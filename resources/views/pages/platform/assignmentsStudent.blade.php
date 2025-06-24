@@ -115,22 +115,33 @@
 
                 <div class="assignment-card bg-white rounded-lg shadow-sm border-l-4 {{ $statusStyle }} overflow-hidden">
                     <div class="p-4 bg-white border-b border-gray-200 flex justify-between items-start">
-                        <div>
-                            <h4 class="font-semibold text-gray-900 truncate">{{ $item['assignment']->title }}</h4>
-                            <span class="inline-block mt-2 px-2 py-1 text-sm font-medium rounded {{ $statusStyle }}">
-                                {{ $statusLabels[$status] ?? 'Неизвестный статус' }}
-                            </span>
+                        <div class="flex-1">
+                            <h4 class="font-semibold text-gray-900 truncate flex items-center">
+                                <i
+                                    class="fas fa-book-open mr-2 text-[#6E76C1] group-hover:scale-110 transition-transform duration-200"></i>
+                                {{ $item['assignment']->title }}
+                            </h4>
+                            <p class="text-xs text-gray-500 mt-1">Дедлайн: {{ $dueDate->format('d.m.Y H:i') }}</p>
                         </div>
+
+                        <span
+                            class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full {{ $statusStyle }}">
+                            {{ $statusLabels[$status] ?? 'Неизвестный статус' }}
+                        </span>
                     </div>
 
                     <div class="p-4 text-sm text-gray-600">
-                        <p class="text-xs text-gray-500">Дедлайн: {{ $dueDate->format('d.m.Y H:i') }}</p>
-                        <p class="mt-1">Класс: <span class="font-medium">{{ $item['class']->name }}</span></p>
-                        <p class="mt-1">Тип: <span class="font-medium">{{ implode(', ', $questionTypes) }}</span></p>
-                        <p class="mt-2 text-gray-700 line-clamp-2">{{ $item['assignment']->description }}</p>
+                        <p class="mt-1"><i class="fas fa-chalkboard-teacher mr-1 text-[#6E76C1]"></i> <span
+                                class="font-medium">{{ $item['class']->name }}</span></p>
+                        <p class="mt-1"><i class="fas fa-tags text-[#6E76C1] mr-1"></i><span
+                                class="font-medium">{{ implode(', ', $questionTypes) }}</span></p>
+                        <p class="mt-2 text-gray-700 truncate" style="white-space: nowrap;">
+                            <i class="fas fa-info-circle mr-1 text-gray-500"></i>
+                            {{ $item['assignment']->description ?: 'Нет описания' }}
+                        </p>
                     </div>
 
-                    <div class="p-4 bg-gray-50 border-t border-gray-100 flex justify-between items-center">
+                    <div class="p-3 bg-gray-50 border-t border-gray-100 flex justify-end">
                         @if ($status === 'not_submitted')
                             <a href="{{ route('assignments.show', $item['assignment']->id) }}"
                                 class="btn outline-none text-red-600 border-red-600 hover:bg-red-600 hover:text-gray-100 rounded-md px-3 py-1 inline-flex items-center">

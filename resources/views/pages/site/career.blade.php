@@ -103,9 +103,6 @@
                                 <a href="mailto:hello@klassugolok.com">hello@klassugolok.com</a>
                             </p>
                         </div>
-
-
-
                     </div>
                     <div class="way">
                         <div class="icon-container">
@@ -119,35 +116,27 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="contact-socials">
-                    <p>Подпишись на нас:</p>
-                    <div class="socials">
-                        <a href="#"><img src="{{ asset('images/vk-contacts.svg') }}" alt="VK"></a>
-                        <a href="#"><img src="{{ asset('images/telegram-contacts.svg') }}" alt="Telegram"></a>
-                    </div>
-                </div>
             </div>
             <div class="second">
                 <div class="head-block">
                     <p>Если вы хотите стать частью команды, отправьте ваше резюме через форму ниже.</p>
                 </div>
 
-                <form action="" class="contact-form">
+                <form id="resume-form" class="contact-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Имя <span>*</span></label>
-                            <input type="text" id="name" placeholder="Ваше имя" required>
+                            <input type="text" id="name" placeholder="Ваше имя">
                         </div>
                         <div class="form-group">
                             <label for="email">Электронная почта <span>*</span></label>
-                            <input type="email" id="email" placeholder="Ваш email" required>
+                            <input type="email" id="email" placeholder="Ваш email">
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="phone">Номер телефона <span>*</span></label>
-                            <input type="tel" id="phone" placeholder="Ваш номер телефона" required>
+                            <input type="tel" id="phone" placeholder="Ваш номер телефона">
                         </div>
                         <div class="form-group">
                             <label for="resume-link">Ссылка на резюме</label>
@@ -174,9 +163,39 @@
                         </p>
                     </div>
                 </form>
+                <div id="form-result" class="hidden text-success"></div>
             </div>
         </div>
     </div>
+
+    <script>
+        function updateFileName(input) {
+            const fileName = input.files[0]?.name || 'Файл не выбран';
+            document.getElementById('file-upload-text').textContent = fileName;
+        }
+
+        document.getElementById('resume-form').addEventListener('submit', function(event) {
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const file = document.getElementById('file-upload').files[0];
+
+            if (!name || !email || !phone || !file) {
+                alert('Пожалуйста, заполните все обязательные поля.');
+                return;
+            }
+
+            const resultDiv = document.getElementById('form-result');
+            resultDiv.textContent = 'Спасибо за заявку, ' + name + '! Мы свяжемся с вами.';
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('text-success');
+        });
+
+        function triggerFileInput() {
+            document.getElementById('file-upload').click();
+        }
+    </script>
+
 
     @include('layout.footer')
 </body>

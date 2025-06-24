@@ -281,15 +281,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 deleteForm.action = `/assignments/${itemId}`;
                 break;
             case "user":
-                entityType = "пользователь";
+                entityType = "пользователя";
                 deleteForm.action = `/users/${itemId}`;
                 break;
             case "student":
-                entityType = "ученик";
+                entityType = "ученика";
                 deleteForm.action = `/admin/classes/${relatedId}/students/${itemId}/remove`;
                 break;
             case "exitStudent":
-                entityType = "класс";
+                entityType = "класса";
                 deleteForm.action = `/classes/${itemId}/leave`;
                 break;
             case "assignmentMaterial":

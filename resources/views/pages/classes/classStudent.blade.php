@@ -45,7 +45,7 @@
                     <option value="submitted">На проверке</option>
                     <option value="graded">Выполнено</option>
                 </select>
-                <label for="filter-type" class="text-sm font-medium text-gray-700">Тип:</label>
+                <label for="filter-type" class="text-sm font-medium text-gray-700"></label>
                 <select id="filter-type" class="form-select w-auto rounded-md border-gray-300">
                     <option value="">Все</option>
                     <option value="file_upload">Загрузка файла</option>
@@ -84,10 +84,10 @@
 
                             $decodedOptions = json_decode($assignment->options, true);
                             $typeTranslations = [
-                                'file_upload' => 'Загрузка файла',
-                                'multiple_choice' => 'Множественный выбор',
+                                'text' => 'Текст',
+                                'file_upload' => 'Файл',
                                 'single_choice' => 'Один выбор',
-                                'text' => 'Текстовый ответ',
+                                'multiple_choice' => 'Множественный',
                             ];
 
                             $questionTypes = !empty($decodedOptions)

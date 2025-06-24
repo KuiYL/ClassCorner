@@ -786,3 +786,15 @@ main.profile-container {
     display: flex;
     pointer-events: auto;
 }
+
+@media (max-width: 768px) {
+    #searchInput {
+        width: 90%;
+        max-width: none;
+    }
+
+    .account img {
+        display: none;
+    }
+
+}

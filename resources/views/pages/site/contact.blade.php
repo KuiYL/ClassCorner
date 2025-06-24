@@ -49,41 +49,33 @@
                         </div>
                     </div>
                 </div>
-
-                <div class="contact-socials">
-                    <p>Подпишись на нас:</p>
-                    <div class="socials">
-                        <a href="#"><img src="{{ asset('images/vk-contacts.svg') }}" alt="VK"></a>
-                        <a href="#"><img src="{{ asset('images/telegram-contacts.svg') }}" alt="Telegram"></a>
-                    </div>
-                </div>
             </div>
             <div class="second">
-                <form action="" class="contact-form">
+                <form id="contact-form" class="contact-form">
                     <div class="form-row">
                         <div class="form-group">
                             <label for="name">Имя <span>*</span></label>
-                            <input type="text" id="name" placeholder="Ваше имя" required>
+                            <input type="text" id="name" placeholder="Ваше имя">
                         </div>
                         <div class="form-group">
                             <label for="surname">Фамилия <span>*</span></label>
-                            <input type="text" id="surname" placeholder="Ваша фамилия" required>
+                            <input type="text" id="surname" placeholder="Ваша фамилия" >
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="email">Электронная почта <span>*</span></label>
-                            <input type="email" id="email" placeholder="Ваш email" required>
+                            <input type="email" id="email" placeholder="Ваш email" >
                         </div>
                         <div class="form-group">
                             <label for="phone">Номер телефона <span>*</span></label>
-                            <input type="tel" id="phone" placeholder="Ваш номер телефона" required>
+                            <input type="tel" id="phone" placeholder="Ваш номер телефона" >
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
                             <label for="message">Сообщение <span>*</span></label>
-                            <textarea id="message" placeholder="Ваше сообщение" required rows="5"></textarea>
+                            <textarea id="message" placeholder="Ваше сообщение"  rows="5"></textarea>
                         </div>
                     </div>
                     <div class="send-contact">
@@ -95,9 +87,36 @@
                         </p>
                     </div>
                 </form>
+                <div id="contact-result" class="hidden text-success"></div>
             </div>
         </div>
     </div>
+
+    <script>
+        document.getElementById('contact-form').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('name').value.trim();
+            const surname = document.getElementById('surname').value.trim();
+            const email = document.getElementById('email').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !surname || !email || !phone || !message) {
+                alert('Пожалуйста, заполните все обязательные поля.');
+                return;
+            }
+
+            const resultDiv = document.getElementById('contact-result');
+            resultDiv.textContent =
+                `Спасибо за ваше сообщение, ${name} ${surname}! Мы свяжемся с вами по электронной почте ${email}.`;
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('text-success');
+
+            document.getElementById('contact-form').reset();
+        });
+    </script>
+
 
     @include('layout.footer')
 </body>

@@ -5,14 +5,7 @@
             <p class="info"> — это онлайн-обучение с инновационными решениями для автоматизации проверки домашних
                 заданий. Наша цель — создать удобный инструмент для преподавателей и учеников, улучшающий
                 образовательный процесс.</p>
-            <div class="social">
-                <a href="https://vk.com" aria-label="ВКонтакте">
-                    <img src="{{ asset('images/vk-white ver..svg') }}" alt="ВКонтакте">
-                </a>
-                <a href="https://t.me" aria-label="Telegram">
-                    <img src="{{ asset('images/telegram-white ver.svg') }}" alt="Telegram">
-                </a>
-            </div>
+
         </div>
         <div class="column-center">
             <nav class="column">

@@ -121,7 +121,6 @@
                                                 </button>
                                             </div>
                                         </div>
-
                                     </div>
                                 </div>
                             </a>
@@ -190,7 +189,6 @@
             @endif
         ];
 
-        // Объединённый список
         const allItems = [...allClasses, ...allAssignments];
 
         function handleSearch(value) {

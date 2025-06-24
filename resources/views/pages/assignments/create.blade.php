@@ -396,6 +396,35 @@
                     });
                 });
 
+                const title = document.getElementById("title").value.trim();
+                const classId = document.getElementById("class_id").value;
+                const dueDate = document.getElementById("due_date").value;
+                const dueTime = document.getElementById("due_time").value;
+
+                if (!title) {
+                    showValidationError("Пожалуйста, введите название задания.");
+                    document.getElementById("title").classList.add("input-error");
+                    isValid = false;
+                }
+
+                if (!classId) {
+                    showValidationError("Пожалуйста, выберите класс.");
+                    document.getElementById("class_id").classList.add("input-error");
+                    isValid = false;
+                }
+
+                if (!dueDate) {
+                    showValidationError("Пожалуйста, укажите дату сдачи.");
+                    document.getElementById("due_date").classList.add("input-error");
+                    isValid = false;
+                }
+
+                if (!dueTime) {
+                    showValidationError("Пожалуйста, укажите время сдачи.");
+                    document.getElementById("due_time").classList.add("input-error");
+                    isValid = false;
+                }
+
                 if (!isValid) return;
 
                 document.getElementById("fields-json").value = JSON.stringify(filledFields);

@@ -179,7 +179,7 @@
                         "p-4 bg-gray-50 border border-gray-200 rounded-lg transition";
                     event.innerHTML = `
         <h4 class="font-semibold text-[#6E76C1]">${ass.title}</h4>
-        <p class="text-sm text-gray-600 mt-1">${ass.description || 'Нет описания'}</p>
+        <p class="text-sm text-gray-600 mt-1"><i class="fas fa-info-circle text-gray-400 mr-1"></i>${ass.description || 'Нет описания'}</p>
         <p class="text-xs text-gray-500 mt-2">Класс: ${ass.class_name}</p>
         <p class="text-xs text-gray-500 mt-1">Дата сдачи: ${new Date(ass.due_date).toLocaleString()}</p>
         <p class="text-xs mt-2 ${statusClass}">Статус: ${statusText}</p>

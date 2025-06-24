@@ -175,14 +175,34 @@
                 <h2>Получайте актуальные объявления первыми!</h2>
             </div>
 
-            <form action="#" method="post" class="form-subscribe">
-                <input class="custom-input" placeholder="Введите адрес вашей рабочей почты" type="text">
+            <form id="form-subscribe" class="form-subscribe">
+                <input class="custom-input" placeholder="Введите адрес вашей рабочей почты" type="email">
                 <button type="submit" class="action-button">Подписаться</button>
             </form>
+
+            <div id="subscribe-result" class="hidden text-success"></div>
         </div>
     </div>
 
     @include('layout.footer')
+
+    <script>
+        document.getElementById('form-subscribe').addEventListener('submit', function(event) {
+            event.preventDefault();
+
+            const emailInput = event.target.querySelector('.custom-input').value;
+
+            if (!emailInput || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(emailInput)) {
+                alert('Пожалуйста, введите корректный адрес электронной почты.');
+                return;
+            }
+
+            const resultDiv = document.getElementById('subscribe-result');
+            resultDiv.textContent = 'Спасибо за подписку! Мы отправим вам новости на ' + emailInput;
+            resultDiv.classList.remove('hidden');
+            resultDiv.classList.add('text-success');
+        });
+    </script>
 </body>
 
 </html>

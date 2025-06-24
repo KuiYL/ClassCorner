@@ -52,12 +52,6 @@
                 <div id="description-text" class="text-gray-800 line-clamp-3 overflow-hidden whitespace-pre-line">
                     {{ $assignment->description ?: 'Нет описания' }}
                 </div>
-                @if ($assignment->description && strlen($assignment->description) > 100)
-                    <button type="button" id="toggle-description"
-                        class="mt-2 text-sm text-[#6E76C1] hover:text-[#616EBD] focus:outline-none">
-                        Показать всё
-                    </button>
-                @endif
             </div>
 
             @php

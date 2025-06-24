@@ -325,40 +325,64 @@ class PagesController extends Controller
         }
     }
 
-    public function showAssignmentsPage()
+    public function showAssignmentsPage(Request $request)
     {
         $user = $this->getAuthenticatedUser();
         $perPage = 6;
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
 
+        $filterClass = $request->input('class');
+        $filterType = $request->input('type');
+        $reverseTypeTranslations = [
+            'Загрузка файла' => 'file_upload',
+            'Множественный выбор' => 'multiple_choice',
+            'Один выбор' => 'single_choice',
+            'Текстовый ответ' => 'text',
+        ];
+
         switch ($user->role) {
             case 'teacher':
-                $classes = $this->getUserClasses($user);
-                $allAssignments = Assignments::where('teacher_id', $user->id)->get();
-
-                $paginatedItems = new LengthAwarePaginator(
-                    $allAssignments->forPage($currentPage, $perPage),
-                    $allAssignments->count(),
-                    $perPage,
-                    $currentPage,
-                    ['path' => route('user.assignments')]
-                );
-
-                return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'paginatedItems'));
-
             case 'admin':
                 $classes = $this->getUserClasses($user);
-                $allAssignments = Assignments::all();
+                $allAssignments = Assignments::query();
+
+                if ($user->role === 'teacher') {
+                    $allAssignments = $allAssignments->where('teacher_id', $user->id);
+                }
+
+                if ($filterClass) {
+                    $allAssignments = $allAssignments->whereHas('class', function ($query) use ($filterClass) {
+                        $query->where('name', 'like', "%{$filterClass}%");
+                    });
+                }
+
+                $allAssignments = $allAssignments->get();
+
+                if ($filterType) {
+                    $internalType = $reverseTypeTranslations[$filterType] ?? null;
+                    if ($internalType) {
+                        $allAssignments = $allAssignments->filter(function ($assignment) use ($internalType) {
+                            $questions = json_decode($assignment->options, true);
+                            foreach ($questions as $q) {
+                                if (isset($q['type']) && $q['type'] === $internalType) {
+                                    return true;
+                                }
+                            }
+                            return false;
+                        });
+                    }
+                }
 
                 $paginatedItems = new LengthAwarePaginator(
                     $allAssignments->forPage($currentPage, $perPage),
                     $allAssignments->count(),
                     $perPage,
                     $currentPage,
-                    ['path' => route('user.assignments')]
+                    ['path' => route('user.assignments'), 'query' => $request->query()]
                 );
 
                 return view('pages.platform.assignmentsTeacher', compact('user', 'classes', 'paginatedItems'));
+
             case 'student':
                 $classes = $user->classes;
                 $assignments = [];
